@@ -1,0 +1,92 @@
+#include <glad/glad.h>
+#include "renderer.hpp"
+#include "shader.hpp"
+#include "camera.hpp"
+#include <stb_image.h>
+#include <iostream>
+#include <glm/gtc/type_ptr.hpp>
+
+Renderer::Renderer() : VAO(0), VBO(0), EBO(0), shaderProgram(0), textureAtlas(0) {}
+
+Renderer::~Renderer()
+{
+    cleanup();
+}
+
+void Renderer::init()
+{
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+    glFrontFace(GL_CCW);
+
+    world.generateChunks(5);
+
+    std::string vertexSource = loadShaderSource("shaders/vertex.glsl");
+    std::string fragmentSource = loadShaderSource("shaders/fragment.glsl");
+
+    shaderProgram = createShaderProgram(vertexSource.c_str(), fragmentSource.c_str());
+    
+    loadTextureAtlas("textures/atlas.png");
+}
+
+void Renderer::renderWorld(const Camera& camera, float aspectRatio) {
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glUseProgram(shaderProgram);
+
+    glm::mat4 projection = glm::perspective(glm::radians(45.0f), aspectRatio, 0.1f, 500.0f); // 500 = "view distance"
+    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"), 1, GL_FALSE, &camera.getViewMatrix()[0][0]);
+    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, &projection[0][0]);
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, textureAtlas);
+    glUniform1i(glGetUniformLocation(shaderProgram, "atlas"), 0);
+    
+
+    world.render(camera, shaderProgram);
+}
+
+void Renderer::cleanup()
+{
+    if (VAO) glDeleteVertexArrays(1, &VAO);
+    if (VBO) glDeleteBuffers(1, &VBO);
+    if (EBO) glDeleteBuffers(1, &EBO);
+    glDeleteTextures(1, &textureAtlas);
+    glDeleteProgram(shaderProgram);
+}
+
+GLuint Renderer::createShader(const char *source, GLenum shaderType)
+{
+    return ::createShader(source, shaderType);
+}
+
+GLuint Renderer::createShaderProgram(const char *vertexSource, const char *fragmentSource)
+{
+    return ::createShaderProgram(vertexSource, fragmentSource);
+}
+
+void Renderer::loadTextureAtlas(const std::string& path)
+{
+    int width, height, channels;
+    stbi_set_flip_vertically_on_load(true);
+    unsigned char* data = stbi_load(path.c_str(), &width, &height, &channels, 0);
+    if (!data) {
+        std::cerr << "Failed to load texture atlas: " << path << std::endl;
+        return;
+    }
+
+    glGenTextures(1, &textureAtlas);
+    glBindTexture(GL_TEXTURE_2D, textureAtlas);
+
+    GLenum format = (channels == 4) ? GL_RGBA : GL_RGB;
+    glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+    glGenerateMipmap(GL_TEXTURE_2D);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+    stbi_image_free(data);
+}
