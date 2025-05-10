@@ -17,50 +17,69 @@ struct RaycastResult {
     glm::ivec3 faceNormal = glm::ivec3(0);
 };
 
+// DDA raycast
 RaycastResult raycast(World* world, const glm::vec3& origin, const glm::vec3& dir, float maxDistance)
 {
     RaycastResult result;
-    glm::vec3 lastEmptyPos = glm::floor(origin);
-    glm::ivec3 lastBlockPos;
+
+    glm::ivec3 blockPos = glm::floor(origin);
+    glm::vec3 deltaDist = glm::abs(1.0f / dir);
+    glm::ivec3 step = glm::sign(dir);
+    glm::vec3 sideDist;
+
+    for (int i = 0; i < 3; ++i) {
+        float nextBorder = (step[i] > 0) ? (blockPos[i] + 1.0f) : blockPos[i];
+        sideDist[i] = glm::abs(origin[i] - nextBorder) * deltaDist[i];
+    }
+
+    float distanceTraveled = 0.0f;
+    glm::ivec3 lastBlockPos = blockPos;
     Chunk* lastChunk = nullptr;
 
-    float step = 0.1f;
-    for (float d = 0.0f; d < maxDistance; d += step) {
-        glm::vec3 checkPos = origin + dir * d;
-        glm::vec3 floored = glm::floor(checkPos);
-
-        int cx = static_cast<int>(floored.x) >> 4;
-        int cz = static_cast<int>(floored.z) >> 4;
+    while (distanceTraveled < maxDistance) {
+        int cx = blockPos.x >> 4;
+        int cz = blockPos.z >> 4;
         Chunk* chunk = world->getChunk(cx, cz);
-        if (!chunk) continue;
 
-        int lx = static_cast<int>(floored.x) - cx * Chunk::WIDTH;
-        int ly = static_cast<int>(floored.y);
-        int lz = static_cast<int>(floored.z) - cz * Chunk::DEPTH;
+        if (chunk) {
+            int lx = blockPos.x - cx * Chunk::WIDTH;
+            int ly = blockPos.y;
+            int lz = blockPos.z - cz * Chunk::DEPTH;
 
-        if (lx < 0 || lx >= Chunk::WIDTH || ly < 0 || ly >= Chunk::HEIGHT || lz < 0 || lz >= Chunk::DEPTH)
-            continue;
+            if (lx >= 0 && lx < Chunk::WIDTH &&
+                ly >= 0 && ly < Chunk::HEIGHT &&
+                lz >= 0 && lz < Chunk::DEPTH &&
+                !chunk->blocks[lx][ly][lz].type.empty())
+            {
+                result.hit = true;
+                result.hitBlockPos = { lx, ly, lz };
+                result.hitChunk = chunk;
+                result.faceNormal = blockPos - lastBlockPos;
 
-        if (!chunk->blocks[lx][ly][lz].type.empty()) {
-            result.hit = true;
-            result.hitBlockPos = glm::ivec3(lx, ly, lz);
-            result.hitChunk = chunk;
+                if (lastChunk) {
+                    result.hasPlacePos = true;
+                    result.placeBlockPos = {
+                        lastBlockPos.x - lastChunk->chunkX * Chunk::WIDTH,
+                        lastBlockPos.y,
+                        lastBlockPos.z - lastChunk->chunkZ * Chunk::DEPTH
+                    };
+                    result.placeChunk = lastChunk;
+                }
 
-            glm::ivec3 normal = glm::ivec3(lastEmptyPos - floored);
-            result.faceNormal = normal;
-
-            if (lastChunk) {
-                result.hasPlacePos = true;
-                result.placeBlockPos = lastBlockPos;
-                result.placeChunk = lastChunk;
+                return result;
             }
-
-            return result;
         }
 
-        lastEmptyPos = floored;
-        lastBlockPos = glm::ivec3(lx, ly, lz);
+        lastBlockPos = blockPos;
         lastChunk = chunk;
+
+        int axis = (sideDist.x < sideDist.y) ? 
+                   ((sideDist.x < sideDist.z) ? 0 : 2) : 
+                   ((sideDist.y < sideDist.z) ? 1 : 2);
+
+        sideDist[axis] += deltaDist[axis];
+        blockPos[axis] += step[axis];
+        distanceTraveled = sideDist[axis] - deltaDist[axis];
     }
 
     return result;

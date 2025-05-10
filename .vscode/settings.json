@@ -63,6 +63,17 @@
         "array": "cpp",
         "sstream": "cpp",
         "xtree": "cpp",
-        "map": "cpp"
+        "map": "cpp",
+        "chrono": "cpp",
+        "condition_variable": "cpp",
+        "deque": "cpp",
+        "forward_list": "cpp",
+        "future": "cpp",
+        "mutex": "cpp",
+        "queue": "cpp",
+        "ratio": "cpp",
+        "set": "cpp",
+        "stop_token": "cpp",
+        "thread": "cpp"
     }
 }

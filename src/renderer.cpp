@@ -6,7 +6,7 @@
 #include <iostream>
 #include <glm/gtc/type_ptr.hpp>
 
-Renderer::Renderer() : VAO(0), VBO(0), EBO(0), shaderProgram(0), textureAtlas(0) {}
+Renderer::Renderer() : VAO(0), VBO(0), EBO(0), shaderProgram(0), textureAtlas(0), crosshairVAO(0), crosshairVBO(0) {}
 
 Renderer::~Renderer()
 {
@@ -24,10 +24,14 @@ void Renderer::init()
 
     std::string vertexSource = loadShaderSource("shaders/vertex.glsl");
     std::string fragmentSource = loadShaderSource("shaders/fragment.glsl");
-
     shaderProgram = createShaderProgram(vertexSource.c_str(), fragmentSource.c_str());
     
+    std::string crosshairVertexSource = loadShaderSource("shaders/crosshair_vertex.glsl");
+    std::string crosshairFragmentSource = loadShaderSource("shaders/crosshair_fragment.glsl");
+    crosshairShaderProgram = createShaderProgram(crosshairVertexSource.c_str(), crosshairFragmentSource.c_str());
+
     loadTextureAtlas("textures/atlas.png");
+    initCrosshair();
 }
 
 void Renderer::renderWorld(const Camera& camera, float aspectRatio) {
@@ -44,6 +48,45 @@ void Renderer::renderWorld(const Camera& camera, float aspectRatio) {
     
 
     world.render(camera, shaderProgram);
+
+    glDisable(GL_DEPTH_TEST);
+    renderCrosshair(aspectRatio);
+    glEnable(GL_DEPTH_TEST);
+}
+
+void Renderer::initCrosshair() {
+    float crosshairVertices[] = {
+        -0.02f,  0.0f,
+         0.02f,  0.0f,
+         0.0f,  -0.02f,
+         0.0f,   0.02f
+    };
+
+    glGenVertexArrays(1, &crosshairVAO);
+    glGenBuffers(1, &crosshairVBO);
+
+    glBindVertexArray(crosshairVAO);
+
+    glBindBuffer(GL_ARRAY_BUFFER, crosshairVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(crosshairVertices), crosshairVertices, GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+
+    glBindVertexArray(0);
+}
+
+void Renderer::renderCrosshair(float aspectRatio) {
+    if (!crosshairVAO || !crosshairShaderProgram) return;
+
+    glUseProgram(crosshairShaderProgram);
+    GLint aspectLoc = glGetUniformLocation(crosshairShaderProgram, "aspectRatio");
+    if (aspectLoc != -1) {
+        glUniform1f(aspectLoc, aspectRatio);
+    }
+    glBindVertexArray(crosshairVAO);
+    glDrawArrays(GL_LINES, 0, 4);
+    glBindVertexArray(0);
 }
 
 void Renderer::cleanup()
@@ -53,6 +96,10 @@ void Renderer::cleanup()
     if (EBO) glDeleteBuffers(1, &EBO);
     glDeleteTextures(1, &textureAtlas);
     glDeleteProgram(shaderProgram);
+
+    if (crosshairVAO) glDeleteVertexArrays(1, &crosshairVAO);
+    if (crosshairVBO) glDeleteBuffers(1, &crosshairVBO);
+    glDeleteProgram(crosshairShaderProgram);
 }
 
 GLuint Renderer::createShader(const char *source, GLenum shaderType)
