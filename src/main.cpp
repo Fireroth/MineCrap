@@ -18,7 +18,7 @@ int main()
     BlockDB::initialize();
     
     Camera camera(
-        glm::vec3(0.0f, 25.0f, 0.0f),  // Position
+        glm::vec3(0.0f, 47.0f, 0.0f),  // Position
         glm::vec3(0.0f, 1.0f, 0.0f),   // Up vector
         0.0f,                          // Yaw
         0.0f                           // Pitch

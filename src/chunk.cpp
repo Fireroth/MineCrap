@@ -41,13 +41,13 @@ void Chunk::generateTerrain() {
             float combined = base + detail * 0.3f;
             combined = std::pow(combined, 1.3f);
 
-            int height = static_cast<int>(combined * 24.0f + 8);
+            int height = static_cast<int>(combined * 24.0f + 30);
 
             for (int y = 0; y < HEIGHT; ++y) {
                 if (y == 0) {
                     blocks[x][y][z].type = "bedrock";
                 } else if (y > height) {
-                    if (y < 12 && blocks[x][y][z].type.empty()) {
+                    if (y < 34 && blocks[x][y][z].type.empty()) {
                         blocks[x][y][z].type = "water";
                     }
                     continue;
