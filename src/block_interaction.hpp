@@ -27,8 +27,7 @@ struct BlockInfo {
 
 RaycastResult raycast(World* world, const glm::vec3& origin, const glm::vec3& dir, float maxDistance);
 
-void breakBlockOnClick(World* world, const Camera& camera);
-void placeBlockOnClick(World* world, const Camera& camera);
+void placeBreakBlockOnClick(World* world, const Camera& camera, char action);
 
 // For ImGui
 BlockInfo getLookedAtBlockInfo(World* world, const Camera& camera);

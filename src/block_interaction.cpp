@@ -66,44 +66,7 @@ RaycastResult raycast(World* world, const glm::vec3& origin, const glm::vec3& di
     return result;
 }
 
-//Todo: combine break and place block functions into one
-void breakBlockOnClick(World* world, const Camera& camera)
-{
-    glm::vec3 origin = camera.getPosition();
-    glm::vec3 dir = camera.getFront();
-
-    RaycastResult hit = raycast(world, origin, dir, 6.0f);
-    if (!hit.hit || !hit.hitChunk) return;
-
-    hit.hitChunk->blocks[hit.hitBlockPos.x][hit.hitBlockPos.y][hit.hitBlockPos.z].type.clear();
-    hit.hitChunk->buildMesh();
-
-    // Rebuild neighbor chunk mesh if at chunk edge
-    int cx = hit.hitChunk->chunkX;
-    int cz = hit.hitChunk->chunkZ;
-    int x = hit.hitBlockPos.x;
-    int z = hit.hitBlockPos.z;
-
-    if (x == 0) {
-        Chunk* neighbor = world->getChunk(cx - 1, cz);
-        if (neighbor) neighbor->buildMesh();
-    }
-    if (x == Chunk::WIDTH - 1) {
-        Chunk* neighbor = world->getChunk(cx + 1, cz);
-        if (neighbor) neighbor->buildMesh();
-    }
-    if (z == 0) {
-        Chunk* neighbor = world->getChunk(cx, cz - 1);
-        if (neighbor) neighbor->buildMesh();
-    }
-    if (z == Chunk::DEPTH - 1) {
-        Chunk* neighbor = world->getChunk(cx, cz + 1);
-        if (neighbor) neighbor->buildMesh();
-    }
-}
-
-
-void placeBlockOnClick(World* world, const Camera& camera)
+void placeBreakBlockOnClick(World* world, const Camera& camera, char action)
 {
     glm::vec3 origin = camera.getPosition();
     glm::vec3 dir = camera.getFront();
@@ -111,12 +74,19 @@ void placeBlockOnClick(World* world, const Camera& camera)
     RaycastResult hit = raycast(world, origin, dir, 6.0f);
     if (!hit.hasPlacePos || !hit.placeChunk) return;
 
-    auto& block = hit.placeChunk->blocks[hit.placeBlockPos.x][hit.placeBlockPos.y][hit.placeBlockPos.z];
-    if (!block.type.empty()) return;
+    // p = place, b = break
+    if (action == 'b') {
+        hit.hitChunk->blocks[hit.hitBlockPos.x][hit.hitBlockPos.y][hit.hitBlockPos.z].type.clear();
+        hit.hitChunk->buildMesh();
+    }
+    if (action == 'p') {
+        auto& block = hit.placeChunk->blocks[hit.placeBlockPos.x][hit.placeBlockPos.y][hit.placeBlockPos.z];
+        if (!block.type.empty()) return;
 
-    block.type = "grass";
-    hit.placeChunk->buildMesh();
-
+        block.type = "grass";
+        hit.placeChunk->buildMesh();
+    }
+    
     // Rebuild neighbor chunk mesh if at chunk edge
     int cx = hit.placeChunk->chunkX;
     int cz = hit.placeChunk->chunkZ;

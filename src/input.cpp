@@ -38,12 +38,12 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
     if (!cursorCaptured) return;
     if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
         if (g_camera && g_world) {
-            breakBlockOnClick(g_world, *g_camera);
+            placeBreakBlockOnClick(g_world, *g_camera, 'b');
         }
     }
     if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS) {
         if (g_camera && g_world) {
-            placeBlockOnClick(g_world, *g_camera);
+            placeBreakBlockOnClick(g_world, *g_camera, 'p');
         }
     }
 }
