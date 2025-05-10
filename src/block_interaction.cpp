@@ -72,27 +72,37 @@ void placeBreakBlockOnClick(World* world, const Camera& camera, char action)
     glm::vec3 dir = camera.getFront();
 
     RaycastResult hit = raycast(world, origin, dir, 6.0f);
-    if (!hit.hasPlacePos || !hit.placeChunk) return;
+
+    int cx = 0, cz = 0, x = 0, z = 0;
 
     // p = place, b = break
     if (action == 'b') {
+        if (!hit.hit || !hit.hitChunk) return;
         hit.hitChunk->blocks[hit.hitBlockPos.x][hit.hitBlockPos.y][hit.hitBlockPos.z].type.clear();
         hit.hitChunk->buildMesh();
+
+        // Assign values for neighbor chunk checks
+        cx = hit.hitChunk->chunkX;
+        cz = hit.hitChunk->chunkZ;
+        x = hit.hitBlockPos.x;
+        z = hit.hitBlockPos.z;
     }
-    if (action == 'p') {
+    else if (action == 'p') {
+        if (!hit.hasPlacePos || !hit.placeChunk) return;
         auto& block = hit.placeChunk->blocks[hit.placeBlockPos.x][hit.placeBlockPos.y][hit.placeBlockPos.z];
         if (!block.type.empty()) return;
 
         block.type = "grass";
         hit.placeChunk->buildMesh();
-    }
-    
-    // Rebuild neighbor chunk mesh if at chunk edge
-    int cx = hit.placeChunk->chunkX;
-    int cz = hit.placeChunk->chunkZ;
-    int x = hit.placeBlockPos.x;
-    int z = hit.placeBlockPos.z;
 
+        // Assign values for neighbor chunk checks
+        cx = hit.placeChunk->chunkX;
+        cz = hit.placeChunk->chunkZ;
+        x = hit.placeBlockPos.x;
+        z = hit.placeBlockPos.z;
+    }
+
+    // Rebuild neighbor chunk mesh if at chunk edge
     if (x == 0) {
         Chunk* neighbor = world->getChunk(cx - 1, cz);
         if (neighbor) neighbor->buildMesh();
@@ -109,7 +119,6 @@ void placeBreakBlockOnClick(World* world, const Camera& camera, char action)
         Chunk* neighbor = world->getChunk(cx, cz + 1);
         if (neighbor) neighbor->buildMesh();
     }
-
 }
 
 // For imgui ----------------------------------------------------------------------------
