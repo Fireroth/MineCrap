@@ -41,5 +41,3 @@ Chunk* World::getChunk(int x, int z) const {
         return it->second;
     return nullptr;
 }
-
-

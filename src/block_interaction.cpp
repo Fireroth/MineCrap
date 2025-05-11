@@ -2,8 +2,6 @@
 #include "chunk.hpp"
 #include "camera.hpp"
 #include "world.hpp"
-#include <glm/glm.hpp>
-#include <GLFW/glfw3.h>
 
 struct RaycastResult {
     bool hit = false;
@@ -141,7 +139,6 @@ void placeBreakBlockOnClick(World* world, const Camera& camera, char action)
 }
 
 // For imgui ----------------------------------------------------------------------------
-
 struct BlockInfo {
     bool valid = false;
     glm::ivec3 worldPos;

@@ -24,5 +24,3 @@ private:
     void loadTextureAtlas(const std::string& path);
     void initCrosshair();
 };
-
-

@@ -11,7 +11,7 @@ class World;
 class Chunk {
 public:
     static const int WIDTH = 16;
-    static const int HEIGHT = 256;
+    static const int HEIGHT = 128; // Reduced from 256 for less memory usage (temporarily)
     static const int DEPTH = 16;
 
     struct Block {

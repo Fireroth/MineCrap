@@ -6,7 +6,7 @@
 #include <iostream>
 #include <glm/gtc/type_ptr.hpp>
 
-Renderer::Renderer() : VAO(0), VBO(0), EBO(0), shaderProgram(0), textureAtlas(0), crosshairVAO(0), crosshairVBO(0) {}
+Renderer::Renderer() : VAO(0), VBO(0), shaderProgram(0), textureAtlas(0), crosshairVAO(0), crosshairVBO(0) {}
 
 Renderer::~Renderer()
 {
@@ -34,26 +34,6 @@ void Renderer::init()
     initCrosshair();
 }
 
-void Renderer::renderWorld(const Camera& camera, float aspectRatio) {
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glUseProgram(shaderProgram);
-
-    glm::mat4 projection = glm::perspective(glm::radians(45.0f), aspectRatio, 0.1f, 500.0f); // 500 = "view distance"
-    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"), 1, GL_FALSE, &camera.getViewMatrix()[0][0]);
-    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, &projection[0][0]);
-
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, textureAtlas);
-    glUniform1i(glGetUniformLocation(shaderProgram, "atlas"), 0);
-    
-
-    world.render(camera, shaderProgram);
-
-    glDisable(GL_DEPTH_TEST);
-    renderCrosshair(aspectRatio);
-    glEnable(GL_DEPTH_TEST);
-}
-
 void Renderer::initCrosshair() {
     float crosshairVertices[] = {
         -0.02f,  0.0f,
@@ -76,6 +56,26 @@ void Renderer::initCrosshair() {
     glBindVertexArray(0);
 }
 
+void Renderer::renderWorld(const Camera& camera, float aspectRatio) {
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glUseProgram(shaderProgram);
+
+    glm::mat4 projection = glm::perspective(glm::radians(45.0f), aspectRatio, 0.1f, 500.0f); // 500 = "view distance"
+    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"), 1, GL_FALSE, &camera.getViewMatrix()[0][0]);
+    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, &projection[0][0]);
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, textureAtlas);
+    glUniform1i(glGetUniformLocation(shaderProgram, "atlas"), 0);
+    
+
+    world.render(camera, shaderProgram);
+
+    glDisable(GL_DEPTH_TEST);
+    renderCrosshair(aspectRatio);
+    glEnable(GL_DEPTH_TEST);
+}
+
 void Renderer::renderCrosshair(float aspectRatio) {
     if (!crosshairVAO || !crosshairShaderProgram) return;
 
@@ -93,7 +93,6 @@ void Renderer::cleanup()
 {
     if (VAO) glDeleteVertexArrays(1, &VAO);
     if (VBO) glDeleteBuffers(1, &VBO);
-    if (EBO) glDeleteBuffers(1, &EBO);
     glDeleteTextures(1, &textureAtlas);
     glDeleteProgram(shaderProgram);
 
