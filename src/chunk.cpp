@@ -45,18 +45,16 @@ void Chunk::generateTerrain() {
 
             for (int y = 0; y < HEIGHT; ++y) {
                 if (y == 0) {
-                    blocks[x][y][z].type = "bedrock";
+                    blocks[x][y][z].type = 6;
                 } else if (y > height) {
-                    if (y < 34 && blocks[x][y][z].type.empty()) {
-                        blocks[x][y][z].type = "water";
-                    }
+                    blocks[x][y][z].type = (y < 34) ? 7 : 0;
                     continue;
                 } else if (y == height) {
-                    blocks[x][y][z].type = "grass";
+                    blocks[x][y][z].type = 1;
                 } else if (y >= height - 2) {
-                    blocks[x][y][z].type = "dirt";
+                    blocks[x][y][z].type = 2;
                 } else {
-                    blocks[x][y][z].type = "stone";
+                    blocks[x][y][z].type = 3;
                 }
             }
         }
@@ -64,6 +62,18 @@ void Chunk::generateTerrain() {
 }
 
 void Chunk::buildMesh() {
+    if (VAO != 0) {
+        glDeleteVertexArrays(1, &VAO);
+        VAO = 0;
+    }
+    if (VBO != 0) {
+        glDeleteBuffers(1, &VBO);
+        VBO = 0;
+    }
+    if (EBO != 0) {
+        glDeleteBuffers(1, &EBO);
+        EBO = 0;
+    }
     std::vector<float> vertices;
     std::vector<unsigned int> indices;
     unsigned int indexOffset = 0;
@@ -71,8 +81,8 @@ void Chunk::buildMesh() {
     for (int x = 0; x < WIDTH; ++x) {
         for (int y = 0; y < HEIGHT; ++y) {
             for (int z = 0; z < DEPTH; ++z) {
-                const std::string& type = blocks[x][y][z].type;
-                if (type.empty()) continue;
+                const uint8_t& type = blocks[x][y][z].type;
+                if (type == 0) continue;
 
                 const BlockDB::BlockInfo* info = BlockDB::getBlockInfo(type);
                 if (!info) continue;
@@ -132,7 +142,7 @@ bool Chunk::isBlockVisible(int x, int y, int z, int face) const {
 
     // If neighbor is within current chunk
     if (nx >= 0 && nx < WIDTH && nz >= 0 && nz < DEPTH) {
-        return blocks[nx][ny][nz].type.empty();
+        return blocks[nx][ny][nz].type == 0;
     }
 
     // Neighbor is in another chunk
@@ -161,7 +171,7 @@ bool Chunk::isBlockVisible(int x, int y, int z, int face) const {
     if (!neighbor)
         return true;  // If no neighbor, assume empty
 
-    return neighbor->blocks[lx][ny][lz].type.empty();
+    return neighbor->blocks[lx][ny][lz].type == 0;
 }
 
 void Chunk::addFace(std::vector<float>& vertices, std::vector<unsigned int>& indices,

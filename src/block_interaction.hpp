@@ -1,7 +1,6 @@
 #pragma once
 
 #include <glm/glm.hpp>
-#include <string>
 
 class Camera;
 class Chunk;
@@ -22,7 +21,7 @@ struct RaycastResult {
 struct BlockInfo {
     bool valid = false;
     glm::ivec3 worldPos;
-    std::string type;
+    uint8_t type;
 };
 
 RaycastResult raycast(World* world, const glm::vec3& origin, const glm::vec3& dir, float maxDistance);

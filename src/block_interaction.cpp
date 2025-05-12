@@ -47,7 +47,7 @@ RaycastResult raycast(World* world, const glm::vec3& origin, const glm::vec3& di
             if (lx >= 0 && lx < Chunk::WIDTH &&
                 ly >= 0 && ly < Chunk::HEIGHT &&
                 lz >= 0 && lz < Chunk::DEPTH &&
-                !chunk->blocks[lx][ly][lz].type.empty())
+                chunk->blocks[lx][ly][lz].type != 0)
             {
                 result.hit = true;
                 result.hitBlockPos = { lx, ly, lz };
@@ -95,7 +95,7 @@ void placeBreakBlockOnClick(World* world, const Camera& camera, char action)
     // p = place, b = break
     if (action == 'b') {
         if (!hit.hit || !hit.hitChunk) return;
-        hit.hitChunk->blocks[hit.hitBlockPos.x][hit.hitBlockPos.y][hit.hitBlockPos.z].type.clear();
+        hit.hitChunk->blocks[hit.hitBlockPos.x][hit.hitBlockPos.y][hit.hitBlockPos.z].type = 0;
         hit.hitChunk->buildMesh();
 
         // Assign values for neighbor chunk checks
@@ -106,10 +106,12 @@ void placeBreakBlockOnClick(World* world, const Camera& camera, char action)
     }
     else if (action == 'p') {
         if (!hit.hasPlacePos || !hit.placeChunk) return;
+        // Prevent placement below bedrock or above chunk height
+        if (hit.placeBlockPos.y < 1 || hit.placeBlockPos.y >= Chunk::HEIGHT) return;
         auto& block = hit.placeChunk->blocks[hit.placeBlockPos.x][hit.placeBlockPos.y][hit.placeBlockPos.z];
-        if (!block.type.empty()) return;
+        if (block.type != 0) return;
 
-        block.type = "grass";
+        block.type = 1;
         hit.placeChunk->buildMesh();
 
         // Assign values for neighbor chunk checks
@@ -142,7 +144,7 @@ void placeBreakBlockOnClick(World* world, const Camera& camera, char action)
 struct BlockInfo {
     bool valid = false;
     glm::ivec3 worldPos;
-    std::string type;
+    uint8_t type;
 };
 
 BlockInfo getLookedAtBlockInfo(World* world, const Camera& camera)

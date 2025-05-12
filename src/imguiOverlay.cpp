@@ -4,6 +4,17 @@
 #include <backends/imgui_impl_glfw.h>
 #include <backends/imgui_impl_opengl3.h>
 
+#include <map>
+#include <string>
+std::map<uint8_t, std::string> blockNames = {
+    { 1, "Grass" },
+    { 2, "Dirt" },
+    { 3, "Stone" },
+    { 4, "Sand" },
+    { 5, "Log" },
+    { 6, "Bedrock" },
+    { 7, "Water" }
+};
 
 const float ImGuiOverlay::fpsRefreshInterval = 0.5f; // 500ms
 
@@ -60,12 +71,12 @@ void ImGuiOverlay::render(float deltaTime, const Camera& camera, World* world) {
     ImGui::Text("Chunk: %d, %d", chunkX, chunkZ);
 
     if (blockInfo.valid) {
-        ImGui::Text("Looking at block: %s", blockInfo.type.c_str());
+        ImGui::Text("Looking at block: %s", blockNames[blockInfo.type].c_str());
         ImGui::Text("Block position: [%d, %d, %d]", blockInfo.worldPos.x, blockInfo.worldPos.y, blockInfo.worldPos.z);
     } else {
         ImGui::Text("Looking at: nothing");
         ImGui::Text("Block position: undefined");
-}
+    }
 
     ImGui::End();
 

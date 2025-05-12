@@ -1,9 +1,16 @@
 #include "blockDB.hpp"
 
-std::unordered_map<std::string, BlockDB::BlockInfo> BlockDB::blockData;
+std::unordered_map<uint8_t, BlockDB::BlockInfo> BlockDB::blockData;
 
 void BlockDB::initialize() {
-    blockData["grass"] = {
+    blockData[0] = {
+        {
+            // air
+        }
+    };
+
+    // Grass
+    blockData[1] = {
         {
             glm::vec2(0.0f, 15.0f), // front
             glm::vec2(0.0f, 15.0f), // back
@@ -14,7 +21,8 @@ void BlockDB::initialize() {
         }
     };
 
-    blockData["dirt"] = {
+    // Dirt
+    blockData[2] = {
         {
             glm::vec2(1.0f, 15.0f),
             glm::vec2(1.0f, 15.0f),
@@ -25,7 +33,8 @@ void BlockDB::initialize() {
         }
     };
 
-    blockData["stone"] = {
+    // Stone
+    blockData[3] = {
         {
             glm::vec2(3.0f, 15.0f),
             glm::vec2(3.0f, 15.0f),
@@ -36,7 +45,8 @@ void BlockDB::initialize() {
         }
     };
 
-    blockData["sand"] = {
+    // Sand
+    blockData[4] = {
         {
             glm::vec2(4.0f, 15.0f),
             glm::vec2(4.0f, 15.0f),
@@ -47,7 +57,8 @@ void BlockDB::initialize() {
         }
     };
 
-    blockData["log"] = {
+    // Log
+    blockData[5] = {
         {
             glm::vec2(2.0f, 14.0f),
             glm::vec2(2.0f, 14.0f),
@@ -58,7 +69,8 @@ void BlockDB::initialize() {
         }
     };
 
-    blockData["bedrock"] = {
+    // Bedrock
+    blockData[6] = {
         {
             glm::vec2(1.0f, 14.0f),
             glm::vec2(1.0f, 14.0f),
@@ -70,7 +82,8 @@ void BlockDB::initialize() {
     };
 
     //Temporary water implementation
-    blockData["water"] = {
+    // Water
+    blockData[7] = {
         {
             glm::vec2(0.0f, 13.0f),
             glm::vec2(0.0f, 13.0f),
@@ -83,7 +96,7 @@ void BlockDB::initialize() {
 
 }
 
-const BlockDB::BlockInfo* BlockDB::getBlockInfo(const std::string& blockName) {
+const BlockDB::BlockInfo* BlockDB::getBlockInfo(const uint8_t& blockName) {
     auto it = blockData.find(blockName);
     if (it != blockData.end()) {
         return &it->second;

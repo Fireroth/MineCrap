@@ -2,7 +2,6 @@
 
 #include <glm/glm.hpp>
 #include <unordered_map>
-#include <string>
 
 class BlockDB {
 public:
@@ -11,8 +10,8 @@ public:
     };
 
     static void initialize();
-    static const BlockInfo* getBlockInfo(const std::string& blockName);
+    static const BlockInfo* getBlockInfo(const uint8_t& blockName);
 
 private:
-    static std::unordered_map<std::string, BlockInfo> blockData;
+    static std::unordered_map<uint8_t, BlockInfo> blockData;
 };
