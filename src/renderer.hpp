@@ -5,6 +5,7 @@
 
 class Renderer {
 public:
+    GLint uModelLoc, uViewLoc, uProjLoc, uAtlasLoc, uAspectLoc;
     Renderer();
     ~Renderer();
 
@@ -14,6 +15,7 @@ public:
     void renderCrosshair(float aspectRatio);
 
     World world;
+    
 
 private:
     GLuint VAO, VBO, EBO, shaderProgram, textureAtlas;

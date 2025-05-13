@@ -81,9 +81,21 @@ void BlockDB::initialize() {
         }
     };
 
+    //Gravel
+    blockData[7] = {
+        {
+            glm::vec2(5.0f, 15.0f),
+            glm::vec2(5.0f, 15.0f),
+            glm::vec2(5.0f, 15.0f),
+            glm::vec2(5.0f, 15.0f),
+            glm::vec2(5.0f, 15.0f),
+            glm::vec2(5.0f, 15.0f)
+        }
+    };
+
     //Temporary water implementation
     // Water
-    blockData[7] = {
+    blockData[8] = {
         {
             glm::vec2(0.0f, 13.0f),
             glm::vec2(0.0f, 13.0f),

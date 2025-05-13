@@ -14,7 +14,7 @@ public:
     Chunk* getChunk(int x, int z) const;
 
     void generateChunks(int radius);
-    void render(const Camera& camera, GLuint shaderProgram);
+    void render(const Camera& camera, GLint uModelLoc);
 
 private:
     std::map<std::pair<int, int>, Chunk*> chunks;

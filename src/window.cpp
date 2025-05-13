@@ -10,13 +10,18 @@ Window::~Window() {
     cleanup();
 }
 
+// Todo: Fix the acpect ratio
+void framebufferSizeCallback(GLFWwindow* window, int width, int height) {
+    glViewport(0, 0, width, height);
+}
+
 bool Window::init() {
     if (!glfwInit()) return false;
 
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+    glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 
     window = glfwCreateWindow(width, height, title, nullptr, nullptr);
     if (!window) {
@@ -32,6 +37,8 @@ bool Window::init() {
         std::cerr << "Failed to initialize GLAD" << std::endl;
         return false;
     }
+
+    glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
 
     return true;
 }

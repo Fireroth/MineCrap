@@ -30,6 +30,12 @@ void Renderer::init()
     std::string crosshairFragmentSource = loadShaderSource("shaders/crosshair_fragment.glsl");
     crosshairShaderProgram = createShaderProgram(crosshairVertexSource.c_str(), crosshairFragmentSource.c_str());
 
+    uModelLoc = glGetUniformLocation(shaderProgram, "model");
+    uViewLoc = glGetUniformLocation(shaderProgram, "view");
+    uProjLoc = glGetUniformLocation(shaderProgram, "projection");
+    uAtlasLoc = glGetUniformLocation(shaderProgram, "atlas");
+    uAspectLoc = glGetUniformLocation(crosshairShaderProgram, "aspectRatio");
+
     loadTextureAtlas("textures/atlas.png");
     initCrosshair();
 }
@@ -57,19 +63,18 @@ void Renderer::initCrosshair() {
 }
 
 void Renderer::renderWorld(const Camera& camera, float aspectRatio) {
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glUseProgram(shaderProgram);
 
     glm::mat4 projection = glm::perspective(glm::radians(45.0f), aspectRatio, 0.1f, 500.0f); // 500 = "view distance"
-    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"), 1, GL_FALSE, &camera.getViewMatrix()[0][0]);
-    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, &projection[0][0]);
+    glUniformMatrix4fv(uViewLoc, 1, GL_FALSE, &camera.getViewMatrix()[0][0]);
+    glUniformMatrix4fv(uProjLoc, 1, GL_FALSE, &projection[0][0]);
+
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, textureAtlas);
-    glUniform1i(glGetUniformLocation(shaderProgram, "atlas"), 0);
-    
+    glUniform1i(uAtlasLoc, 0);
 
-    world.render(camera, shaderProgram);
+    world.render(camera, uModelLoc);
 
     glDisable(GL_DEPTH_TEST);
     renderCrosshair(aspectRatio);
@@ -80,9 +85,9 @@ void Renderer::renderCrosshair(float aspectRatio) {
     if (!crosshairVAO || !crosshairShaderProgram) return;
 
     glUseProgram(crosshairShaderProgram);
-    GLint aspectLoc = glGetUniformLocation(crosshairShaderProgram, "aspectRatio");
-    if (aspectLoc != -1) {
-        glUniform1f(aspectLoc, aspectRatio);
+    
+    if (uAspectLoc != -1) {
+        glUniform1f(uAspectLoc, aspectRatio);
     }
     glBindVertexArray(crosshairVAO);
     glDrawArrays(GL_LINES, 0, 4);

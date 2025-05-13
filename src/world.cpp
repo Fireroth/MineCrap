@@ -29,9 +29,9 @@ void World::generateChunks(int radius) {
 }
 
 
-void World::render(const Camera& camera, GLuint shaderProgram) {
+void World::render(const Camera& camera, GLint uModelLoc) {
     for (auto& [coord, chunk] : chunks) {
-        chunk->render(camera, shaderProgram);
+        chunk->render(camera, uModelLoc);
     }
 }
 

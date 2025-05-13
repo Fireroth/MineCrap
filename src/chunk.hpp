@@ -23,7 +23,7 @@ public:
 
     void generateTerrain();
     void buildMesh();
-    void render(const Camera& camera, GLuint shaderProgram);
+    void render(const Camera& camera, GLint uModelLoc);
 
     Block blocks[WIDTH][HEIGHT][DEPTH];
     int chunkX, chunkZ;

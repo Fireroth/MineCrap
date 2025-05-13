@@ -47,7 +47,7 @@ void Chunk::generateTerrain() {
                 if (y == 0) {
                     blocks[x][y][z].type = 6;
                 } else if (y > height) {
-                    blocks[x][y][z].type = (y < 34) ? 7 : 0;
+                    blocks[x][y][z].type = (y < 34) ? 8 : 0;
                     continue;
                 } else if (y == height) {
                     blocks[x][y][z].type = 1;
@@ -208,11 +208,9 @@ void Chunk::addFace(std::vector<float>& vertices, std::vector<unsigned int>& ind
     indexOffset += 4;
 }
 
-void Chunk::render(const Camera& camera, GLuint shaderProgram) {
-    glUseProgram(shaderProgram);
-
+void Chunk::render(const Camera& camera, GLint uModelLoc) {
     glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(chunkX * WIDTH, 0, chunkZ * DEPTH));
-    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, &model[0][0]);
+    glUniformMatrix4fv(uModelLoc, 1, GL_FALSE, &model[0][0]);
 
     glBindVertexArray(VAO);
     glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, 0);
