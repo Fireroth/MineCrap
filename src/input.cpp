@@ -9,6 +9,11 @@ static Camera* g_camera = nullptr;
 static World* g_world = nullptr;
 static float lastX;
 static float lastY;
+static uint8_t selectedBlockType = 1; // Default to grass
+
+uint8_t getSelectedBlockType() {
+    return selectedBlockType;
+}
 
 // Mouse movement
 void mouse_callback(GLFWwindow* window, double xpos, double ypos)
@@ -38,12 +43,12 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
     if (!cursorCaptured) return;
     if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
         if (g_camera && g_world) {
-            placeBreakBlockOnClick(g_world, *g_camera, 'b');
+            placeBreakBlockOnClick(g_world, *g_camera, 'b', selectedBlockType);
         }
     }
     if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS) {
         if (g_camera && g_world) {
-            placeBreakBlockOnClick(g_world, *g_camera, 'p');
+            placeBreakBlockOnClick(g_world, *g_camera, 'p', selectedBlockType);
         }
     }
 }
@@ -85,7 +90,6 @@ void processInput(GLFWwindow* window, Camera& camera, float deltaTime, float spe
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
         camera.processKeyboard("RIGHT", deltaTime, speedMultiplier);
 
-
     static bool escPressedLastFrame = false;
     bool escPressedThisFrame = glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS;
 
@@ -97,5 +101,12 @@ void processInput(GLFWwindow* window, Camera& camera, float deltaTime, float spe
         firstMouse = true; // Reset mouse position capture
     }
     escPressedLastFrame = escPressedThisFrame;
+
+    // Block selection with number keys 1-8
+    for (int i = 1; i <= 8; ++i) {
+        if (glfwGetKey(window, GLFW_KEY_1 + (i - 1)) == GLFW_PRESS) {
+            selectedBlockType = static_cast<uint8_t>(i);
+        }
+    }
 }
 

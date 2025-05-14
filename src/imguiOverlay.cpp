@@ -1,5 +1,6 @@
 #include "ImGuiOverlay.hpp"
 #include "block_interaction.hpp"
+#include "input.hpp"
 #include <imgui.h>
 #include <backends/imgui_impl_glfw.h>
 #include <backends/imgui_impl_opengl3.h>
@@ -13,7 +14,8 @@ std::map<uint8_t, std::string> blockNames = {
     { 4, "Sand" },
     { 5, "Log" },
     { 6, "Bedrock" },
-    { 7, "Water" }
+    { 7, "Gravel"},
+    { 8, "Water"}
 };
 
 const float ImGuiOverlay::fpsRefreshInterval = 0.5f; // 500ms
@@ -51,7 +53,7 @@ void ImGuiOverlay::render(float deltaTime, const Camera& camera, World* world) {
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
-    ImGui::SetNextWindowSize(ImVec2(300, 190)); // Width: 300, Height: 150
+    ImGui::SetNextWindowSize(ImVec2(300, 205)); // Width: 300, Height: 205
     
     glm::vec3 pos = camera.getPosition();
     glm::vec3 front = camera.getFront();
@@ -77,6 +79,8 @@ void ImGuiOverlay::render(float deltaTime, const Camera& camera, World* world) {
         ImGui::Text("Looking at: nothing");
         ImGui::Text("Block position: undefined");
     }
+
+    ImGui::Text("Selected block: %s", blockNames[getSelectedBlockType()].c_str());
 
     ImGui::End();
 

@@ -65,7 +65,7 @@ void Renderer::initCrosshair() {
 void Renderer::renderWorld(const Camera& camera, float aspectRatio) {
     glUseProgram(shaderProgram);
 
-    glm::mat4 projection = glm::perspective(glm::radians(45.0f), aspectRatio, 0.1f, 500.0f); // 500 = "view distance"
+    glm::mat4 projection = glm::perspective(glm::radians(60.0f), aspectRatio, 0.1f, 500.0f); // 500 = "view distance"
     glUniformMatrix4fv(uViewLoc, 1, GL_FALSE, &camera.getViewMatrix()[0][0]);
     glUniformMatrix4fv(uProjLoc, 1, GL_FALSE, &projection[0][0]);
 

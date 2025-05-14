@@ -83,7 +83,7 @@ RaycastResult raycast(World* world, const glm::vec3& origin, const glm::vec3& di
     return result;
 }
 
-void placeBreakBlockOnClick(World* world, const Camera& camera, char action)
+void placeBreakBlockOnClick(World* world, const Camera& camera, char action, uint8_t blockType)
 {
     glm::vec3 origin = camera.getPosition();
     glm::vec3 dir = camera.getFront();
@@ -107,11 +107,11 @@ void placeBreakBlockOnClick(World* world, const Camera& camera, char action)
     else if (action == 'p') {
         if (!hit.hasPlacePos || !hit.placeChunk) return;
         // Prevent placement below bedrock or above chunk height
-        if (hit.placeBlockPos.y < 1 || hit.placeBlockPos.y >= Chunk::HEIGHT) return;
+        if (hit.placeBlockPos.y < 0 || hit.placeBlockPos.y >= Chunk::HEIGHT) return;
         auto& block = hit.placeChunk->blocks[hit.placeBlockPos.x][hit.placeBlockPos.y][hit.placeBlockPos.z];
         if (block.type != 0) return;
 
-        block.type = 1;
+        block.type = blockType;
         hit.placeChunk->buildMesh();
 
         // Assign values for neighbor chunk checks
