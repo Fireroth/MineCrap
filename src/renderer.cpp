@@ -42,10 +42,10 @@ void Renderer::init()
 
 void Renderer::initCrosshair() {
     float crosshairVertices[] = {
-        -0.02f,  0.0f,
-         0.02f,  0.0f,
-         0.0f,  -0.02f,
-         0.0f,   0.02f
+        -0.025f,  0.0f,
+         0.025f,  0.0f,
+         0.0f,  -0.025f,
+         0.0f,   0.025f
     };
 
     glGenVertexArrays(1, &crosshairVAO);
@@ -82,15 +82,17 @@ void Renderer::renderWorld(const Camera& camera, float aspectRatio) {
 }
 
 void Renderer::renderCrosshair(float aspectRatio) {
-    if (!crosshairVAO || !crosshairShaderProgram) return;
-
     glUseProgram(crosshairShaderProgram);
     
     if (uAspectLoc != -1) {
         glUniform1f(uAspectLoc, aspectRatio);
     }
     glBindVertexArray(crosshairVAO);
+
+    glLineWidth(2.0f);
     glDrawArrays(GL_LINES, 0, 4);
+    glLineWidth(1.0f);
+
     glBindVertexArray(0);
 }
 
