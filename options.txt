@@ -2,3 +2,5 @@ window_width=1280
 window_height=720
 render_distance=5
 fov=60
+world_seed=1234
+vsync=0

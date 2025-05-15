@@ -7,6 +7,7 @@ class BlockDB {
 public:
     struct BlockInfo {
         glm::vec2 textureCoords[6];
+        bool transparent;
     };
 
     static void initialize();

@@ -18,7 +18,7 @@ public:
     
 
 private:
-    GLuint VAO, VBO, EBO, shaderProgram, textureAtlas;
+    GLuint shaderProgram, textureAtlas;
     GLuint crosshairVAO, crosshairVBO, crosshairShaderProgram;
     World* currentWorld = nullptr;
     GLuint createShader(const char* source, GLenum shaderType);

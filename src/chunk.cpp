@@ -1,6 +1,6 @@
 #include "chunk.hpp"
+#include "options.hpp"
 #include <FastNoiseLite.h>
-#include <glad/glad.h>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream>
@@ -21,12 +21,12 @@ void Chunk::generateTerrain() {
     FastNoiseLite baseNoise;
     baseNoise.SetNoiseType(FastNoiseLite::NoiseType_OpenSimplex2);
     baseNoise.SetFrequency(0.005f);
-    baseNoise.SetSeed(69420);
+    baseNoise.SetSeed(getOptionInt("world_seed", 1234));
 
     FastNoiseLite detailNoise;
     detailNoise.SetNoiseType(FastNoiseLite::NoiseType_OpenSimplex2);
     detailNoise.SetFrequency(0.02f);
-    detailNoise.SetSeed(69421);
+    detailNoise.SetSeed(getOptionInt("world_seed", 1234) + 1);
 
     for (int x = 0; x < WIDTH; ++x) {
         for (int z = 0; z < DEPTH; ++z) {

@@ -7,7 +7,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include "options.hpp"
 
-Renderer::Renderer() : VAO(0), VBO(0), shaderProgram(0), textureAtlas(0), crosshairVAO(0), crosshairVBO(0) {}
+Renderer::Renderer() : shaderProgram(0), textureAtlas(0), crosshairVAO(0), crosshairVBO(0) {}
 
 Renderer::~Renderer()
 {
@@ -99,13 +99,11 @@ void Renderer::renderCrosshair(float aspectRatio) {
 
 void Renderer::cleanup()
 {
-    if (VAO) glDeleteVertexArrays(1, &VAO);
-    if (VBO) glDeleteBuffers(1, &VBO);
     glDeleteTextures(1, &textureAtlas);
     glDeleteProgram(shaderProgram);
 
-    if (crosshairVAO) glDeleteVertexArrays(1, &crosshairVAO);
-    if (crosshairVBO) glDeleteBuffers(1, &crosshairVBO);
+    glDeleteVertexArrays(1, &crosshairVAO);
+    glDeleteBuffers(1, &crosshairVBO);
     glDeleteProgram(crosshairShaderProgram);
 }
 
@@ -123,7 +121,7 @@ void Renderer::loadTextureAtlas(const std::string& path)
 {
     int width, height, channels;
     stbi_set_flip_vertically_on_load(true);
-    unsigned char* data = stbi_load(path.c_str(), &width, &height, &channels, 0);
+    unsigned char* data = stbi_load(path.c_str(), &width, &height, &channels, 4);
     if (!data) {
         std::cerr << "Failed to load texture atlas: " << path << std::endl;
         return;
@@ -132,8 +130,7 @@ void Renderer::loadTextureAtlas(const std::string& path)
     glGenTextures(1, &textureAtlas);
     glBindTexture(GL_TEXTURE_2D, textureAtlas);
 
-    GLenum format = (channels == 4) ? GL_RGBA : GL_RGB;
-    glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
     glGenerateMipmap(GL_TEXTURE_2D);
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);

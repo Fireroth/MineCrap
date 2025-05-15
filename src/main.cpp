@@ -33,7 +33,7 @@ int main()
 
     setupInputCallbacks(glfwWindow, &camera, &renderer.world);
 
-    glfwSwapInterval(0); // 0 = Disable V-Sync
+    glfwSwapInterval(getOptionInt("vsync", 0));
     
     ImGuiOverlay.init(glfwWindow);
     renderer.init();

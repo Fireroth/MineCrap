@@ -36,5 +36,3 @@ float getOptionFloat(const std::string& key, float defaultValue) {
     if (it != optionsMap.end()) return static_cast<float>(it->second);
     return defaultValue;
 }
-
-

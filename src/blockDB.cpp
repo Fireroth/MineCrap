@@ -6,7 +6,8 @@ void BlockDB::initialize() {
     blockData[0] = {
         {
             // air
-        }
+        },
+        true // transparency
     };
 
     // Grass
@@ -18,7 +19,8 @@ void BlockDB::initialize() {
             glm::vec2(0.0f, 15.0f), // right
             glm::vec2(2.0f, 15.0f), // top
             glm::vec2(1.0f, 15.0f)  // bottom
-        }
+        },
+        false
     };
 
     // Dirt
@@ -30,7 +32,8 @@ void BlockDB::initialize() {
             glm::vec2(1.0f, 15.0f),
             glm::vec2(1.0f, 15.0f),
             glm::vec2(1.0f, 15.0f)
-        }
+        },
+        false
     };
 
     // Stone
@@ -42,7 +45,8 @@ void BlockDB::initialize() {
             glm::vec2(3.0f, 15.0f),
             glm::vec2(3.0f, 15.0f),
             glm::vec2(3.0f, 15.0f)
-        }
+        },
+        false
     };
 
     // Sand
@@ -54,7 +58,8 @@ void BlockDB::initialize() {
             glm::vec2(4.0f, 15.0f),
             glm::vec2(4.0f, 15.0f),
             glm::vec2(4.0f, 15.0f)
-        }
+        },
+        false
     };
 
     // Log
@@ -66,7 +71,8 @@ void BlockDB::initialize() {
             glm::vec2(2.0f, 14.0f),
             glm::vec2(3.0f, 14.0f),
             glm::vec2(3.0f, 14.0f)
-        }
+        },
+        false
     };
 
     // Bedrock
@@ -78,7 +84,8 @@ void BlockDB::initialize() {
             glm::vec2(1.0f, 14.0f),
             glm::vec2(1.0f, 14.0f),
             glm::vec2(1.0f, 14.0f)
-        }
+        },
+        false
     };
 
     //Gravel
@@ -90,7 +97,8 @@ void BlockDB::initialize() {
             glm::vec2(5.0f, 15.0f),
             glm::vec2(5.0f, 15.0f),
             glm::vec2(5.0f, 15.0f)
-        }
+        },
+        false
     };
 
     //Bricks
@@ -102,8 +110,22 @@ void BlockDB::initialize() {
             glm::vec2(4.0f, 14.0f),
             glm::vec2(4.0f, 14.0f),
             glm::vec2(4.0f, 14.0f)
-        }
+        },
+        false
     };
+
+    //Leaves
+    /*blockData[9] = {
+        {
+            glm::vec2(5.0f, 14.0f),
+            glm::vec2(5.0f, 14.0f),
+            glm::vec2(5.0f, 14.0f),
+            glm::vec2(5.0f, 14.0f),
+            glm::vec2(5.0f, 14.0f),
+            glm::vec2(5.0f, 14.0f)
+        },
+        true
+    };*/
 
     //Temporary water implementation
     // Water
@@ -115,7 +137,8 @@ void BlockDB::initialize() {
             glm::vec2(0.0f, 13.0f),
             glm::vec2(0.0f, 13.0f),
             glm::vec2(0.0f, 13.0f)
-        }
+        },
+        true
     };
 
 }
