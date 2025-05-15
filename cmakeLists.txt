@@ -53,3 +53,11 @@ add_custom_command(TARGET MineCrap POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
     ${CMAKE_SOURCE_DIR}/sounds $<TARGET_FILE_DIR:MineCrap>/sounds
 )
+
+add_custom_command(
+    TARGET MineCrap POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy
+            "${CMAKE_SOURCE_DIR}/options.txt"
+            "$<TARGET_FILE_DIR:MineCrap>/options.txt"
+)
+

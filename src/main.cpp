@@ -4,15 +4,16 @@
 #include "renderer.hpp"
 #include "camera.hpp"
 #include "input.hpp"
-
-int windowWidth = 1280;
-int windowHeight = 720;
-float aspectRatio = static_cast<float>(windowWidth) / static_cast<float>(windowHeight);
-float deltaTime = 0.0f;
-float lastFrame = 0.0f;
+#include "options.hpp"
 
 int main()
 {
+    int windowWidth = getOptionInt("window_width", 1280);
+    int windowHeight = getOptionInt("window_height", 720);
+    float aspectRatio = static_cast<float>(windowWidth) / static_cast<float>(windowHeight);
+    float deltaTime = 0.0f;
+    float lastFrame = 0.0f;
+
     Renderer renderer;
     ImGuiOverlay ImGuiOverlay;
     BlockDB::initialize();

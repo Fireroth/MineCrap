@@ -15,7 +15,8 @@ std::map<uint8_t, std::string> blockNames = {
     { 5, "Log" },
     { 6, "Bedrock" },
     { 7, "Gravel"},
-    { 8, "Water"}
+    { 8, "Bricks"},
+    { 9, "Water"}
 };
 
 const float ImGuiOverlay::fpsRefreshInterval = 0.5f; // 500ms

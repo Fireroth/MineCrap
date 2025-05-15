@@ -47,7 +47,7 @@ void Chunk::generateTerrain() {
                 if (y == 0) {
                     blocks[x][y][z].type = 6;
                 } else if (y > height) {
-                    blocks[x][y][z].type = (y < 34) ? 8 : 0;
+                    blocks[x][y][z].type = (y < 34) ? 9 : 0;
                     continue;
                 } else if (y == height) {
                     blocks[x][y][z].type = 1;

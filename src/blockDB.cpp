@@ -93,9 +93,21 @@ void BlockDB::initialize() {
         }
     };
 
+    //Bricks
+    blockData[8] = {
+        {
+            glm::vec2(4.0f, 14.0f),
+            glm::vec2(4.0f, 14.0f),
+            glm::vec2(4.0f, 14.0f),
+            glm::vec2(4.0f, 14.0f),
+            glm::vec2(4.0f, 14.0f),
+            glm::vec2(4.0f, 14.0f)
+        }
+    };
+
     //Temporary water implementation
     // Water
-    blockData[8] = {
+    blockData[9] = {
         {
             glm::vec2(0.0f, 13.0f),
             glm::vec2(0.0f, 13.0f),
