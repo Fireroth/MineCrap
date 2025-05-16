@@ -3,7 +3,8 @@ project(MineCrap)
 
 set(CMAKE_CXX_STANDARD 17)
 
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin) 
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_SOURCE_DIR}/bin)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_SOURCE_DIR}/bin)
 
 # GLAD
 add_library(glad STATIC lib/glad/src/glad.c)
@@ -41,23 +42,12 @@ target_link_libraries(MineCrap glad glfw glm imgui ${CMAKE_DL_LIBS})
 
 add_custom_command(TARGET MineCrap POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
-    ${CMAKE_SOURCE_DIR}/textures $<TARGET_FILE_DIR:MineCrap>/textures
-)
-
-add_custom_command(TARGET MineCrap POST_BUILD
+            ${CMAKE_SOURCE_DIR}/textures $<TARGET_FILE_DIR:MineCrap>/textures
     COMMAND ${CMAKE_COMMAND} -E copy_directory
-    ${CMAKE_SOURCE_DIR}/shaders $<TARGET_FILE_DIR:MineCrap>/shaders
-)
-
-add_custom_command(TARGET MineCrap POST_BUILD
+            ${CMAKE_SOURCE_DIR}/shaders $<TARGET_FILE_DIR:MineCrap>/shaders
     COMMAND ${CMAKE_COMMAND} -E copy_directory
-    ${CMAKE_SOURCE_DIR}/sounds $<TARGET_FILE_DIR:MineCrap>/sounds
-)
-
-add_custom_command(
-    TARGET MineCrap POST_BUILD
+            ${CMAKE_SOURCE_DIR}/sounds $<TARGET_FILE_DIR:MineCrap>/sounds
     COMMAND ${CMAKE_COMMAND} -E copy
-            "${CMAKE_SOURCE_DIR}/options.txt"
-            "$<TARGET_FILE_DIR:MineCrap>/options.txt"
+            "${CMAKE_SOURCE_DIR}/options.txt""$<TARGET_FILE_DIR:MineCrap>/options.txt"
 )
 
