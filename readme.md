@@ -1,24 +1,40 @@
-
 # MineCrap - WIP
-A simple Minecraft clone written in C++<br> 
+A simple Minecraft clone written in C++<br>
 <img src="preview/thumb.png" alt="In-game screenshot" width="400"/>
 
----
+## Building from source
+⚠ Precompiled binaries will be available in the future
+
+Before building the project, ensure you have the following installed:
+- C++ compiler with C++17 (or later) support
+- CMake (version 3.10 or higher)
+
+Clone the repository
+```
+git clone https://github.com/Fireroth/MineCrap.git
+cd MineCrap
+```
+
+
+Run CMake
+```
+cmake ./
+```
+
+Build the project
+```
+cmake --build .
+```
 
 ## ✨ Features
 -  Face Culling
 -  Chunk based world generation
 -  Block placing and breaking
--  More features coming later :P  
-
----
 
 ## 🛠️ To-Do
 -  Inventory system
 -  Infinite terrain
 -  Sounds
-
----
 
 ## 📚 Libraries used
 - [glfw](https://www.glfw.org/) – Window and input handling  
@@ -36,4 +52,3 @@ Low Level Game Dev - [YouTube](https://www.youtube.com/@lowlevelgamedev9330)<br>
 WSAL Evan - [YouTube](https://www.youtube.com/@wsalevan)<br> 
 obiwac - [YouTube](https://www.youtube.com/@obiwac)<br> 
 LearnOpenGL - [Website](https://learnopengl.com/)</sub>
-
