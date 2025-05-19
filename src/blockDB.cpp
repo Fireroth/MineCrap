@@ -3,13 +3,6 @@
 std::unordered_map<uint8_t, BlockDB::BlockInfo> BlockDB::blockData;
 
 void BlockDB::initialize() {
-    blockData[0] = {
-        {
-            // air
-        },
-        true // transparency
-    };
-
     // Grass
     blockData[1] = {
         {
