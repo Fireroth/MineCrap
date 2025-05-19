@@ -13,7 +13,7 @@ void BlockDB::initialize() {
             glm::vec2(2.0f, 15.0f), // top
             glm::vec2(1.0f, 15.0f)  // bottom
         },
-        false
+        false // transparency
     };
 
     // Dirt
