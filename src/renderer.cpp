@@ -21,7 +21,7 @@ void Renderer::init()
     glCullFace(GL_BACK);
     glFrontFace(GL_CCW);
 
-    world.generateChunks(getOptionInt("render_distance", 5));
+    world.generateChunks(2); // Generate initial chunks around the 0,0
 
     std::string vertexSource = loadShaderSource("shaders/vertex.glsl");
     std::string fragmentSource = loadShaderSource("shaders/fragment.glsl");
@@ -64,6 +64,9 @@ void Renderer::initCrosshair() {
 }
 
 void Renderer::renderWorld(const Camera& camera, float aspectRatio) {
+    int renderDist = getOptionInt("render_distance", 5);
+    world.updateChunksAroundPlayer(camera.getPosition(), renderDist);
+
     glUseProgram(shaderProgram);
 
     glm::mat4 projection = glm::perspective(glm::radians(getOptionFloat("fov", 60.0f)), aspectRatio, 0.1f, 500.0f); // 500 = "view distance"

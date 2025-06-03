@@ -47,7 +47,7 @@ void Chunk::generateTerrain() {
                 if (y == 0) {
                     blocks[x][y][z].type = 6;
                 } else if (y > height) {
-                    blocks[x][y][z].type = (y < 34) ? 9 : 0;
+                    blocks[x][y][z].type = (y < 38) ? 9 : 0;
                     continue;
                 } else if (y == height) {
                     blocks[x][y][z].type = 1;
@@ -62,6 +62,23 @@ void Chunk::generateTerrain() {
 }
 
 void Chunk::buildMesh() {
+    // Defer mesh generation if any neighbor chunk is missing
+    for (int face = 0; face < 6; ++face) {
+        int nx = 0, ny = 0, nz = 0;
+        switch (face) {
+            case 0: nx = chunkX;     ny = 0; nz = chunkZ + 1; break; // front
+            case 1: nx = chunkX;     ny = 0; nz = chunkZ - 1; break; // back
+            case 2: nx = chunkX - 1; ny = 0; nz = chunkZ;     break; // left
+            case 3: nx = chunkX + 1; ny = 0; nz = chunkZ;     break; // right
+            case 4: continue; // top face (no neighbor needed)
+            case 5: continue; // bottom face (no neighbor needed)
+        }
+        if (world->getChunk(nx, nz) == nullptr) {
+            // Neighbor chunk missing = skip mesh generation for now
+            return;
+        }
+    }
+
     if (VAO != 0) {
         glDeleteVertexArrays(1, &VAO);
         VAO = 0;

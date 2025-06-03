@@ -74,8 +74,8 @@ float getSpeedMultiplier(GLFWwindow* window)
 {
     return (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS ||
             glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
-               ? 7.0f
-               : 2.0f;
+               ? 30.0f
+               : 5.0f;
 }
 
 // Keyboard movement
