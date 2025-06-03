@@ -28,10 +28,10 @@ cmake --build .
 -  Face Culling
 -  Chunk based world generation
 -  Block placing and breaking
+-  Infinite terrain
 
 ## 🛠️ To-Do
 -  Inventory system
--  Infinite terrain
 -  Sounds
 
 ## 📚 Libraries used
