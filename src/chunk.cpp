@@ -28,6 +28,11 @@ void Chunk::generateTerrain() {
     detailNoise.SetFrequency(0.02f);
     detailNoise.SetSeed(getOptionInt("world_seed", 1234) + 1);
 
+    FastNoiseLite detail2Noise;
+    detail2Noise.SetNoiseType(FastNoiseLite::NoiseType_OpenSimplex2);
+    detail2Noise.SetFrequency(0.05f);
+    detail2Noise.SetSeed(getOptionInt("world_seed", 1234) + 2);
+
     for (int x = 0; x < WIDTH; ++x) {
         for (int z = 0; z < DEPTH; ++z) {
             float fx = static_cast<float>(chunkX * WIDTH + x);
@@ -36,9 +41,10 @@ void Chunk::generateTerrain() {
             // Base terrain shape
             float base = baseNoise.GetNoise(fx, fz) * 0.5f + 0.5f;
             float detail = detailNoise.GetNoise(fx, fz) * 0.5f + 0.5f;
+            float detail2 = detailNoise.GetNoise(fx, fz) * 0.5f + 0.5f;
 
             // Combine with weight
-            float combined = base + detail * 0.3f;
+            float combined = (base + detail * 0.3f) + detail2 * 0.2f;
             combined = std::pow(combined, 1.3f);
 
             int height = static_cast<int>(combined * 24.0f + 30);
@@ -47,7 +53,7 @@ void Chunk::generateTerrain() {
                 if (y == 0) {
                     blocks[x][y][z].type = 6;
                 } else if (y > height) {
-                    blocks[x][y][z].type = (y < 38) ? 9 : 0;
+                    blocks[x][y][z].type = (y < 40) ? 9 : 0;
                     continue;
                 } else if (y == height) {
                     blocks[x][y][z].type = 1;

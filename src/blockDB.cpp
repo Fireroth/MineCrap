@@ -120,7 +120,7 @@ void BlockDB::initialize() {
         true
     };*/
 
-    //Temporary water implementation
+    //Temporary water and lava implementation
     // Water
     blockData[9] = {
         {
@@ -134,6 +134,18 @@ void BlockDB::initialize() {
         true
     };
 
+    // Lava
+    blockData[10] = {
+        {
+            glm::vec2(1.0f, 13.0f),
+            glm::vec2(1.0f, 13.0f),
+            glm::vec2(1.0f, 13.0f),
+            glm::vec2(1.0f, 13.0f),
+            glm::vec2(1.0f, 13.0f),
+            glm::vec2(1.0f, 13.0f)
+        },
+        true
+    };
 }
 
 const BlockDB::BlockInfo* BlockDB::getBlockInfo(const uint8_t& blockName) {

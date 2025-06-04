@@ -42,7 +42,7 @@ void World::updateChunksAroundPlayer(const glm::vec3& playerPos, int radius) {
         lastPlayerChunkX = playerChunkX;
         lastPlayerChunkZ = playerChunkZ;
 
-        // 1. Unload chunks outside radius
+        // Unload chunks outside radius
         std::vector<std::pair<int, int>> toRemove;
         for (const auto& [coord, chunk] : chunks) {
             int dx = coord.first - playerChunkX;

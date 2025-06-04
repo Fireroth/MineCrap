@@ -21,6 +21,8 @@ void Renderer::init()
     glCullFace(GL_BACK);
     glFrontFace(GL_CCW);
 
+    glLineWidth(2.0f);
+
     world.generateChunks(2); // Generate initial chunks around the 0,0
 
     std::string vertexSource = loadShaderSource("shaders/vertex.glsl");
@@ -93,9 +95,7 @@ void Renderer::renderCrosshair(float aspectRatio) {
     }
     glBindVertexArray(crosshairVAO);
 
-    glLineWidth(2.0f);
     glDrawArrays(GL_LINES, 0, 4);
-    glLineWidth(1.0f);
 
     glBindVertexArray(0);
 }

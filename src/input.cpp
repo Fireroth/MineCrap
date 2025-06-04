@@ -102,7 +102,17 @@ void processInput(GLFWwindow* window, Camera& camera, float deltaTime, float spe
     }
     escPressedLastFrame = escPressedThisFrame;
 
-    // Block selection with number keys 1-8
+    // Toggle wireframe mode with F key
+    static bool fPressedLastFrame = false;
+    static bool wireframeEnabled = false;
+    bool fPressedThisFrame = glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS;
+    if (fPressedThisFrame && !fPressedLastFrame) {
+        wireframeEnabled = !wireframeEnabled;
+        glPolygonMode(GL_FRONT_AND_BACK, wireframeEnabled ? GL_LINE : GL_FILL);
+    }
+    fPressedLastFrame = fPressedThisFrame;
+
+    // Block selection with number keys 1-9
     for (int i = 1; i <= 9; ++i) {
         if (glfwGetKey(window, GLFW_KEY_1 + (i - 1)) == GLFW_PRESS) {
             selectedBlockType = static_cast<uint8_t>(i);
