@@ -15,6 +15,10 @@ uint8_t getSelectedBlockType() {
     return selectedBlockType;
 }
 
+void setSelectedBlockType(uint8_t type) {
+    selectedBlockType = type;
+}
+
 // Mouse movement
 void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 {
@@ -49,6 +53,16 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
     if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS) {
         if (g_camera && g_world) {
             placeBreakBlockOnClick(g_world, *g_camera, 'p', selectedBlockType);
+        }
+    }
+    
+    // Middle mouse button: pick block type
+    if (button == GLFW_MOUSE_BUTTON_MIDDLE && action == GLFW_PRESS) {
+        if (g_camera && g_world) {
+            BlockInfo info = getLookedAtBlockInfo(g_world, *g_camera);
+            if (info.valid && info.type != 0) {
+                setSelectedBlockType(info.type);
+            }
         }
     }
 }

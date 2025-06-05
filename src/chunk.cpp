@@ -8,6 +8,18 @@
 
 Chunk::Chunk(int x, int z, World* worldPtr)
     : chunkX(x), chunkZ(z), world(worldPtr), VAO(0), VBO(0), EBO(0), indexCount(0) {
+
+    FastNoiseLite biomeNoise;
+    biomeNoise.SetNoiseType(FastNoiseLite::NoiseType_OpenSimplex2);
+    biomeNoise.SetFrequency(0.0015f);
+    biomeNoise.SetSeed(getOptionInt("world_seed", 1234) + 1000);
+    float b = biomeNoise.GetNoise((float)(x * WIDTH), (float)(z * DEPTH));
+    if (b >= 0.5f)
+        biome = Biome::Forest;
+    else if (b >= 0.0f)
+        biome = Biome::Desert;
+    else
+        biome = Biome::Plains;
     generateTerrain();
 }
 
@@ -33,6 +45,11 @@ void Chunk::generateTerrain() {
     detail2Noise.SetFrequency(0.05f);
     detail2Noise.SetSeed(getOptionInt("world_seed", 1234) + 2);
 
+    FastNoiseLite biomeNoise;
+    biomeNoise.SetNoiseType(FastNoiseLite::NoiseType_OpenSimplex2);
+    biomeNoise.SetFrequency(0.0015f);
+    biomeNoise.SetSeed(getOptionInt("world_seed", 1234) + 1000);
+
     for (int x = 0; x < WIDTH; ++x) {
         for (int z = 0; z < DEPTH; ++z) {
             float fx = static_cast<float>(chunkX * WIDTH + x);
@@ -41,26 +58,166 @@ void Chunk::generateTerrain() {
             // Base terrain shape
             float base = baseNoise.GetNoise(fx, fz) * 0.5f + 0.5f;
             float detail = detailNoise.GetNoise(fx, fz) * 0.5f + 0.5f;
-            float detail2 = detailNoise.GetNoise(fx, fz) * 0.5f + 0.5f;
+            float detail2 = detail2Noise.GetNoise(fx, fz) * 0.5f + 0.5f;
 
-            // Combine with weight
+            // Smooth biome transition
+            float biomeVal = biomeNoise.GetNoise(fx, fz); // -1..1
+            float tDesert = glm::clamp(0.5f - biomeVal, 0.0f, 1.0f); // 1 at -1, 0 at 0.5
+            float tPlains = glm::clamp(biomeVal, 0.0f, 0.5f) * 2.0f; // 1 at 0.25, 0 at 0 or 0.5
+            float tForest = glm::clamp(biomeVal - 0.5f, 0.0f, 0.5f) * 2.0f; // 1 at 1, 0 at 0.5
+
+            // Biome terrain modifiers
+            float biomeMod = 0.7f * tDesert + 0.6f * tPlains + 1.1f * tForest;
+
             float combined = (base + detail * 0.3f) + detail2 * 0.2f;
             combined = std::pow(combined, 1.3f);
 
-            int height = static_cast<int>(combined * 24.0f + 30);
+            int height = static_cast<int>(combined * 24.0f * biomeMod + 30);
+
+            Biome columnBiome;
+            if (biomeVal >= 0.5f)
+                columnBiome = Biome::Forest;
+            else if (biomeVal >= 0.0f)
+                columnBiome = Biome::Desert;
+            else
+                columnBiome = Biome::Plains;
 
             for (int y = 0; y < HEIGHT; ++y) {
                 if (y == 0) {
-                    blocks[x][y][z].type = 6;
+                    blocks[x][y][z].type = 6; // Bedrock
                 } else if (y > height) {
-                    blocks[x][y][z].type = (y < 40) ? 9 : 0;
+                    blocks[x][y][z].type = (y < 37) ? 9 : 0; // Water or air
                     continue;
                 } else if (y == height) {
-                    blocks[x][y][z].type = 1;
+                    switch (columnBiome) {
+                        case Biome::Plains:
+                        case Biome::Forest:
+                            blocks[x][y][z].type = 1; // Grass
+                            break;
+                        case Biome::Desert:
+                            blocks[x][y][z].type = 4; // Sand
+                            break;
+                    }
                 } else if (y >= height - 2) {
-                    blocks[x][y][z].type = 2;
+                    switch (columnBiome) {
+                        case Biome::Plains:
+                        case Biome::Forest:
+                            blocks[x][y][z].type = 2; // Dirt
+                            break;
+                        case Biome::Desert:
+                            blocks[x][y][z].type = 4; // Sand
+                            break;
+                    }
                 } else {
-                    blocks[x][y][z].type = 3;
+                    blocks[x][y][z].type = 3; // Stone
+                }
+            }
+        }
+    }
+
+    // Biome-specific features
+    switch (biome) {
+        case Biome::Plains:
+            generatePlainsFeatures();
+            break;
+        case Biome::Forest:
+            generateForestFeatures();
+            break;
+        case Biome::Desert:
+            generateDesertFeatures();
+            break;
+    }
+}
+
+void Chunk::generatePlainsFeatures() {
+    FastNoiseLite treeNoise;
+    treeNoise.SetNoiseType(FastNoiseLite::NoiseType_OpenSimplex2);
+    treeNoise.SetFrequency(200.0f);
+    treeNoise.SetSeed(getOptionInt("world_seed", 1234) + 4000);
+
+    for (int x = 2; x < WIDTH - 2; ++x) { // Avoid cut trees because of chunk edges (temporary solution)
+        for (int z = 2; z < DEPTH - 2; ++z) {
+            float fx = static_cast<float>(chunkX * WIDTH + x);
+            float fz = static_cast<float>(chunkZ * DEPTH + z);
+            float n = treeNoise.GetNoise(fx, fz);
+            if (n > 0.97f) { // Chance of tree spawning
+                int y = HEIGHT - 2;
+                while (y > 0 && blocks[x][y][z].type == 0) --y;
+                if (blocks[x][y][z].type == 1) { // Only on grass
+                    int trunkHeight = 4 + (int)((n - 0.4f) * 4);
+                    for (int t = 1; t <= trunkHeight && y + t < HEIGHT; ++t)
+                        blocks[x][y + t][z].type = 5;
+                    for (int dx = -2; dx <= 2; ++dx)
+                        for (int dz = -2; dz <= 2; ++dz)
+                            for (int dy = trunkHeight - 1; dy <= trunkHeight + 1; ++dy) {
+                                int lx = x + dx, ly = y + dy, lz = z + dz;
+                                if (lx >= 0 && lx < WIDTH && lz >= 0 && lz < DEPTH && ly >= 0 && ly < HEIGHT) {
+                                    if (std::abs(dx) + std::abs(dz) + std::abs(dy - trunkHeight) < 4)
+                                        if (blocks[lx][ly][lz].type == 0)
+                                            blocks[lx][ly][lz].type = 11;
+                                }
+                            }
+                }
+            }
+        }
+    }
+}
+
+void Chunk::generateForestFeatures() {
+    FastNoiseLite treeNoise;
+    treeNoise.SetNoiseType(FastNoiseLite::NoiseType_OpenSimplex2);
+    treeNoise.SetFrequency(100.0f);
+    treeNoise.SetSeed(getOptionInt("world_seed", 1234) + 4000);
+
+    for (int x = 2; x < WIDTH - 2; ++x) { // Avoid cut trees because of chunk edges (temporary solution)
+        for (int z = 2; z < DEPTH - 2; ++z) {
+            float fx = static_cast<float>(chunkX * WIDTH + x);
+            float fz = static_cast<float>(chunkZ * DEPTH + z);
+            float n = treeNoise.GetNoise(fx, fz);
+            if (n > 0.7f) { // Chance of tree spawning
+                int y = HEIGHT - 2;
+                while (y > 0 && blocks[x][y][z].type == 0) --y;
+                if (blocks[x][y][z].type == 1) { // Only on grass
+                    int trunkHeight = 4 + (int)((n - 0.4f) * 4);
+                    for (int t = 1; t <= trunkHeight && y + t < HEIGHT; ++t)
+                        blocks[x][y + t][z].type = 5;
+                    for (int dx = -2; dx <= 2; ++dx)
+                        for (int dz = -2; dz <= 2; ++dz)
+                            for (int dy = trunkHeight - 1; dy <= trunkHeight + 1; ++dy) {
+                                int lx = x + dx, ly = y + dy, lz = z + dz;
+                                if (lx >= 0 && lx < WIDTH && lz >= 0 && lz < DEPTH && ly >= 0 && ly < HEIGHT) {
+                                    if (std::abs(dx) + std::abs(dz) + std::abs(dy - trunkHeight) < 4)
+                                        if (blocks[lx][ly][lz].type == 0)
+                                            blocks[lx][ly][lz].type = 11;
+                                }
+                            }
+                }
+            }
+        }
+    }
+}
+
+void Chunk::generateDesertFeatures() {
+    FastNoiseLite cactusNoise;
+    cactusNoise.SetNoiseType(FastNoiseLite::NoiseType_OpenSimplex2);
+    cactusNoise.SetFrequency(100.0f);
+    cactusNoise.SetSeed(getOptionInt("world_seed", 1234) + 3000);
+
+    for (int x = 1; x < WIDTH - 1; ++x) {
+        for (int z = 1; z < DEPTH - 1; ++z) {
+            float fx = static_cast<float>(chunkX * WIDTH + x);
+            float fz = static_cast<float>(chunkZ * DEPTH + z);
+            float n = cactusNoise.GetNoise(fx, fz);
+            if (n > 0.85f) { // Chance of cactus spawning
+                int y = HEIGHT - 2;
+                while (y > 0 && blocks[x][y][z].type == 0) --y;
+                if (blocks[x][y][z].type == 4) { // Only on sand
+                    // Cactus height: random between 2 and 4
+                    int cactusHeight = 2 + static_cast<int>((n - 0.85f) / (1.0f - 0.85f) * 2.99f);
+                    if (cactusHeight > 4) cactusHeight = 4;
+                    if (cactusHeight < 2) cactusHeight = 2;
+                    for (int t = 1; t <= cactusHeight && y + t < HEIGHT; ++t)
+                        blocks[x][y + t][z].type = 12; // Cactus
                 }
             }
         }

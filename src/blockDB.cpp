@@ -107,19 +107,6 @@ void BlockDB::initialize() {
         false
     };
 
-    //Leaves
-    /*blockData[9] = {
-        {
-            glm::vec2(5.0f, 14.0f),
-            glm::vec2(5.0f, 14.0f),
-            glm::vec2(5.0f, 14.0f),
-            glm::vec2(5.0f, 14.0f),
-            glm::vec2(5.0f, 14.0f),
-            glm::vec2(5.0f, 14.0f)
-        },
-        true
-    };*/
-
     //Temporary water and lava implementation
     // Water
     blockData[9] = {
@@ -145,6 +132,32 @@ void BlockDB::initialize() {
             glm::vec2(1.0f, 13.0f)
         },
         true
+    };
+
+    //Leaves
+    blockData[11] = {
+        {
+            glm::vec2(6.0f, 15.0f),
+            glm::vec2(6.0f, 15.0f),
+            glm::vec2(6.0f, 15.0f),
+            glm::vec2(6.0f, 15.0f),
+            glm::vec2(6.0f, 15.0f),
+            glm::vec2(6.0f, 15.0f)
+        },
+        true
+    };
+    
+    //Cactus
+    blockData[12] = {
+        {
+            glm::vec2(7.0f, 15.0f),
+            glm::vec2(7.0f, 15.0f),
+            glm::vec2(7.0f, 15.0f),
+            glm::vec2(7.0f, 15.0f),
+            glm::vec2(7.0f, 14.0f),
+            glm::vec2(8.0f, 15.0f)
+        },
+        false
     };
 }
 

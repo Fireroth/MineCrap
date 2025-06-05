@@ -14,6 +14,12 @@ public:
     static const int HEIGHT = 256;
     static const int DEPTH = 16;
 
+    enum class Biome {
+        Plains,
+        Desert,
+        Forest
+    };
+
     struct Block {
         uint8_t type;
     };
@@ -27,6 +33,7 @@ public:
 
     Block blocks[WIDTH][HEIGHT][DEPTH];
     int chunkX, chunkZ;
+    Biome biome;
 
 private:
     World* world;
@@ -38,6 +45,10 @@ private:
                  int x, int y, int z, int face, const BlockDB::BlockInfo* blockInfo, unsigned int& indexOffset);
 
     bool isBlockVisible(int x, int y, int z, int face) const;
+
+    void generatePlainsFeatures();
+    void generateDesertFeatures();
+    void generateForestFeatures();
 
     friend class World; // Allow World to access private members (yay, a friend)
 };

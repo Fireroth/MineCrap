@@ -29,6 +29,7 @@ cmake --build .
 -  Chunk based world generation
 -  Block placing and breaking
 -  Infinite terrain
+-  Biomes
 
 ## 🛠️ To-Do
 -  Inventory system
