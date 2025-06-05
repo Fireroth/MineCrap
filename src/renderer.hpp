@@ -15,7 +15,7 @@ public:
     void renderCrosshair(float aspectRatio);
 
     World world;
-    
+    float currentFov;
 
 private:
     GLuint shaderProgram, textureAtlas;

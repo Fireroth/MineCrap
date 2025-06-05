@@ -6,6 +6,9 @@
 #include "input.hpp"
 #include "options.hpp"
 
+GLFWwindow* g_currentGLFWwindow = nullptr;
+GLFWwindow* getCurrentGLFWwindow() { return g_currentGLFWwindow; }
+
 int main()
 {
     int windowWidth = getOptionInt("window_width", 1280);
@@ -30,6 +33,7 @@ int main()
         return -1;
 
     GLFWwindow* glfwWindow = window.getGLFWwindow();
+    g_currentGLFWwindow = glfwWindow;
 
     setupInputCallbacks(glfwWindow, &camera, &renderer.world);
 

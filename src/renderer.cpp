@@ -1,4 +1,5 @@
 #include <glad/glad.h>
+#include <GLFW/glfw3.h>
 #include "renderer.hpp"
 #include "shader.hpp"
 #include "camera.hpp"
@@ -41,6 +42,8 @@ void Renderer::init()
 
     loadTextureAtlas("textures/atlas.png");
     initCrosshair();
+
+    currentFov = getOptionFloat("fov", 60.0f);
 }
 
 void Renderer::initCrosshair() {
@@ -71,7 +74,17 @@ void Renderer::renderWorld(const Camera& camera, float aspectRatio) {
 
     glUseProgram(shaderProgram);
 
-    glm::mat4 projection = glm::perspective(glm::radians(getOptionFloat("fov", 60.0f)), aspectRatio, 0.1f, 500.0f); // 500 = "view distance"
+    float baseFov = getOptionFloat("fov", 60.0f);
+    float sprintFov = baseFov + 10.0f;
+    float getSpeedMultiplier(GLFWwindow* window);
+    GLFWwindow* getCurrentGLFWwindow();
+    GLFWwindow* window = getCurrentGLFWwindow();
+    bool sprinting = window && getSpeedMultiplier(window) > 5.0f;
+    float targetFov = sprinting ? sprintFov : baseFov;
+
+    currentFov = currentFov + (targetFov-currentFov) * 0.10f;
+
+    glm::mat4 projection = glm::perspective(glm::radians(currentFov), aspectRatio, 0.1f, 500.0f); // 500 = "view distance"
     glUniformMatrix4fv(uViewLoc, 1, GL_FALSE, &camera.getViewMatrix()[0][0]);
     glUniformMatrix4fv(uProjLoc, 1, GL_FALSE, &projection[0][0]);
 
