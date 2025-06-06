@@ -14,11 +14,11 @@ void main()
     int faceIndex = int(FaceID + 0.5);
     
     switch(faceIndex) {
-        case 0: brightness = 0.95; break; // Front
-        case 1: brightness = 0.85; break; // Back
-        case 2: brightness = 0.90; break; // Left
-        case 3: brightness = 1.00; break; // Right
-        case 4: brightness = 1.10; break; // Top
+        case 0: brightness = 0.90; break; // Front
+        case 1: brightness = 0.90; break; // Back
+        case 2: brightness = 0.80; break; // Left
+        case 3: brightness = 0.80; break; // Right
+        case 4: brightness = 1.00; break; // Top
         case 5: brightness = 0.75; break; // Bottom
     }
 

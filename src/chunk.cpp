@@ -21,8 +21,10 @@ static ChunkNoises noiseInit() {
 
     int seed = getOptionInt("world_seed", 1234);
 
-    noises.biomeNoise.SetNoiseType(FastNoiseLite::NoiseType_OpenSimplex2);
-    noises.biomeNoise.SetFrequency(0.0015f);
+    noises.biomeNoise.SetNoiseType(FastNoiseLite::NoiseType_Cellular);
+    noises.biomeNoise.SetCellularReturnType(FastNoiseLite::CellularReturnType_CellValue);
+    noises.biomeNoise.SetCellularDistanceFunction(FastNoiseLite::CellularDistanceFunction_Hybrid);
+    noises.biomeNoise.SetFrequency(0.010f);
     noises.biomeNoise.SetSeed(seed + 1000);
 
     noises.baseNoise.SetNoiseType(FastNoiseLite::NoiseType_OpenSimplex2);
@@ -57,7 +59,7 @@ Chunk::Chunk(int x, int z, World* worldPtr)
 
     ChunkNoises noises = noiseInit();
     float b = noises.biomeNoise.GetNoise((float)(x * WIDTH), (float)(z * DEPTH));
-    if (b >= 0.5f)
+    if (b >= 0.6f)
         biome = Biome::Forest;
     else if (b >= 0.0f)
         biome = Biome::Desert;
@@ -75,80 +77,146 @@ Chunk::~Chunk() {
 void Chunk::generateTerrain() {
     ChunkNoises noises = noiseInit();
 
-    for (int x = 0; x < WIDTH; ++x) {
-        for (int z = 0; z < DEPTH; ++z) {
-            float fx = static_cast<float>(chunkX * WIDTH + x);
-            float fz = static_cast<float>(chunkZ * DEPTH + z);
+    // PreCompute biome and base heights for all columns in chunk and neighbors
+    Biome columnBiomes[WIDTH + 2][DEPTH + 2];
+    float columnHeights[WIDTH + 2][DEPTH + 2];
+
+    for (int dx = -1; dx <= WIDTH; ++dx) {
+        for (int dz = -1; dz <= DEPTH; ++dz) {
+            float fx = static_cast<float>(chunkX * WIDTH + dx);
+            float fz = static_cast<float>(chunkZ * DEPTH + dz);
+            float b = noises.biomeNoise.GetNoise(fx, fz);
+            Biome biome;
+            if (b >= 0.6f)
+                biome = Biome::Forest;
+            else if (b >= 0.0f)
+                biome = Biome::Desert;
+            else
+                biome = Biome::Plains;
 
             // Base terrain shape
             float base = noises.baseNoise.GetNoise(fx, fz) * 0.5f + 0.5f;
             float detail = noises.detailNoise.GetNoise(fx, fz) * 0.5f + 0.5f;
             float detail2 = noises.detail2Noise.GetNoise(fx, fz) * 0.5f + 0.5f;
 
-            // Smooth biome transition
-            float biomeVal = noises.biomeNoise.GetNoise(fx, fz); // -1..1
-            float tDesert = glm::clamp(0.5f - biomeVal, 0.0f, 1.0f); // 1 at -1, 0 at 0.5
-            float tPlains = glm::clamp(biomeVal, 0.0f, 0.5f) * 2.0f; // 1 at 0.25, 0 at 0 or 0.5
-            float tForest = glm::clamp(biomeVal - 0.5f, 0.0f, 0.5f) * 2.0f; // 1 at 1, 0 at 0.5
+            float heightScale = 1.0f;
+            float detailWeight = 1.0f;
+            float power = 1.3f;
+            float baseHeight = 30.0f;
 
-            // Biome terrain modifiers
-            float biomeMod = 0.7f * tDesert + 0.6f * tPlains + 1.1f * tForest;
+            switch (biome) {
+                case Biome::Desert:
+                    heightScale = 0.5f;
+                    detailWeight = 0.1f;
+                    power = 1.0f;
+                    baseHeight = 36.0f;
+                    break;
+                case Biome::Plains:
+                    heightScale = 0.7f;
+                    detailWeight = 0.1f;
+                    power = 1.0f;
+                    baseHeight = 31.0f;
+                    break;
+                case Biome::Forest:
+                    heightScale = 1.0f;
+                    detailWeight = 0.4f;
+                    power = 1.3f;
+                    baseHeight = 30.0f;
+                    break;
+            }
 
-            float combined = (base + detail * 0.3f) + detail2 * 0.2f;
-            combined = std::pow(combined, 1.3f);
+            float combined = base + detail * detailWeight + detail2 * 0.2f;
+            combined = std::pow(combined, power);
+            float height = combined * 24.0f * heightScale + baseHeight;
 
-            int height = static_cast<int>(combined * 24.0f * biomeMod + 30);
+            columnBiomes[dx + 1][dz + 1] = biome;
+            columnHeights[dx + 1][dz + 1] = height;
+        }
+    }
 
-            Biome columnBiome;
-            if (biomeVal >= 0.5f)
-                columnBiome = Biome::Forest;
-            else if (biomeVal >= 0.0f)
-                columnBiome = Biome::Desert;
-            else
-                columnBiome = Biome::Plains;
+    const int transitionRadius = 4; // blend over 4 blocks
 
-            for (int y = 0; y < HEIGHT; ++y) {
-                if (y == 0) {
-                    blocks[x][y][z].type = 6; // Bedrock
-                } else if (y > height) {
-                    blocks[x][y][z].type = (y < 37) ? 9 : 0; // Water or air
+for (int x = 0; x < WIDTH; ++x) {
+    for (int z = 0; z < DEPTH; ++z) {
+        float totalWeight = 0.0f;
+        float blendedHeight = 0.0f;
+        std::map<Biome, float> biomeWeights;
+
+        for (int dx = -transitionRadius; dx <= transitionRadius; ++dx) {
+            for (int dz = -transitionRadius; dz <= transitionRadius; ++dz) {
+                int cx = x + dx + 1;
+                int cz = z + dz + 1;
+
+                if (cx < 0 || cz < 0 || cx >= WIDTH + 2 || cz >= DEPTH + 2)
                     continue;
-                } else if (y == height) {
-                    switch (columnBiome) {
-                        case Biome::Plains:
-                        case Biome::Forest:
-                            blocks[x][y][z].type = 1; // Grass
-                            break;
-                        case Biome::Desert:
-                            blocks[x][y][z].type = 4; // Sand
-                            break;
-                    }
-                } else if (y >= height - 2) {
-                    switch (columnBiome) {
-                        case Biome::Plains:
-                        case Biome::Forest:
-                            blocks[x][y][z].type = 2; // Dirt
-                            break;
-                        case Biome::Desert:
-                            blocks[x][y][z].type = 4; // Sand
-                            break;
-                    }
-                } else if (y >= height - 4) { // Desert will have stone lower underground
-                    switch (columnBiome) {
-                        case Biome::Plains:
-                        case Biome::Forest:
-                            blocks[x][y][z].type = 3; // Stone
-                            break;
-                        case Biome::Desert:
-                            blocks[x][y][z].type = 4; // Sand
-                            break;
-                    }
-                } else {
-                    blocks[x][y][z].type = 3; // Stone
+
+                float dist2 = static_cast<float>(dx * dx + dz * dz);
+                float weight = 1.0f / (dist2 + 1.0f);
+
+                Biome b = columnBiomes[cx][cz];
+                float h = columnHeights[cx][cz];
+
+                biomeWeights[b] += weight;
+                blendedHeight += h * weight;
+                totalWeight += weight;
+            }
+        }
+
+        blendedHeight /= totalWeight;
+
+        Biome finalBiome = Biome::Plains;
+        float maxWeight = -1.0f;
+        for (auto& [b, w] : biomeWeights) {
+            if (w > maxWeight) {
+                maxWeight = w;
+                finalBiome = b;
+            }
+        }
+
+        int height = static_cast<int>(blendedHeight);
+
+        for (int y = 0; y < HEIGHT; ++y) {
+            if (y == 0) {
+                blocks[x][y][z].type = 6; // Bedrock
+            } else if (y > height) {
+                blocks[x][y][z].type = (y < 37) ? 9 : 0; // Water or air
+                continue;
+            } else if (y == height) {
+                switch (finalBiome) {
+                    case Biome::Plains:
+                    case Biome::Forest:
+                        blocks[x][y][z].type = 1; // Grass
+                        break;
+                    case Biome::Desert:
+                        blocks[x][y][z].type = 4; // Sand
+                        break;
                 }
+            } else if (y >= height - 2) {
+                switch (finalBiome) {
+                    case Biome::Plains:
+                    case Biome::Forest:
+                        blocks[x][y][z].type = 2; // Dirt
+                        break;
+                    case Biome::Desert:
+                        blocks[x][y][z].type = 4; // Sand
+                        break;
+                }
+            } else if (y >= height - 4) { // Desert will have stone lower underground
+                switch (finalBiome) {
+                    case Biome::Plains:
+                    case Biome::Forest:
+                        blocks[x][y][z].type = 3; // Stone
+                        break;
+                    case Biome::Desert:
+                        blocks[x][y][z].type = 4; // Sand
+                        break;
+                }
+            } else {
+                blocks[x][y][z].type = 3; // Stone
             }
         }
     }
+}
 
     // Biome-specific features
     switch (biome) {
