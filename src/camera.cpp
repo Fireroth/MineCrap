@@ -16,13 +16,17 @@ void Camera::processKeyboard(const char *direction, float deltaTime, float speed
 {
     float velocity = movementSpeed * deltaTime * speedMultiplier;
     if (strcmp(direction, "FORWARD") == 0)
-        position += front * velocity;
+        position += glm::normalize(glm::vec3(front.x, 0.0f, front.z)) * velocity; // Ignore Y
     if (strcmp(direction, "BACKWARD") == 0)
-        position -= front * velocity;
+        position -= glm::normalize(glm::vec3(front.x, 0.0f, front.z)) * velocity; // Ignore Y
     if (strcmp(direction, "LEFT") == 0)
         position -= right * velocity;
     if (strcmp(direction, "RIGHT") == 0)
         position += right * velocity;
+    if (strcmp(direction, "UP") == 0)
+        position += worldUp * velocity;
+    if (strcmp(direction, "DOWN") == 0)
+        position -= worldUp * velocity;
 }
 
 void Camera::processMouseMovement(float xOffset, float yOffset)

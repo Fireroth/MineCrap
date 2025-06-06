@@ -86,10 +86,7 @@ void setupInputCallbacks(GLFWwindow* window, Camera* camera, World* world)
 // Speed multiplier
 float getSpeedMultiplier(GLFWwindow* window)
 {
-    return (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS ||
-            glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
-               ? 30.0f
-               : 5.0f;
+    return (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS) ? 30.0f : 5.0f;
 }
 
 // Keyboard movement
@@ -103,6 +100,10 @@ void processInput(GLFWwindow* window, Camera& camera, float deltaTime, float spe
         camera.processKeyboard("LEFT", deltaTime, speedMultiplier);
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
         camera.processKeyboard("RIGHT", deltaTime, speedMultiplier);
+    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
+        camera.processKeyboard("UP", deltaTime, speedMultiplier);
+    if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
+        camera.processKeyboard("DOWN", deltaTime, speedMultiplier);
 
     static bool escPressedLastFrame = false;
     bool escPressedThisFrame = glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS;
