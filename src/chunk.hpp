@@ -5,8 +5,11 @@
 #include "blockDB.hpp"
 #include "camera.hpp"
 #include "world.hpp"
+#include "structureDB.hpp"
 
 class World;
+
+struct ChunkNoises;
 
 class Chunk {
 public:
@@ -30,6 +33,7 @@ public:
     void generateTerrain();
     void buildMesh();
     void render(const Camera& camera, GLint uModelLoc);
+    void placeStructure(const Structure& structure, int baseX, int baseY, int baseZ);
 
     Block blocks[WIDTH][HEIGHT][DEPTH];
     int chunkX, chunkZ;

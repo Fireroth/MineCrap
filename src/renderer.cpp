@@ -24,6 +24,8 @@ void Renderer::init()
 
     glLineWidth(2.0f);
 
+    StructureDB::initialize();
+
     world.generateChunks(2); // Generate initial chunks around the 0,0
 
     std::string vertexSource = loadShaderSource("shaders/vertex.glsl");
