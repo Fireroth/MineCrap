@@ -21,10 +21,11 @@ static ChunkNoises noiseInit() {
 
     int seed = getOptionInt("world_seed", 1234);
 
-    noises.biomeNoise.SetNoiseType(FastNoiseLite::NoiseType_Cellular);
-    noises.biomeNoise.SetCellularReturnType(FastNoiseLite::CellularReturnType_CellValue);
-    noises.biomeNoise.SetCellularDistanceFunction(FastNoiseLite::CellularDistanceFunction_Hybrid);
-    noises.biomeNoise.SetFrequency(0.010f);
+    noises.biomeNoise.SetNoiseType(FastNoiseLite::NoiseType_OpenSimplex2S);
+    noises.biomeNoise.SetFractalType(FastNoiseLite::FractalType_FBm);
+    noises.biomeNoise.SetFractalOctaves(2);
+    noises.biomeNoise.SetFractalWeightedStrength(0.0f);
+    noises.biomeNoise.SetFrequency(0.0020f);
     noises.biomeNoise.SetSeed(seed + 1000);
 
     noises.baseNoise.SetNoiseType(FastNoiseLite::NoiseType_OpenSimplex2);
@@ -59,12 +60,12 @@ Chunk::Chunk(int x, int z, World* worldPtr)
 
     ChunkNoises noises = noiseInit();
     float b = noises.biomeNoise.GetNoise((float)(x * WIDTH), (float)(z * DEPTH));
-    if (b >= 0.6f)
+    if (b >= -1.0f && b < -0.3333f)
         biome = Biome::Forest;
-    else if (b >= 0.0f)
-        biome = Biome::Desert;
-    else
+    else if (b >= -0.3333f && b < 0.3333f)
         biome = Biome::Plains;
+    else
+        biome = Biome::Desert;
     generateTerrain();
 }
 
@@ -87,12 +88,12 @@ void Chunk::generateTerrain() {
             float fz = static_cast<float>(chunkZ * DEPTH + dz);
             float b = noises.biomeNoise.GetNoise(fx, fz);
             Biome biome;
-            if (b >= 0.6f)
+            if (b >= -1.0f && b < -0.3333f)
                 biome = Biome::Forest;
-            else if (b >= 0.0f)
-                biome = Biome::Desert;
-            else
+            else if (b >= -0.3333f && b < 0.3333f)
                 biome = Biome::Plains;
+            else
+                biome = Biome::Desert;
 
             // Base terrain shape
             float base = noises.baseNoise.GetNoise(fx, fz) * 0.5f + 0.5f;

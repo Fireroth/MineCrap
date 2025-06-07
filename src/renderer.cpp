@@ -41,11 +41,19 @@ void Renderer::init()
     uProjLoc = glGetUniformLocation(shaderProgram, "projection");
     uAtlasLoc = glGetUniformLocation(shaderProgram, "atlas");
     uAspectLoc = glGetUniformLocation(crosshairShaderProgram, "aspectRatio");
+    uFogDensityLoc = glGetUniformLocation(shaderProgram, "fogDensity");
+    uFogStartLoc = glGetUniformLocation(shaderProgram, "fogStartDistance");
+    uFogColorLoc = glGetUniformLocation(shaderProgram, "fogColor");
 
     loadTextureAtlas("textures/atlas.png");
     initCrosshair();
 
     currentFov = getOptionFloat("fov", 60.0f);
+
+    fogEnabled = getOptionInt("fog", 1);
+    fogDensity = 0.19f;
+    fogStartDistance = (getOptionFloat("render_distance", 7) * 16) - 29;
+    fogColor = glm::vec3(0.6f, 1.0f, 1.0f);
 }
 
 void Renderer::initCrosshair() {
@@ -94,6 +102,14 @@ void Renderer::renderWorld(const Camera& camera, float aspectRatio) {
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, textureAtlas);
     glUniform1i(uAtlasLoc, 0);
+
+    if (fogEnabled) {
+        glUniform1f(uFogDensityLoc, fogDensity);
+        glUniform1f(uFogStartLoc, fogStartDistance);
+        glUniform3fv(uFogColorLoc, 1, glm::value_ptr(fogColor));
+    } else {
+        glUniform1f(uFogDensityLoc, 0.0f); // Disable fog
+    }
 
     world.render(camera, uModelLoc);
 

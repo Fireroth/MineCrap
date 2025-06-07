@@ -1,9 +1,11 @@
 #version 330 core
 in vec2 TexCoord;
 in float FaceID;
+in float fogFactor;
 out vec4 FragColor;
 
 uniform sampler2D atlas;
+uniform vec3 fogColor;
 
 void main()
 {
@@ -22,5 +24,7 @@ void main()
         case 5: brightness = 0.75; break; // Bottom
     }
 
-    FragColor = vec4(texColor.rgb * brightness, texColor.a);
+    vec4 baseColor = vec4(texColor.rgb * brightness, texColor.a);
+    vec3 finalColor = mix(fogColor, baseColor.rgb, fogFactor);
+    FragColor = vec4(finalColor, baseColor.a);
 }

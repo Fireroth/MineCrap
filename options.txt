@@ -4,3 +4,4 @@ render_distance=7
 fov=60
 world_seed=1234
 vsync=0
+fog=1

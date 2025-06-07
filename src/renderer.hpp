@@ -5,7 +5,7 @@
 
 class Renderer {
 public:
-    GLint uModelLoc, uViewLoc, uProjLoc, uAtlasLoc, uAspectLoc;
+    GLint uModelLoc, uViewLoc, uProjLoc, uAtlasLoc, uAspectLoc, uFogDensityLoc, uFogStartLoc, uFogColorLoc;
     Renderer();
     ~Renderer();
 
@@ -16,6 +16,10 @@ public:
 
     World world;
     float currentFov;
+    bool fogEnabled;
+    float fogDensity;
+    float fogStartDistance;
+    glm::vec3 fogColor;
 
 private:
     GLuint shaderProgram, textureAtlas;
