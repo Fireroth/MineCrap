@@ -78,7 +78,7 @@ void Renderer::initCrosshair() {
     glBindVertexArray(0);
 }
 
-void Renderer::renderWorld(const Camera& camera, float aspectRatio) {
+void Renderer::renderWorld(const Camera& camera, float aspectRatio, float deltaTime) {
     int renderDist = getOptionInt("render_distance", 5);
     world.updateChunksAroundPlayer(camera.getPosition(), renderDist);
 
@@ -92,7 +92,9 @@ void Renderer::renderWorld(const Camera& camera, float aspectRatio) {
     bool sprinting = window && getSpeedMultiplier(window) > 5.0f;
     float targetFov = sprinting ? sprintFov : baseFov;
 
-    currentFov = currentFov + (targetFov-currentFov) * 0.10f;
+    float fovLerpSpeed = 30.0f;
+    float lerpFactor = 1.0f - expf(-fovLerpSpeed * deltaTime);
+    currentFov = currentFov + (targetFov - currentFov) * lerpFactor;
 
     glm::mat4 projection = glm::perspective(glm::radians(currentFov), aspectRatio, 0.1f, 500.0f); // 500 = "view distance"
     glUniformMatrix4fv(uViewLoc, 1, GL_FALSE, &camera.getViewMatrix()[0][0]);

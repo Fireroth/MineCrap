@@ -11,7 +11,7 @@ public:
 
     void init();
     void cleanup();
-    void renderWorld(const class Camera& camera, float aspectRatio);
+    void renderWorld(const class Camera& camera, float aspectRatio, float deltaTime);
     void renderCrosshair(float aspectRatio);
 
     World world;

@@ -6,16 +6,17 @@
 #include "camera.hpp"
 #include "world.hpp"
 #include "structureDB.hpp"
+#include "noise.hpp"
 
 class World;
-
-struct ChunkNoises;
 
 class Chunk {
 public:
     static const int WIDTH = 16;
     static const int HEIGHT = 256;
     static const int DEPTH = 16;
+
+    ChunkNoises noises;
 
     enum class Biome {
         Plains,
@@ -30,7 +31,6 @@ public:
     Chunk(int x, int z, World* worldRef);
     ~Chunk();
 
-    void generateTerrain();
     void buildMesh();
     void render(const Camera& camera, GLint uModelLoc);
     void placeStructure(const Structure& structure, int baseX, int baseY, int baseZ);
@@ -50,9 +50,7 @@ private:
 
     bool isBlockVisible(int x, int y, int z, int face) const;
 
-    void generatePlainsFeatures();
-    void generateDesertFeatures();
-    void generateForestFeatures();
+    void generateBiomeFeatures(int margin, float treshold, int xOffset, int zOffset, std::string structureName, int allowedBlockID);
 
     friend class World; // Allow World to access private members (yay, a friend)
 };

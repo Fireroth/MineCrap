@@ -52,7 +52,7 @@ int main()
         processInput(glfwWindow, camera, deltaTime, getSpeedMultiplier(glfwWindow));
 
         window.clear(0.6f, 1.0f, 1.0f, 1.0f); // Light blue background
-        renderer.renderWorld(camera, aspectRatio);
+        renderer.renderWorld(camera, aspectRatio, deltaTime);
         ImGuiOverlay.render(deltaTime, camera, &renderer.world);
 
         window.swapBuffers();
