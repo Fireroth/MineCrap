@@ -1,16 +1,36 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream>
+#include <set>
 #include "chunk.hpp"
 #include "../core/options.hpp"
 #include "noise.hpp"
 #include "chunkTerrain.hpp"
+
+struct pendingBlock {
+    int x, y, z;
+    uint8_t type;
+};
+static std::map<std::pair<int, int>, std::vector<pendingBlock >> pendingBlockPlacements;
 
 Chunk::Chunk(int x, int z, World* worldPtr)
     : chunkX(x), chunkZ(z), world(worldPtr), VAO(0), VBO(0), EBO(0), indexCount(0)
 {
     noises = noiseInit();
     generateChunkTerrain(*this);
+
+    // Apply any pending block placements for this chunk
+    auto key = std::make_pair(chunkX, chunkZ);
+    auto it = pendingBlockPlacements.find(key);
+    if (it != pendingBlockPlacements.end()) {
+        for (const auto& pb : it->second) {
+            if (pb.x >= 0 && pb.x < WIDTH && pb.y >= 0 && pb.y < HEIGHT && pb.z >= 0 && pb.z < DEPTH) {
+                blocks[pb.x][pb.y][pb.z].type = pb.type;
+            }
+        }
+        pendingBlockPlacements.erase(it);
+        buildMesh();
+    }
 }
 
 Chunk::~Chunk() {
@@ -23,6 +43,7 @@ void Chunk::placeStructure(const Structure& structure, int baseX, int baseY, int
     int structHeight = (int)structure.layers.size();
     int structDepth = (int)structure.layers[0].size();
     int structWidth = (int)structure.layers[0][0].size();
+    std::set<Chunk*> affectedChunks; // Track which chunks are affected
 
     for (int y = 0; y < structHeight; ++y) {
         for (int z = 0; z < structDepth; ++z) {
@@ -32,11 +53,52 @@ void Chunk::placeStructure(const Structure& structure, int baseX, int baseY, int
                 int wx = baseX + x;
                 int wy = baseY + y;
                 int wz = baseZ + z;
-                if (wx >= 0 && wx < WIDTH && wy >= 0 && wy < HEIGHT && wz >= 0 && wz < DEPTH) {
-                    blocks[wx][wy][wz].type = blockType;
+
+                // Compute which chunk this block belongs to
+                int chunkOffsetX = 0, chunkOffsetZ = 0;
+                int localX = wx, localZ = wz;
+                if (wx < 0) {
+                    chunkOffsetX = (wx / WIDTH) - (wx % WIDTH != 0 ? 1 : 0);
+                    localX = wx - chunkOffsetX * WIDTH;
+                } else if (wx >= WIDTH) {
+                    chunkOffsetX = wx / WIDTH;
+                    localX = wx - chunkOffsetX * WIDTH;
+                }
+                if (wz < 0) {
+                    chunkOffsetZ = (wz / DEPTH) - (wz % DEPTH != 0 ? 1 : 0);
+                    localZ = wz - chunkOffsetZ * DEPTH;
+                } else if (wz >= DEPTH) {
+                    chunkOffsetZ = wz / DEPTH;
+                    localZ = wz - chunkOffsetZ * DEPTH;
+                }
+
+                int targetChunkX = chunkX + chunkOffsetX;
+                int targetChunkZ = chunkZ + chunkOffsetZ;
+
+                if (wy >= 0 && wy < HEIGHT) {
+                    Chunk* targetChunk = nullptr;
+                    if (chunkOffsetX == 0 && chunkOffsetZ == 0) {
+                        targetChunk = this;
+                    } else if (world) {
+                        targetChunk = world->getChunk(targetChunkX, targetChunkZ);
+                    }
+                    if (targetChunk &&
+                        localX >= 0 && localX < WIDTH &&
+                        localZ >= 0 && localZ < DEPTH) {
+                        targetChunk->blocks[localX][wy][localZ].type = blockType;
+                        affectedChunks.insert(targetChunk);
+                    } else {
+                        // Chunk not loaded, defer placement
+                        auto key = std::make_pair(targetChunkX, targetChunkZ);
+                        pendingBlockPlacements[key].push_back({localX, wy, localZ, blockType});
+                    }
                 }
             }
         }
+    }
+    // Rebuild mesh for all affected chunks
+    for (Chunk* chunk : affectedChunks) {
+        chunk->buildMesh();
     }
 }
 

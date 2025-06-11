@@ -70,14 +70,14 @@ void ImGuiOverlay::render(float deltaTime, const Camera& camera, World* world) {
     ImGui::Begin("Debug");
     ImGui::Text("FPS: %.1f", fpsDisplay);
     ImGui::Text("fpsTimer: %.1f", fpsTimer);
-    ImGui::Text("Cam Pos: %.2f, %.2f, %.2f", pos.x, pos.y, pos.z);
-    ImGui::Text("Cam Front: %.2f, %.2f, %.2f", front.x, front.y, front.z);
-    ImGui::Text("Cam Yaw: %.2f", camera.getYaw());
-    ImGui::Text("Cam Pitch: %.2f", camera.getPitch());
+    ImGui::Text("Camera Pos: %.2f, %.2f, %.2f", pos.x, pos.y, pos.z);
+    ImGui::Text("Camera Front: %.2f, %.2f, %.2f", front.x, front.y, front.z);
+    ImGui::Text("Camera Yaw: %.2f", camera.getYaw());
+    ImGui::Text("Camera Pitch: %.2f", camera.getPitch());
     ImGui::Text("Chunk: %d, %d", chunkX, chunkZ);
 
     if (blockInfo.valid) {
-        ImGui::Text("Looking at block: %s", blockNames[blockInfo.type].c_str());
+        ImGui::Text("Looking at: %s", blockNames[blockInfo.type].c_str());
         ImGui::Text("Block position: [%d, %d, %d]", blockInfo.worldPos.x, blockInfo.worldPos.y, blockInfo.worldPos.z);
     } else {
         ImGui::Text("Looking at: nothing");
