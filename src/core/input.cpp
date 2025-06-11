@@ -1,7 +1,7 @@
 #include <glad/glad.h>
 #include "input.hpp"
-#include "block_interaction.hpp"
-#include "world.hpp"
+#include "../world/block_interaction.hpp"
+#include "../world/world.hpp"
 
 static bool firstMouse = true;
 static bool cursorCaptured = true;

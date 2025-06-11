@@ -1,6 +1,6 @@
 #pragma once
 #include <GLFW/glfw3.h>
-#include "camera.hpp"
+#include "../core/camera.hpp"
 
 class ImGuiOverlay {
 public:

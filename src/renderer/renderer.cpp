@@ -1,12 +1,12 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include "renderer.hpp"
-#include "shader.hpp"
-#include "camera.hpp"
 #include <stb_image.h>
 #include <iostream>
 #include <glm/gtc/type_ptr.hpp>
-#include "options.hpp"
+#include "renderer.hpp"
+#include "shader.hpp"
+#include "../core/camera.hpp"
+#include "../core/options.hpp"
 
 Renderer::Renderer() : shaderProgram(0), textureAtlas(0), crosshairVAO(0), crosshairVBO(0) {}
 

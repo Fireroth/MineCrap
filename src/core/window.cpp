@@ -1,7 +1,7 @@
 #include <glad/glad.h>
+#include <iostream>
 #include "window.hpp"
 #include "stb_image.h"
-#include <iostream>
 
 Window::Window(int width, int height, const char* title)
     : width(width), height(height), title(title), window(nullptr) {}
@@ -10,9 +10,19 @@ Window::~Window() {
     cleanup();
 }
 
-// Todo: Fix the acpect ratio
-void framebufferSizeCallback(GLFWwindow* window, int width, int height) {
+void Window::framebufferSizeCallback(GLFWwindow* glfwWindow, int width, int height) {
     glViewport(0, 0, width, height);
+    std::cout << "Resolution changed: " << width << "x" << height << std::endl;
+
+    Window* window = static_cast<Window*>(glfwGetWindowUserPointer(glfwWindow));
+    if (window) {
+        window->width = width;
+        window->height = height;
+        window->aspectRatio = static_cast<float>(width) / static_cast<float>(height);
+        if (window->framebufferResizeCallback) {
+            window->framebufferResizeCallback(width, height, window->aspectRatio);
+        }
+    }
 }
 
 bool Window::init() {
@@ -38,7 +48,10 @@ bool Window::init() {
         return false;
     }
 
+    glfwSetWindowUserPointer(window, this);
     glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
+
+    aspectRatio = static_cast<float>(width) / static_cast<float>(height);
 
     return true;
 }
@@ -84,4 +97,12 @@ void Window::setIcon(const char* iconPath) {
     } else {
         std::cerr << "Failed to load window icon: " << iconPath << std::endl;
     }
+}
+
+float Window::getAspectRatio() const {
+    return aspectRatio;
+}
+
+void Window::setFramebufferResizeCallback(std::function<void(int, int, float)> callback) {
+    framebufferResizeCallback = callback;
 }

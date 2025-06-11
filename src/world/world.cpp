@@ -1,9 +1,9 @@
-#include "world.hpp"
 #include <glm/glm.hpp>
 #include <iostream>
 #include <cmath>
 #include <deque>
 #include <algorithm>
+#include "world.hpp"
 
 static std::deque<std::pair<int, int>> chunkLoadQueue;
 

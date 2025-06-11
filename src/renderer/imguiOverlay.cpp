@@ -1,12 +1,12 @@
-#include "ImGuiOverlay.hpp"
-#include "block_interaction.hpp"
-#include "input.hpp"
 #include <imgui.h>
 #include <backends/imgui_impl_glfw.h>
 #include <backends/imgui_impl_opengl3.h>
-
 #include <map>
 #include <string>
+#include "ImGuiOverlay.hpp"
+#include "../world/block_interaction.hpp"
+#include "../core/input.hpp"
+
 std::map<uint8_t, std::string> blockNames = {
     { 1, "Grass" },
     { 2, "Dirt" },

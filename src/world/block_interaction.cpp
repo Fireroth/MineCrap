@@ -1,6 +1,6 @@
 #include <glad/glad.h>
 #include "chunk.hpp"
-#include "camera.hpp"
+#include "../core/camera.hpp"
 #include "world.hpp"
 
 struct RaycastResult {

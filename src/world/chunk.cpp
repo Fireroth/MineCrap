@@ -1,10 +1,10 @@
-#include "chunk.hpp"
-#include "options.hpp"
-#include "noise.hpp"
-#include "chunkTerrain.hpp"
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream>
+#include "chunk.hpp"
+#include "../core/options.hpp"
+#include "noise.hpp"
+#include "chunkTerrain.hpp"
 
 Chunk::Chunk(int x, int z, World* worldPtr)
     : chunkX(x), chunkZ(z), world(worldPtr), VAO(0), VBO(0), EBO(0), indexCount(0)

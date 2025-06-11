@@ -3,7 +3,7 @@
 #include <vector>
 #include <glad/glad.h>
 #include "blockDB.hpp"
-#include "camera.hpp"
+#include "../core/camera.hpp"
 #include "world.hpp"
 #include "structureDB.hpp"
 #include "noise.hpp"

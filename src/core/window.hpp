@@ -1,6 +1,7 @@
 #pragma once
 
 #include <GLFW/glfw3.h>
+#include <functional>
 
 class Window {
 public:
@@ -17,9 +18,16 @@ public:
 
     GLFWwindow* getGLFWwindow() const;
 
+    float getAspectRatio() const;
+    void setFramebufferResizeCallback(std::function<void(int, int, float)> callback);
+
 private:
     int width;
     int height;
     const char* title;
     GLFWwindow* window;
+
+    float aspectRatio = 1.0f;
+    std::function<void(int, int, float)> framebufferResizeCallback;
+    static void framebufferSizeCallback(GLFWwindow* window, int width, int height);
 };

@@ -1,10 +1,10 @@
 #include <glad/glad.h>
-#include "imguiOverlay.hpp"
-#include "window.hpp"
-#include "renderer.hpp"
-#include "camera.hpp"
-#include "input.hpp"
-#include "options.hpp"
+#include "renderer/imguiOverlay.hpp"
+#include "core/window.hpp"
+#include "renderer/renderer.hpp"
+#include "core/camera.hpp"
+#include "core/input.hpp"
+#include "core/options.hpp"
 
 GLFWwindow* g_currentGLFWwindow = nullptr;
 GLFWwindow* getCurrentGLFWwindow() { return g_currentGLFWwindow; }
@@ -31,6 +31,10 @@ int main()
     Window window(windowWidth, windowHeight, "MineCrap");
     if (!window.init())
         return -1;
+
+    window.setFramebufferResizeCallback([&aspectRatio](int w, int h, float ar) {
+        aspectRatio = ar;
+    });
 
     GLFWwindow* glfwWindow = window.getGLFWwindow();
     g_currentGLFWwindow = glfwWindow;

@@ -1,5 +1,5 @@
-#include "camera.hpp"
 #include <glm/gtc/matrix_transform.hpp>
+#include "camera.hpp"
 
 Camera::Camera(glm::vec3 position, glm::vec3 up, float yaw, float pitch)
     : position(position), worldUp(up), yaw(yaw), pitch(pitch), movementSpeed(2.5f), mouseSensitivity(0.1f)

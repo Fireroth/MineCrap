@@ -1,7 +1,7 @@
+#include <map>
 #include "structureDB.hpp"
 #include "noise.hpp"
 #include "chunkTerrain.hpp"
-#include <map>
 
 Chunk::Biome getBiome(float b, Chunk& chunk) {
     if (b >= -1.0f && b < -0.3333f)
@@ -163,10 +163,10 @@ void generateChunkTerrain(Chunk& chunk) {
     chunk.biome = biome;
     switch (biome) {
         case Chunk::Biome::Plains:
-            generateChunkBiomeFeatures(chunk, 3, 0.99f, 2, 2, "tree", 1);
+            generateChunkBiomeFeatures(chunk, 0, 0.995f, 2, 2, "tree", 1);
             break;
         case Chunk::Biome::Forest:
-            generateChunkBiomeFeatures(chunk, 3, 0.75f, 2, 2, "tree", 1);
+            generateChunkBiomeFeatures(chunk, 0, 0.95f, 2, 2, "tree", 1);
             break;
         case Chunk::Biome::Desert:
             generateChunkBiomeFeatures(chunk, 0, 0.95f, 0, 0, "cactus", 4);

@@ -1,5 +1,5 @@
 #include "noise.hpp"
-#include "options.hpp"
+#include "../core/options.hpp"
 
 ChunkNoises noiseInit() {
     ChunkNoises noises;

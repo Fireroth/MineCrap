@@ -6,6 +6,10 @@
 static std::map<std::string, int> optionsMap;
 static bool loaded = false;
 
+static std::map<std::string, std::string> controlsMap;
+static bool controlsLoaded = false;
+
+// ------------ option.txt ------------
 void loadOptionsFromFile(const std::string& filename) {
     if (loaded) return;
     std::ifstream file(filename);
@@ -22,14 +26,14 @@ void loadOptionsFromFile(const std::string& filename) {
     loaded = true;
 }
 
-int getOptionInt(const std::string& key, int defaultValue) {
+int getOptionInt(const std::string& key, const int defaultValue) {
     if (!loaded) loadOptionsFromFile("options.txt");
     auto it = optionsMap.find(key);
     if (it != optionsMap.end()) return it->second;
     return defaultValue;
 }
 
-float getOptionFloat(const std::string& key, float defaultValue) {
+float getOptionFloat(const std::string& key, const float defaultValue) {
     if (!loaded) loadOptionsFromFile("options.txt");
     auto it = optionsMap.find(key);
     if (it != optionsMap.end()) return static_cast<float>(it->second);
