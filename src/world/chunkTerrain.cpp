@@ -79,39 +79,64 @@ void generateChunkTerrain(Chunk& chunk) {
 
     for (int x = 0; x < WIDTH; ++x) {
         for (int z = 0; z < DEPTH; ++z) {
-            float totalWeight = 0.0f;
-            float blendedHeight = 0.0f;
-            std::map<Chunk::Biome, float> biomeWeights;
+            std::map<Chunk::Biome, int> biomeCounts;
+            Chunk::Biome centerBiome = columnBiomes[x + 1][z + 1];
+            float centerHeight = columnHeights[x + 1][z + 1];
 
-            for (int dx = -transitionRadius; dx <= transitionRadius; ++dx) {
-                for (int dz = -transitionRadius; dz <= transitionRadius; ++dz) {
+            // Check neighbors to detect if all biomes are the same
+            bool hasDifferentBiome = false;
+            for (int dx = -transitionRadius; dx <= transitionRadius && !hasDifferentBiome; ++dx) {
+                for (int dz = -transitionRadius; dz <= transitionRadius && !hasDifferentBiome; ++dz) {
                     int cx = x + dx + 1;
                     int cz = z + dz + 1;
-
                     if (cx < 0 || cz < 0 || cx >= WIDTH + 2 || cz >= DEPTH + 2)
                         continue;
 
-                    float dist2 = static_cast<float>(dx * dx + dz * dz);
-                    float weight = 1.0f / (dist2 + 1.0f);
-
-                    Chunk::Biome b = columnBiomes[cx][cz];
-                    float h = columnHeights[cx][cz];
-
-                    biomeWeights[b] += weight;
-                    blendedHeight += h * weight;
-                    totalWeight += weight;
+                    if (columnBiomes[cx][cz] != centerBiome) {
+                        hasDifferentBiome = true;
+                    }
                 }
             }
 
-            blendedHeight /= totalWeight;
+            float blendedHeight = 0.0f;
+            Chunk::Biome finalBiome = centerBiome;
 
-            Chunk::Biome finalBiome = Chunk::Biome::Plains;
-            float maxWeight = -1.0f;
-            for (auto& [b, w] : biomeWeights) {
-                if (w > maxWeight) {
-                    maxWeight = w;
-                    finalBiome = b;
+            if (hasDifferentBiome) {
+                float totalWeight = 0.0f;
+                std::map<Chunk::Biome, float> biomeWeights;
+
+                for (int dx = -transitionRadius; dx <= transitionRadius; ++dx) {
+                    for (int dz = -transitionRadius; dz <= transitionRadius; ++dz) {
+                        int cx = x + dx + 1;
+                        int cz = z + dz + 1;
+                        if (cx < 0 || cz < 0 || cx >= WIDTH + 2 || cz >= DEPTH + 2)
+                            continue;
+
+                        float dist2 = static_cast<float>(dx * dx + dz * dz);
+                        float weight = 1.0f / (dist2 + 1.0f);
+
+                        Chunk::Biome b = columnBiomes[cx][cz];
+                        float h = columnHeights[cx][cz];
+
+                        biomeWeights[b] += weight;
+                        blendedHeight += h * weight;
+                        totalWeight += weight;
+                    }
                 }
+
+                blendedHeight /= totalWeight;
+
+                float maxWeight = -1.0f;
+                for (auto& [b, w] : biomeWeights) {
+                    if (w > maxWeight) {
+                        maxWeight = w;
+                        finalBiome = b;
+                    }
+                }
+            } else {
+                // No blending needed
+                blendedHeight = centerHeight;
+                finalBiome = centerBiome;
             }
 
             int height = static_cast<int>(blendedHeight);
@@ -163,6 +188,7 @@ void generateChunkTerrain(Chunk& chunk) {
     chunk.biome = biome;
     switch (biome) {
         case Chunk::Biome::Plains:
+            //generateChunkBiomeFeatures(chunk, 0, 0.9999f, 19, 19, "big_test", 1);
             generateChunkBiomeFeatures(chunk, 0, 0.998f, 2, 2, "tree", 1);
             break;
         case Chunk::Biome::Forest:
