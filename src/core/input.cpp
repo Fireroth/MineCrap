@@ -89,6 +89,12 @@ float getSpeedMultiplier(GLFWwindow* window)
     return (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS) ? 30.0f : 5.0f;
 }
 
+// Zoom state
+bool getZoomState(GLFWwindow* window)
+{
+    return (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS) ? true : false;
+}
+
 // Keyboard movement
 void processInput(GLFWwindow* window, Camera& camera, float deltaTime, float speedMultiplier)
 {

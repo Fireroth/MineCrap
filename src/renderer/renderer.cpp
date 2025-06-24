@@ -84,13 +84,24 @@ void Renderer::renderWorld(const Camera& camera, float aspectRatio, float deltaT
 
     glUseProgram(shaderProgram);
 
-    float baseFov = getOptionFloat("fov", 60.0f);
-    float sprintFov = baseFov + 10.0f;
-    float getSpeedMultiplier(GLFWwindow* window);
     GLFWwindow* getCurrentGLFWwindow();
     GLFWwindow* window = getCurrentGLFWwindow();
-    bool sprinting = window && getSpeedMultiplier(window) > 5.0f;
-    float targetFov = sprinting ? sprintFov : baseFov;
+    float baseFov = getOptionFloat("fov", 60.0f);
+    
+    float getSpeedMultiplier(GLFWwindow* window);
+    bool sprintState = window && getSpeedMultiplier(window) > 5.0f;
+    float sprintFov = baseFov + 10.0f;
+
+    bool getZoomState(GLFWwindow* window);
+    bool zoomState = window && getZoomState(window);
+    float zoomFov = baseFov * 0.1f;
+
+    float targetFov = baseFov;
+    if (zoomState) {
+        targetFov = zoomFov;
+    } else if (sprintState) {
+        targetFov = sprintFov;
+    }
 
     float fovLerpSpeed = 30.0f;
     float lerpFactor = 1.0f - expf(-fovLerpSpeed * deltaTime);
@@ -105,8 +116,14 @@ void Renderer::renderWorld(const Camera& camera, float aspectRatio, float deltaT
     glBindTexture(GL_TEXTURE_2D, textureAtlas);
     glUniform1i(uAtlasLoc, 0);
 
+    // Adjust fog density when zoomed in to avoid weird effect
+    float adjustedFogDensity = fogDensity;
+    if (zoomState) {
+        adjustedFogDensity *= (zoomFov / baseFov);
+    }
+
     if (fogEnabled) {
-        glUniform1f(uFogDensityLoc, fogDensity);
+        glUniform1f(uFogDensityLoc, adjustedFogDensity);
         glUniform1f(uFogStartLoc, fogStartDistance);
         glUniform3fv(uFogColorLoc, 1, glm::value_ptr(fogColor));
     } else {

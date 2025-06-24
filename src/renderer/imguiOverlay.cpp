@@ -57,7 +57,7 @@ void ImGuiOverlay::render(float deltaTime, const Camera& camera, World* world) {
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
-    ImGui::SetNextWindowSize(ImVec2(300, 205)); // Width: 300, Height: 205
+    ImGui::SetNextWindowSize(ImVec2(300, 190)); // Width: 300, Height: 200
     
     glm::vec3 pos = camera.getPosition();
     glm::vec3 front = camera.getFront();
@@ -69,7 +69,6 @@ void ImGuiOverlay::render(float deltaTime, const Camera& camera, World* world) {
 
     ImGui::Begin("Debug");
     ImGui::Text("FPS: %.1f", fpsDisplay);
-    ImGui::Text("fpsTimer: %.1f", fpsTimer);
     ImGui::Text("Camera Pos: %.2f, %.2f, %.2f", pos.x, pos.y, pos.z);
     ImGui::Text("Camera Front: %.2f, %.2f, %.2f", front.x, front.y, front.z);
     ImGui::Text("Camera Yaw: %.2f", camera.getYaw());

@@ -44,7 +44,7 @@ void generateChunkTerrain(Chunk& chunk) {
     auto& noises = chunk.noises;
     int chunkX = chunk.chunkX;
     int chunkZ = chunk.chunkZ;
-    const int transitionRadius = 4; // blend over 4 blocks
+    const int transitionRadius = 5; // blend over 5 blocks
 
     // Distortion strength for biome edges
     const float biomeDistortStrength = 8.0f;
