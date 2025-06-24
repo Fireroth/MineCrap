@@ -3,14 +3,38 @@
 #include "noise.hpp"
 #include "chunkTerrain.hpp"
 
-Chunk::Biome getBiome(float b, Chunk& chunk) {
+// Helper function to get biome based on noise value
+Chunk::Biome getBiome(float b) {
     if (b >= -1.0f && b < -0.3333f)
-        chunk.biome = Chunk::Biome::Forest;
+        return Chunk::Biome::Forest;
     else if (b >= -0.3333f && b < 0.25f)
-        chunk.biome = Chunk::Biome::Plains;
+        return Chunk::Biome::Plains;
     else
-        chunk.biome = Chunk::Biome::Desert;
-    return chunk.biome;
+        return Chunk::Biome::Desert;
+}
+
+// Helper function to get biome parameters
+void getBiomeParams(Chunk::Biome biome, float& heightScale, float& detailWeight, float& power, float& baseHeight) {
+    switch (biome) {
+        case Chunk::Biome::Desert:
+            heightScale = 0.5f;
+            detailWeight = 0.1f;
+            power = 1.0f;
+            baseHeight = 36.0f;
+            break;
+        case Chunk::Biome::Plains:
+            heightScale = 0.7f;
+            detailWeight = 0.1f;
+            power = 1.0f;
+            baseHeight = 31.0f;
+            break;
+        case Chunk::Biome::Forest:
+            heightScale = 1.0f;
+            detailWeight = 0.4f;
+            power = 1.3f;
+            baseHeight = 30.0f;
+            break;
+    }
 }
 
 void generateChunkTerrain(Chunk& chunk) {
@@ -20,79 +44,70 @@ void generateChunkTerrain(Chunk& chunk) {
     auto& noises = chunk.noises;
     int chunkX = chunk.chunkX;
     int chunkZ = chunk.chunkZ;
+    const int transitionRadius = 4; // blend over 4 blocks
 
-    float b = noises.biomeNoise.GetNoise((float)(chunkX * WIDTH), (float)(chunkZ * DEPTH));
-    Chunk::Biome biome = getBiome(b, chunk);
+    // Distortion strength for biome edges
+    const float biomeDistortStrength = 8.0f;
 
-    // PreCompute biome and base heights for all columns in chunk and neighbors
-    Chunk::Biome columnBiomes[WIDTH + 2][DEPTH + 2];
-    float columnHeights[WIDTH + 2][DEPTH + 2];
+    // Get the "main" biome for this chunk for feature generation
+    float b = noises.biomeNoise.GetNoise(
+        (float)(chunkX * WIDTH) + noises.biomeDistortNoise.GetNoise((float)(chunkX * WIDTH), (float)(chunkZ * DEPTH)) * biomeDistortStrength,
+        (float)(chunkZ * DEPTH) + noises.biomeDistortNoise.GetNoise((float)(chunkX * WIDTH) + 1000.0f, (float)(chunkZ * DEPTH) + 1000.0f) * biomeDistortStrength
+    );
+    Chunk::Biome biome = getBiome(b);
 
-    for (int dx = -1; dx <= WIDTH; ++dx) {
-        for (int dz = -1; dz <= DEPTH; ++dz) {
-            float fx = static_cast<float>(chunkX * WIDTH + dx);
-            float fz = static_cast<float>(chunkZ * DEPTH + dz);
-            float b = noises.biomeNoise.GetNoise(fx, fz);
-            Chunk::Biome biome = getBiome(b, chunk);
+    // Precompute biome and height values for the blending to avoid redundant noise calls
+    std::vector<std::vector<Chunk::Biome>> biomeCache(WIDTH + 2 * transitionRadius, std::vector<Chunk::Biome>(DEPTH + 2 * transitionRadius));
+    std::vector<std::vector<float>> heightCache(WIDTH + 2 * transitionRadius, std::vector<float>(DEPTH + 2 * transitionRadius));
 
-            // Base terrain shape
-            float base = noises.baseNoise.GetNoise(fx, fz) * 0.5f + 0.5f;
-            float detail = noises.detailNoise.GetNoise(fx, fz) * 0.5f + 0.5f;
-            float detail2 = noises.detail2Noise.GetNoise(fx, fz) * 0.5f + 0.5f;
+    for (int dx = -transitionRadius; dx < WIDTH + transitionRadius; ++dx) {
+        for (int dz = -transitionRadius; dz < DEPTH + transitionRadius; ++dz) {
+            int wx = chunkX * WIDTH + dx;
+            int wz = chunkZ * DEPTH + dz;
+
+            // Distort biome noise coordinates
+            float distortX = noises.biomeDistortNoise.GetNoise((float)wx, (float)wz) * biomeDistortStrength;
+            float distortY = noises.biomeDistortNoise.GetNoise((float)wx + 1000.0f, (float)wz + 1000.0f) * biomeDistortStrength;
+            float biomeNoise = noises.biomeNoise.GetNoise((float)wx + distortX, (float)wz + distortY);
+            Chunk::Biome biome = getBiome(biomeNoise);
+            biomeCache[dx + transitionRadius][dz + transitionRadius] = biome;
+
+            float base = noises.baseNoise.GetNoise((float)wx, (float)wz) * 0.5f + 0.5f;
+            float detail = noises.detailNoise.GetNoise((float)wx, (float)wz) * 0.5f + 0.5f;
+            float detail2 = noises.detail2Noise.GetNoise((float)wx, (float)wz) * 0.5f + 0.5f;
 
             float heightScale = 1.0f;
             float detailWeight = 1.0f;
             float power = 1.3f;
             float baseHeight = 30.0f;
-
-            switch (biome) {
-                case Chunk::Biome::Desert:
-                    heightScale = 0.5f;
-                    detailWeight = 0.1f;
-                    power = 1.0f;
-                    baseHeight = 36.0f;
-                    break;
-                case Chunk::Biome::Plains:
-                    heightScale = 0.7f;
-                    detailWeight = 0.1f;
-                    power = 1.0f;
-                    baseHeight = 31.0f;
-                    break;
-                case Chunk::Biome::Forest:
-                    heightScale = 1.0f;
-                    detailWeight = 0.4f;
-                    power = 1.3f;
-                    baseHeight = 30.0f;
-                    break;
-            }
+            getBiomeParams(biome, heightScale, detailWeight, power, baseHeight);
 
             float combined = base + detail * detailWeight + detail2 * 0.2f;
             combined = std::pow(combined, power);
             float height = combined * 24.0f * heightScale + baseHeight;
-
-            columnBiomes[dx + 1][dz + 1] = biome;
-            columnHeights[dx + 1][dz + 1] = height;
+            heightCache[dx + transitionRadius][dz + transitionRadius] = height;
         }
     }
 
-    const int transitionRadius = 4; // blend over 4 blocks
-
     for (int x = 0; x < WIDTH; ++x) {
         for (int z = 0; z < DEPTH; ++z) {
-            std::map<Chunk::Biome, int> biomeCounts;
-            Chunk::Biome centerBiome = columnBiomes[x + 1][z + 1];
-            float centerHeight = columnHeights[x + 1][z + 1];
+            int wx = chunkX * WIDTH + x;
+            int wz = chunkZ * DEPTH + z;
 
-            // Check neighbors to detect if all biomes are the same
+            // Distort biome noise coordinates for this column
+            float distortX = noises.biomeDistortNoise.GetNoise((float)wx, (float)wz) * biomeDistortStrength;
+            float distortY = noises.biomeDistortNoise.GetNoise((float)wx + 1000.0f, (float)wz + 1000.0f) * biomeDistortStrength;
+            float centerBiomeNoise = noises.biomeNoise.GetNoise((float)wx + distortX, (float)wz + distortY);
+            Chunk::Biome centerBiome = getBiome(centerBiomeNoise);
+
+            float centerHeight = heightCache[x + transitionRadius][z + transitionRadius];
+
+            // Blending
             bool hasDifferentBiome = false;
             for (int dx = -transitionRadius; dx <= transitionRadius && !hasDifferentBiome; ++dx) {
                 for (int dz = -transitionRadius; dz <= transitionRadius && !hasDifferentBiome; ++dz) {
-                    int cx = x + dx + 1;
-                    int cz = z + dz + 1;
-                    if (cx < 0 || cz < 0 || cx >= WIDTH + 2 || cz >= DEPTH + 2)
-                        continue;
-
-                    if (columnBiomes[cx][cz] != centerBiome) {
+                    Chunk::Biome nBiome = biomeCache[x + dx + transitionRadius][z + dz + transitionRadius];
+                    if (nBiome != centerBiome) {
                         hasDifferentBiome = true;
                     }
                 }
@@ -107,19 +122,14 @@ void generateChunkTerrain(Chunk& chunk) {
 
                 for (int dx = -transitionRadius; dx <= transitionRadius; ++dx) {
                     for (int dz = -transitionRadius; dz <= transitionRadius; ++dz) {
-                        int cx = x + dx + 1;
-                        int cz = z + dz + 1;
-                        if (cx < 0 || cz < 0 || cx >= WIDTH + 2 || cz >= DEPTH + 2)
-                            continue;
-
                         float dist2 = static_cast<float>(dx * dx + dz * dz);
                         float weight = 1.0f / (dist2 + 1.0f);
 
-                        Chunk::Biome b = columnBiomes[cx][cz];
-                        float h = columnHeights[cx][cz];
+                        Chunk::Biome nBiome = biomeCache[x + dx + transitionRadius][z + dz + transitionRadius];
+                        float nHeight = heightCache[x + dx + transitionRadius][z + dz + transitionRadius];
 
-                        biomeWeights[b] += weight;
-                        blendedHeight += h * weight;
+                        biomeWeights[nBiome] += weight;
+                        blendedHeight += nHeight * weight;
                         totalWeight += weight;
                     }
                 }
@@ -195,7 +205,7 @@ void generateChunkTerrain(Chunk& chunk) {
             generateChunkBiomeFeatures(chunk, 0, 0.93f, 2, 2, "tree", 1);
             break;
         case Chunk::Biome::Desert:
-            generateChunkBiomeFeatures(chunk, 0, 0.95f, 0, 0, "cactus", 4);
+            generateChunkBiomeFeatures(chunk, 0, 0.97f, 0, 0, "cactus", 4);
             break;
     }
 }

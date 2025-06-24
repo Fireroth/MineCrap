@@ -52,7 +52,7 @@ void Renderer::init()
 
     fogEnabled = getOptionInt("fog", 1);
     fogDensity = 0.19f;
-    fogStartDistance = (getOptionFloat("render_distance", 7) * 16) - 29;
+    fogStartDistance = ((getOptionFloat("render_distance", 7) + 1) * 16) - 29;
     fogColor = glm::vec3(0.6f, 1.0f, 1.0f);
 }
 
@@ -79,7 +79,7 @@ void Renderer::initCrosshair() {
 }
 
 void Renderer::renderWorld(const Camera& camera, float aspectRatio, float deltaTime) {
-    int renderDist = getOptionInt("render_distance", 5);
+    int renderDist = getOptionInt("render_distance", 7) + 1; // +1 to account for invisible "mesh helper" chunk
     world.updateChunksAroundPlayer(camera.getPosition(), renderDist);
 
     glUseProgram(shaderProgram);

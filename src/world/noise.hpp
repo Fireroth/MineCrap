@@ -8,6 +8,7 @@ struct ChunkNoises {
     FastNoiseLite detailNoise;
     FastNoiseLite detail2Noise;
     FastNoiseLite featureNoise;
+    FastNoiseLite biomeDistortNoise;
 };
 
 ChunkNoises noiseInit();
