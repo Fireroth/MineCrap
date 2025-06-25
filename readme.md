@@ -1,4 +1,4 @@
-# MineCrap - WIP
+# MineCrap
 A simple Minecraft clone written in C++<br>
 <img src="preview/thumb.png" alt="In-game screenshot" width="400"/>
 
@@ -12,7 +12,6 @@ Clone the repository
 git clone https://github.com/Fireroth/MineCrap.git
 cd MineCrap
 ```
-
 
 Run CMake
 ```
@@ -34,6 +33,10 @@ cmake --build .
 ## 🛠️ To-Do
 -  Inventory system
 -  Sounds
+-  Frustum culling
+-  Transparent blocks
+-  Player physics & collisions
+-  Chunk saving
 
 ## 📚 Libraries used
 - [glfw](https://www.glfw.org/) – Window and input handling  
