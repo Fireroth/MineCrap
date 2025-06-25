@@ -6,6 +6,7 @@
 #include "ImGuiOverlay.hpp"
 #include "../world/block_interaction.hpp"
 #include "../core/input.hpp"
+#include <vector>
 
 std::map<uint8_t, std::string> blockNames = {
     { 1, "Grass" },
@@ -57,7 +58,7 @@ void ImGuiOverlay::render(float deltaTime, const Camera& camera, World* world) {
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
-    ImGui::SetNextWindowSize(ImVec2(300, 190)); // Width: 300, Height: 200
+    ImGui::SetNextWindowSize(ImVec2(285, 190)); // Width: 285, Height: 190
     
     glm::vec3 pos = camera.getPosition();
     glm::vec3 front = camera.getFront();
@@ -83,7 +84,29 @@ void ImGuiOverlay::render(float deltaTime, const Camera& camera, World* world) {
         ImGui::Text("Block position: undefined");
     }
 
-    ImGui::Text("Selected block: %s", blockNames[getSelectedBlockType()].c_str());
+    // Dropdown for block selection
+    static std::vector<const char*> blockItems;
+    static std::vector<uint8_t> blockIds;
+    if (blockItems.empty()) {
+        for (const auto& [id, name] : blockNames) {
+            blockItems.push_back(name.c_str());
+            blockIds.push_back(id);
+        }
+    }
+    int currentIdx = 0;
+    uint8_t selectedBlock = getSelectedBlockType();
+    for (size_t i = 0; i < blockIds.size(); ++i) {
+        if (blockIds[i] == selectedBlock) {
+            currentIdx = static_cast<int>(i);
+            break;
+        }
+    }
+    ImGui::Text("Selected block:");
+    ImGui::SameLine();
+    ImGui::SetNextItemWidth(150);
+    if (ImGui::Combo("##SelectedBlockCombo", &currentIdx, blockItems.data(), static_cast<int>(blockItems.size()))) {
+        setSelectedBlockType(blockIds[currentIdx]);
+    }
 
     ImGui::End();
 
