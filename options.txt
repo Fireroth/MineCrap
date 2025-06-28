@@ -6,3 +6,4 @@ world_seed=1234
 vsync=0
 fog=1
 chunks_to_load_per_frame=1
+hide_console=1

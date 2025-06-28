@@ -5,23 +5,17 @@ layout (location = 2) in float aFaceID;
 
 out vec2 TexCoord;
 out float FaceID;
-out float fogFactor;
+out vec3 WorldPos;
 
 uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
 
-uniform float fogStartDistance;
-uniform float fogDensity;
-
 void main()
 {
-    gl_Position = projection * view * model * vec4(aPos, 1.0);
+    vec4 worldPosition = model * vec4(aPos, 1.0);
+    gl_Position = projection * view * worldPosition;
     TexCoord = aTexCoord;
     FaceID = aFaceID;
-    
-    float distance = length(gl_Position.xyz);
-    float adjustedDistance = max(0.0, distance - fogStartDistance);
-    fogFactor = exp(-fogDensity * adjustedDistance);
-    fogFactor = clamp(fogFactor, 0.0, 1.0);
+    WorldPos = worldPosition.xyz;
 }

@@ -1,3 +1,4 @@
+#include <windows.h>
 #include <glad/glad.h>
 #include "renderer/imguiOverlay.hpp"
 #include "core/window.hpp"
@@ -16,6 +17,9 @@ int main()
     float aspectRatio = static_cast<float>(windowWidth) / static_cast<float>(windowHeight);
     float deltaTime = 0.0f;
     float lastFrame = 0.0f;
+
+    HWND hwnd = GetConsoleWindow();
+    ShowWindow(hwnd, getOptionInt("hide_console", 1) ? SW_HIDE : SW_SHOW);
 
     Renderer renderer;
     ImGuiOverlay ImGuiOverlay;

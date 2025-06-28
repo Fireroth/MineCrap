@@ -44,6 +44,7 @@ void Renderer::init()
     uFogDensityLoc = glGetUniformLocation(shaderProgram, "fogDensity");
     uFogStartLoc = glGetUniformLocation(shaderProgram, "fogStartDistance");
     uFogColorLoc = glGetUniformLocation(shaderProgram, "fogColor");
+    uCamPosLoc = glGetUniformLocation(shaderProgram, "cameraPos");
 
     loadTextureAtlas("textures/atlas.png");
     initCrosshair();
@@ -51,8 +52,8 @@ void Renderer::init()
     currentFov = getOptionFloat("fov", 60.0f);
 
     fogEnabled = getOptionInt("fog", 1);
-    fogDensity = 0.19f;
-    fogStartDistance = ((getOptionFloat("render_distance", 7) + 1) * 16) - 29;
+    fogDensity = 0.30f;
+    fogStartDistance = ((getOptionFloat("render_distance", 7) + 1) * 16) - 20;
     fogColor = glm::vec3(0.6f, 1.0f, 1.0f);
 }
 
@@ -111,19 +112,17 @@ void Renderer::renderWorld(const Camera& camera, float aspectRatio, float deltaT
     glUniformMatrix4fv(uViewLoc, 1, GL_FALSE, &camera.getViewMatrix()[0][0]);
     glUniformMatrix4fv(uProjLoc, 1, GL_FALSE, &projection[0][0]);
 
-
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, textureAtlas);
     glUniform1i(uAtlasLoc, 0);
 
-    // Adjust fog density when zoomed in to avoid weird effect
-    float adjustedFogDensity = fogDensity;
-    if (zoomState) {
-        adjustedFogDensity *= (zoomFov / baseFov);
+    if (uCamPosLoc != -1) {
+        glm::vec3 camPos = camera.getPosition();
+        glUniform3fv(uCamPosLoc, 1, glm::value_ptr(camPos));
     }
 
     if (fogEnabled) {
-        glUniform1f(uFogDensityLoc, adjustedFogDensity);
+        glUniform1f(uFogDensityLoc, fogDensity);
         glUniform1f(uFogStartLoc, fogStartDistance);
         glUniform3fv(uFogColorLoc, 1, glm::value_ptr(fogColor));
     } else {

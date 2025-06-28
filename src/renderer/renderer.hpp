@@ -5,7 +5,7 @@
 
 class Renderer {
 public:
-    GLint uModelLoc, uViewLoc, uProjLoc, uAtlasLoc, uAspectLoc, uFogDensityLoc, uFogStartLoc, uFogColorLoc;
+    GLint uModelLoc, uViewLoc, uProjLoc, uAtlasLoc, uAspectLoc, uFogDensityLoc, uFogStartLoc, uFogColorLoc, uCamPosLoc;
     Renderer();
     ~Renderer();
 

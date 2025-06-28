@@ -198,7 +198,6 @@ void generateChunkTerrain(Chunk& chunk) {
     chunk.biome = biome;
     switch (biome) {
         case Chunk::Biome::Plains:
-            //generateChunkBiomeFeatures(chunk, 0, 0.9999f, 19, 19, "big_test", 1);
             generateChunkBiomeFeatures(chunk, 0, 0.998f, 2, 2, "tree", 1);
             break;
         case Chunk::Biome::Forest:
@@ -220,7 +219,7 @@ void generateChunkBiomeFeatures(Chunk& chunk, int margin, float treshold, int xO
             float fx = static_cast<float>(chunk.chunkX * Chunk::WIDTH + x);
             float fz = static_cast<float>(chunk.chunkZ * Chunk::DEPTH + z);
             float n = noises.featureNoise.GetNoise(fx, fz);
-            if (n > treshold) { // Chance of feature spawning
+            if (n > treshold) {
                 int y = Chunk::HEIGHT - 2;
                 while (y > 0 && chunk.blocks[x][y][z].type == 0) --y; {
                     if (chunk.blocks[x][y][z].type == allowedBlockID) {
