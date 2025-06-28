@@ -107,7 +107,7 @@ void Renderer::renderWorld(const Camera& camera, float aspectRatio, float deltaT
     float lerpFactor = 1.0f - expf(-fovLerpSpeed * deltaTime);
     currentFov = currentFov + (targetFov - currentFov) * lerpFactor;
 
-    glm::mat4 projection = glm::perspective(glm::radians(currentFov), aspectRatio, 0.1f, 500.0f); // 500 = "view distance"
+    glm::mat4 projection = glm::perspective(glm::radians(currentFov), aspectRatio, 0.1f, 5000.0f); // 5000 = "view distance"
     glUniformMatrix4fv(uViewLoc, 1, GL_FALSE, &camera.getViewMatrix()[0][0]);
     glUniformMatrix4fv(uProjLoc, 1, GL_FALSE, &projection[0][0]);
 

@@ -4,6 +4,7 @@
 #include <deque>
 #include <algorithm>
 #include "world.hpp"
+#include "../core/options.hpp"
 
 static std::deque<std::pair<int, int>> chunkLoadQueue;
 
@@ -80,7 +81,8 @@ void World::updateChunksAroundPlayer(const glm::vec3& playerPos, int radius) {
         }
     }
 
-    if (!chunkLoadQueue.empty()) {
+    int chunksToLoadPerFrame = getOptionInt("chunks_to_load_per_frame", 1);
+    for (int i = 0; i < chunksToLoadPerFrame && !chunkLoadQueue.empty(); ++i) {
         auto pos = chunkLoadQueue.front();
         chunkLoadQueue.pop_front();
         if (chunks.find(pos) == chunks.end()) {
