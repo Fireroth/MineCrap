@@ -6,10 +6,6 @@
 static std::map<std::string, int> optionsMap;
 static bool loaded = false;
 
-static std::map<std::string, std::string> controlsMap;
-static bool controlsLoaded = false;
-
-// ------------ option.txt ------------
 void loadOptionsFromFile(const std::string& filename) {
     if (loaded) return;
     std::ifstream file(filename);

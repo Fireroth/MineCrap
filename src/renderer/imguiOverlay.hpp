@@ -1,5 +1,6 @@
 #pragma once
 #include <GLFW/glfw3.h>
+#include <vector>
 #include "../core/camera.hpp"
 
 class ImGuiOverlay {
@@ -9,7 +10,9 @@ public:
 
     bool init(GLFWwindow* window);
     void render(float deltaTime, const Camera& camera, class World* world);
-    void shutdown();
+
+    static std::vector<const char*> blockItems;
+    static std::vector<uint8_t> blockIds;
 
 private:
     float fpsTimer;

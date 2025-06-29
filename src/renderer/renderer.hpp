@@ -10,7 +10,6 @@ public:
     ~Renderer();
 
     void init();
-    void cleanup();
     void renderWorld(const class Camera& camera, float aspectRatio, float deltaTime);
     void renderCrosshair(float aspectRatio);
 
@@ -24,7 +23,6 @@ public:
 private:
     GLuint shaderProgram, textureAtlas;
     GLuint crosshairVAO, crosshairVBO, crosshairShaderProgram;
-    World* currentWorld = nullptr;
     GLuint createShader(const char* source, GLenum shaderType);
     GLuint createShaderProgram(const char* vertexSource, const char* fragmentSource);
     void loadTextureAtlas(const std::string& path);

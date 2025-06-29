@@ -1,35 +1,24 @@
 #include <imgui.h>
 #include <backends/imgui_impl_glfw.h>
 #include <backends/imgui_impl_opengl3.h>
-#include <map>
 #include <string>
+#include "../world/blockDB.hpp"
 #include "ImGuiOverlay.hpp"
 #include "../world/block_interaction.hpp"
 #include "../core/input.hpp"
-#include <vector>
-
-std::map<uint8_t, std::string> blockNames = {
-    { 1, "Grass" },
-    { 2, "Dirt" },
-    { 3, "Stone" },
-    { 4, "Sand" },
-    { 5, "Log" },
-    { 6, "Bedrock" },
-    { 7, "Gravel"},
-    { 8, "Bricks"},
-    { 9, "Water"},
-    { 10, "Lava"},
-    { 11, "Leaves"},
-    { 12, "Cactus"}
-};
 
 const float ImGuiOverlay::fpsRefreshInterval = 0.5f; // 500ms
+
+std::vector<const char*> ImGuiOverlay::blockItems;
+std::vector<uint8_t> ImGuiOverlay::blockIds;
 
 ImGuiOverlay::ImGuiOverlay()
     : fpsTimer(0.0f), frameCount(0), fpsDisplay(0.0f) {}
 
 ImGuiOverlay::~ImGuiOverlay() {
-    shutdown();
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
 }
 
 bool ImGuiOverlay::init(GLFWwindow* window) {
@@ -39,6 +28,14 @@ bool ImGuiOverlay::init(GLFWwindow* window) {
     ImGui::StyleColorsDark();
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init("#version 330");
+
+    for (uint8_t id = 1; id <= 254; ++id) {
+        const auto* info = BlockDB::getBlockInfo(id);
+        if (info) {
+            blockItems.push_back(info->name.c_str());
+            blockIds.push_back(id);
+        }
+    }
 
     return true;
 }
@@ -58,7 +55,7 @@ void ImGuiOverlay::render(float deltaTime, const Camera& camera, World* world) {
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
-    ImGui::SetNextWindowSize(ImVec2(285, 190)); // Width: 285, Height: 190
+    ImGui::SetNextWindowSize(ImVec2(285, 190)); // Width, Height
     
     glm::vec3 pos = camera.getPosition();
     glm::vec3 front = camera.getFront();
@@ -77,7 +74,8 @@ void ImGuiOverlay::render(float deltaTime, const Camera& camera, World* world) {
     ImGui::Text("Chunk: %d, %d", chunkX, chunkZ);
 
     if (blockInfo.valid) {
-        ImGui::Text("Looking at: %s", blockNames[blockInfo.type].c_str());
+        const auto* info = BlockDB::getBlockInfo(blockInfo.type);
+        ImGui::Text("Looking at: %s", info->name.c_str());
         ImGui::Text("Block position: [%d, %d, %d]", blockInfo.worldPos.x, blockInfo.worldPos.y, blockInfo.worldPos.z);
     } else {
         ImGui::Text("Looking at: nothing");
@@ -85,37 +83,16 @@ void ImGuiOverlay::render(float deltaTime, const Camera& camera, World* world) {
     }
 
     // Dropdown for block selection
-    static std::vector<const char*> blockItems;
-    static std::vector<uint8_t> blockIds;
-    if (blockItems.empty()) {
-        for (const auto& [id, name] : blockNames) {
-            blockItems.push_back(name.c_str());
-            blockIds.push_back(id);
-        }
-    }
-    int currentIdx = 0;
-    uint8_t selectedBlock = getSelectedBlockType();
-    for (size_t i = 0; i < blockIds.size(); ++i) {
-        if (blockIds[i] == selectedBlock) {
-            currentIdx = static_cast<int>(i);
-            break;
-        }
-    }
+    int currentId = getSelectedBlockType()-1;
     ImGui::Text("Selected block:");
     ImGui::SameLine();
     ImGui::SetNextItemWidth(150);
-    if (ImGui::Combo("##SelectedBlockCombo", &currentIdx, blockItems.data(), static_cast<int>(blockItems.size()))) {
-        setSelectedBlockType(blockIds[currentIdx]);
+    if (ImGui::Combo("##SelectedBlockCombo", &currentId, blockItems.data(), static_cast<int>(blockItems.size()))) {
+        setSelectedBlockType(blockIds[currentId]);
     }
 
     ImGui::End();
 
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-}
-
-void ImGuiOverlay::shutdown() {
-    ImGui_ImplOpenGL3_Shutdown();
-    ImGui_ImplGlfw_Shutdown();
-    ImGui::DestroyContext();
 }

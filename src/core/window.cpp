@@ -51,8 +51,6 @@ bool Window::init() {
     glfwSetWindowUserPointer(window, this);
     glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
 
-    aspectRatio = static_cast<float>(width) / static_cast<float>(height);
-
     return true;
 }
 

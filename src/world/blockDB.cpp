@@ -3,7 +3,6 @@
 std::unordered_map<uint8_t, BlockDB::BlockInfo> BlockDB::blockData;
 
 void BlockDB::initialize() {
-    // Grass
     blockData[1] = {
         {
             glm::vec2(0.0f, 15.0f), // front
@@ -13,10 +12,10 @@ void BlockDB::initialize() {
             glm::vec2(2.0f, 15.0f), // top
             glm::vec2(1.0f, 15.0f)  // bottom
         },
-        false // transparency
+        false, // Transparency
+        "Grass" // Name
     };
 
-    // Dirt
     blockData[2] = {
         {
             glm::vec2(1.0f, 15.0f),
@@ -26,10 +25,10 @@ void BlockDB::initialize() {
             glm::vec2(1.0f, 15.0f),
             glm::vec2(1.0f, 15.0f)
         },
-        false
+        false,
+        "Dirt"
     };
 
-    // Stone
     blockData[3] = {
         {
             glm::vec2(3.0f, 15.0f),
@@ -39,10 +38,10 @@ void BlockDB::initialize() {
             glm::vec2(3.0f, 15.0f),
             glm::vec2(3.0f, 15.0f)
         },
-        false
+        false,
+        "Stone"
     };
 
-    // Sand
     blockData[4] = {
         {
             glm::vec2(4.0f, 15.0f),
@@ -52,10 +51,10 @@ void BlockDB::initialize() {
             glm::vec2(4.0f, 15.0f),
             glm::vec2(4.0f, 15.0f)
         },
-        false
+        false,
+        "Sand"
     };
 
-    // Log
     blockData[5] = {
         {
             glm::vec2(2.0f, 14.0f),
@@ -65,10 +64,10 @@ void BlockDB::initialize() {
             glm::vec2(3.0f, 14.0f),
             glm::vec2(3.0f, 14.0f)
         },
-        false
+        false,
+        "Log"
     };
 
-    // Bedrock
     blockData[6] = {
         {
             glm::vec2(1.0f, 14.0f),
@@ -78,10 +77,10 @@ void BlockDB::initialize() {
             glm::vec2(1.0f, 14.0f),
             glm::vec2(1.0f, 14.0f)
         },
-        false
+        false,
+        "Bedrock"
     };
 
-    //Gravel
     blockData[7] = {
         {
             glm::vec2(5.0f, 15.0f),
@@ -91,10 +90,10 @@ void BlockDB::initialize() {
             glm::vec2(5.0f, 15.0f),
             glm::vec2(5.0f, 15.0f)
         },
-        false
+        false,
+        "Gravel"
     };
 
-    //Bricks
     blockData[8] = {
         {
             glm::vec2(4.0f, 14.0f),
@@ -104,11 +103,11 @@ void BlockDB::initialize() {
             glm::vec2(4.0f, 14.0f),
             glm::vec2(4.0f, 14.0f)
         },
-        false
+        false,
+        "Bricks"
     };
 
     //Temporary water and lava implementation
-    // Water
     blockData[9] = {
         {
             glm::vec2(0.0f, 13.0f),
@@ -118,10 +117,10 @@ void BlockDB::initialize() {
             glm::vec2(0.0f, 13.0f),
             glm::vec2(0.0f, 13.0f)
         },
-        true
+        true,
+        "Water"
     };
 
-    // Lava
     blockData[10] = {
         {
             glm::vec2(1.0f, 13.0f),
@@ -131,10 +130,10 @@ void BlockDB::initialize() {
             glm::vec2(1.0f, 13.0f),
             glm::vec2(1.0f, 13.0f)
         },
-        true
+        true,
+        "Lava"
     };
 
-    //Leaves
     blockData[11] = {
         {
             glm::vec2(6.0f, 15.0f),
@@ -144,10 +143,10 @@ void BlockDB::initialize() {
             glm::vec2(6.0f, 15.0f),
             glm::vec2(6.0f, 15.0f)
         },
-        true
+        true,
+        "Leaves"
     };
-    
-    //Cactus
+
     blockData[12] = {
         {
             glm::vec2(7.0f, 15.0f),
@@ -157,7 +156,8 @@ void BlockDB::initialize() {
             glm::vec2(7.0f, 14.0f),
             glm::vec2(8.0f, 15.0f)
         },
-        false
+        false,
+        "Cactus"
     };
 }
 

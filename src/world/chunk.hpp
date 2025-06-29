@@ -50,7 +50,5 @@ private:
 
     bool isBlockVisible(int x, int y, int z, int face) const;
 
-    void generateBiomeFeatures(int margin, float treshold, int xOffset, int zOffset, std::string structureName, int allowedBlockID);
-
     friend class World; // Allow World to access private members (yay, a friend)
 };

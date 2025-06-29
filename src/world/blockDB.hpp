@@ -2,12 +2,14 @@
 
 #include <glm/glm.hpp>
 #include <unordered_map>
+#include <string>
 
 class BlockDB {
 public:
     struct BlockInfo {
         glm::vec2 textureCoords[6];
         bool transparent;
+        std::string name;
     };
 
     static void initialize();

@@ -81,7 +81,7 @@ void World::updateChunksAroundPlayer(const glm::vec3& playerPos, int radius) {
         }
     }
 
-    int chunksToLoadPerFrame = getOptionInt("chunks_to_load_per_frame", 1);
+    static int chunksToLoadPerFrame = getOptionInt("chunks_to_load_per_frame", 1);
     for (int i = 0; i < chunksToLoadPerFrame && !chunkLoadQueue.empty(); ++i) {
         auto pos = chunkLoadQueue.front();
         chunkLoadQueue.pop_front();

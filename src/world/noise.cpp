@@ -20,11 +20,11 @@ ChunkNoises noiseInit() {
     noises.baseNoise.SetFrequency(0.005f);
     noises.baseNoise.SetSeed(seed);
 
-    noises.detailNoise.SetNoiseType(FastNoiseLite::NoiseType_OpenSimplex2);
+    noises.detailNoise.SetNoiseType(FastNoiseLite::NoiseType_OpenSimplex2S);
     noises.detailNoise.SetFrequency(0.02f);
     noises.detailNoise.SetSeed(seed + 1);
 
-    noises.detail2Noise.SetNoiseType(FastNoiseLite::NoiseType_OpenSimplex2);
+    noises.detail2Noise.SetNoiseType(FastNoiseLite::NoiseType_OpenSimplex2S);
     noises.detail2Noise.SetFrequency(0.05f);
     noises.detail2Noise.SetSeed(seed + 2);
 

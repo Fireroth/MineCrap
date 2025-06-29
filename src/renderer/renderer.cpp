@@ -12,7 +12,12 @@ Renderer::Renderer() : shaderProgram(0), textureAtlas(0), crosshairVAO(0), cross
 
 Renderer::~Renderer()
 {
-    cleanup();
+    glDeleteTextures(1, &textureAtlas);
+    glDeleteProgram(shaderProgram);
+
+    glDeleteVertexArrays(1, &crosshairVAO);
+    glDeleteBuffers(1, &crosshairVBO);
+    glDeleteProgram(crosshairShaderProgram);
 }
 
 void Renderer::init()
@@ -80,14 +85,15 @@ void Renderer::initCrosshair() {
 }
 
 void Renderer::renderWorld(const Camera& camera, float aspectRatio, float deltaTime) {
-    int renderDist = getOptionInt("render_distance", 7) + 1; // +1 to account for invisible "mesh helper" chunk
+    glEnable(GL_DEPTH_TEST);
+    static int renderDist = getOptionInt("render_distance", 7) + 1; // +1 to account for invisible "mesh helper" chunk
     world.updateChunksAroundPlayer(camera.getPosition(), renderDist);
 
     glUseProgram(shaderProgram);
 
     GLFWwindow* getCurrentGLFWwindow();
     GLFWwindow* window = getCurrentGLFWwindow();
-    float baseFov = getOptionFloat("fov", 60.0f);
+    static float baseFov = getOptionFloat("fov", 60.0f);
     
     float getSpeedMultiplier(GLFWwindow* window);
     bool sprintState = window && getSpeedMultiplier(window) > 5.0f;
@@ -108,7 +114,7 @@ void Renderer::renderWorld(const Camera& camera, float aspectRatio, float deltaT
     float lerpFactor = 1.0f - expf(-fovLerpSpeed * deltaTime);
     currentFov = currentFov + (targetFov - currentFov) * lerpFactor;
 
-    glm::mat4 projection = glm::perspective(glm::radians(currentFov), aspectRatio, 0.1f, 5000.0f); // 5000 = "view distance"
+    glm::mat4 projection = glm::perspective(glm::radians(currentFov), aspectRatio, 0.1f, 5000.0f);
     glUniformMatrix4fv(uViewLoc, 1, GL_FALSE, &camera.getViewMatrix()[0][0]);
     glUniformMatrix4fv(uProjLoc, 1, GL_FALSE, &projection[0][0]);
 
@@ -130,13 +136,10 @@ void Renderer::renderWorld(const Camera& camera, float aspectRatio, float deltaT
     }
 
     world.render(camera, uModelLoc);
-
-    glDisable(GL_DEPTH_TEST);
-    renderCrosshair(aspectRatio);
-    glEnable(GL_DEPTH_TEST);
 }
 
 void Renderer::renderCrosshair(float aspectRatio) {
+    glDisable(GL_DEPTH_TEST);
     glUseProgram(crosshairShaderProgram);
     
     if (uAspectLoc != -1) {
@@ -147,16 +150,6 @@ void Renderer::renderCrosshair(float aspectRatio) {
     glDrawArrays(GL_LINES, 0, 4);
 
     glBindVertexArray(0);
-}
-
-void Renderer::cleanup()
-{
-    glDeleteTextures(1, &textureAtlas);
-    glDeleteProgram(shaderProgram);
-
-    glDeleteVertexArrays(1, &crosshairVAO);
-    glDeleteBuffers(1, &crosshairVBO);
-    glDeleteProgram(crosshairShaderProgram);
 }
 
 GLuint Renderer::createShader(const char *source, GLenum shaderType)
