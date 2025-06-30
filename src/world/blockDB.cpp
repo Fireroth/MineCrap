@@ -12,7 +12,8 @@ void BlockDB::initialize() {
             glm::vec2(2.0f, 15.0f), // top
             glm::vec2(1.0f, 15.0f)  // bottom
         },
-        false, // Transparency
+        false, // Transparent
+        false, // Liquid
         "Grass" // Name
     };
 
@@ -25,6 +26,7 @@ void BlockDB::initialize() {
             glm::vec2(1.0f, 15.0f),
             glm::vec2(1.0f, 15.0f)
         },
+        false,
         false,
         "Dirt"
     };
@@ -39,6 +41,7 @@ void BlockDB::initialize() {
             glm::vec2(3.0f, 15.0f)
         },
         false,
+        false,
         "Stone"
     };
 
@@ -51,6 +54,7 @@ void BlockDB::initialize() {
             glm::vec2(4.0f, 15.0f),
             glm::vec2(4.0f, 15.0f)
         },
+        false,
         false,
         "Sand"
     };
@@ -65,6 +69,7 @@ void BlockDB::initialize() {
             glm::vec2(3.0f, 14.0f)
         },
         false,
+        false,
         "Log"
     };
 
@@ -77,6 +82,7 @@ void BlockDB::initialize() {
             glm::vec2(1.0f, 14.0f),
             glm::vec2(1.0f, 14.0f)
         },
+        false,
         false,
         "Bedrock"
     };
@@ -91,6 +97,7 @@ void BlockDB::initialize() {
             glm::vec2(5.0f, 15.0f)
         },
         false,
+        false,
         "Gravel"
     };
 
@@ -103,6 +110,7 @@ void BlockDB::initialize() {
             glm::vec2(4.0f, 14.0f),
             glm::vec2(4.0f, 14.0f)
         },
+        false,
         false,
         "Bricks"
     };
@@ -118,6 +126,7 @@ void BlockDB::initialize() {
             glm::vec2(0.0f, 13.0f)
         },
         true,
+        true,
         "Water"
     };
 
@@ -130,6 +139,7 @@ void BlockDB::initialize() {
             glm::vec2(1.0f, 13.0f),
             glm::vec2(1.0f, 13.0f)
         },
+        true,
         true,
         "Lava"
     };
@@ -144,6 +154,7 @@ void BlockDB::initialize() {
             glm::vec2(6.0f, 15.0f)
         },
         true,
+        false,
         "Leaves"
     };
 
@@ -156,6 +167,7 @@ void BlockDB::initialize() {
             glm::vec2(7.0f, 14.0f),
             glm::vec2(8.0f, 15.0f)
         },
+        false,
         false,
         "Cactus"
     };

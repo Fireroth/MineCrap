@@ -199,36 +199,57 @@ bool Chunk::isBlockVisible(int x, int y, int z, int face) const {
 
     // If neighbor is within current chunk
     if (nx >= 0 && nx < WIDTH && nz >= 0 && nz < DEPTH) {
-        return blocks[nx][ny][nz].type == 0;
+        //return blocks[nx][ny][nz].type == 0;
+
+        // ---- Temporary (maybe) ----
+        uint8_t neighborType = blocks[nx][ny][nz].type;
+        if (neighborType == 0) return true;
+        const BlockDB::BlockInfo* neighborInfo = BlockDB::getBlockInfo(neighborType);
+        const BlockDB::BlockInfo* thisInfo = BlockDB::getBlockInfo(blocks[x][y][z].type);
+        // Render face if neighbor is transparent and current block is opaque
+        if (neighborInfo && thisInfo && neighborInfo->transparent && !thisInfo->transparent)
+            return true;
+        return false;
+        // ---------------------------
+
+    } else { // Neighbor is in another chunk
+        int neighborChunkX = chunkX;
+        int neighborChunkZ = chunkZ;
+        int lx = nx;
+        int lz = nz;
+
+        if (lx < 0) {
+            neighborChunkX -= 1;
+            lx += WIDTH;
+        } else if (lx >= WIDTH) {
+            neighborChunkX += 1;
+            lx -= WIDTH;
+        }
+
+        if (lz < 0) {
+            neighborChunkZ -= 1;
+            lz += DEPTH;
+        } else if (lz >= DEPTH) {
+            neighborChunkZ += 1;
+            lz -= DEPTH;
+        }
+
+        Chunk* neighbor = world->getChunk(neighborChunkX, neighborChunkZ);
+        if (!neighbor)
+            return true;  // If no neighbor, assume empty
+
+        //return neighbor->blocks[lx][ny][lz].type == 0;
+        // ---- Temporary (maybe) ----
+        uint8_t neighborType = neighbor->blocks[lx][ny][lz].type;
+        if (neighborType == 0) return true;
+        const BlockDB::BlockInfo* neighborInfo = BlockDB::getBlockInfo(neighborType);
+        const BlockDB::BlockInfo* thisInfo = BlockDB::getBlockInfo(blocks[x][y][z].type);
+        // Render face if neighbor is transparent and current block is opaque
+        if (neighborInfo && thisInfo && neighborInfo->transparent && !thisInfo->transparent)
+            return true;
+        return false;
+        // ---------------------------
     }
-
-    // Neighbor is in another chunk
-    int neighborChunkX = chunkX;
-    int neighborChunkZ = chunkZ;
-    int lx = nx;
-    int lz = nz;
-
-    if (lx < 0) {
-        neighborChunkX -= 1;
-        lx += WIDTH;
-    } else if (lx >= WIDTH) {
-        neighborChunkX += 1;
-        lx -= WIDTH;
-    }
-
-    if (lz < 0) {
-        neighborChunkZ -= 1;
-        lz += DEPTH;
-    } else if (lz >= DEPTH) {
-        neighborChunkZ += 1;
-        lz -= DEPTH;
-    }
-
-    Chunk* neighbor = world->getChunk(neighborChunkX, neighborChunkZ);
-    if (!neighbor)
-        return true;  // If no neighbor, assume empty
-
-    return neighbor->blocks[lx][ny][lz].type == 0;
 }
 
 void Chunk::addFace(std::vector<float>& vertices, std::vector<unsigned int>& indices,

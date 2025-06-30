@@ -15,6 +15,9 @@ public:
     float getYaw() const { return yaw; }
     float getPitch() const { return pitch; }
 
+    void updateVelocity(float deltaTime);
+    void applyAcceleration(const glm::vec3& acceleration, float deltaTime);
+
 private:
     void updateCameraVectors();
 
@@ -29,4 +32,6 @@ private:
 
     float movementSpeed;
     float mouseSensitivity;
+
+    glm::vec3 velocity = glm::vec3(0.0f);
 };

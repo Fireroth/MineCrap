@@ -86,7 +86,7 @@ void setupInputCallbacks(GLFWwindow* window, Camera* camera, World* world)
 // Speed multiplier
 float getSpeedMultiplier(GLFWwindow* window)
 {
-    return (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS) ? 30.0f : 5.0f;
+    return (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS) ? 30.0f : 4.0f;
 }
 
 // Zoom state
@@ -110,6 +110,8 @@ void processInput(GLFWwindow* window, Camera& camera, float deltaTime, float spe
         camera.processKeyboard("UP", deltaTime, speedMultiplier);
     if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
         camera.processKeyboard("DOWN", deltaTime, speedMultiplier);
+
+    camera.updateVelocity(deltaTime);
 
     static bool escPressedLastFrame = false;
     bool escPressedThisFrame = glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS;

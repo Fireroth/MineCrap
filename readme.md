@@ -2,7 +2,7 @@
 A simple Minecraft clone written in C++<br>
 <img src="preview/thumb.png" alt="In-game screenshot" width="400"/>
 
-## Building from source
+## 🧱 Building from source
 Before building the project, ensure you have the following installed:
 - C++ compiler with C++17 (or later) support
 - CMake (version 3.10 or higher)

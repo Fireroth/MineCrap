@@ -9,6 +9,7 @@ public:
     struct BlockInfo {
         glm::vec2 textureCoords[6];
         bool transparent;
+        bool liquid;
         std::string name;
     };
 

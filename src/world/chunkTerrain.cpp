@@ -38,17 +38,16 @@ void getBiomeParams(Chunk::Biome biome, float& heightScale, float& detailWeight,
 }
 
 void generateChunkTerrain(Chunk& chunk) {
+    const int transitionRadius = 5; // blend over 5 blocks
+    const float biomeDistortStrength = 8.0f;
+
     const int WIDTH = Chunk::WIDTH;
     const int HEIGHT = Chunk::HEIGHT;
     const int DEPTH = Chunk::DEPTH;
     auto& noises = chunk.noises;
     int chunkX = chunk.chunkX;
     int chunkZ = chunk.chunkZ;
-    const int transitionRadius = 5; // blend over 5 blocks
-
-    // Distortion strength for biome edges
-    const float biomeDistortStrength = 8.0f;
-
+    
     // Get the "main" biome for this chunk for feature generation
     float b = noises.biomeNoise.GetNoise(
         (float)(chunkX * WIDTH) + noises.biomeDistortNoise.GetNoise((float)(chunkX * WIDTH), (float)(chunkZ * DEPTH)) * biomeDistortStrength,
