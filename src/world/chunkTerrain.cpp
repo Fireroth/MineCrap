@@ -41,28 +41,28 @@ void generateChunkTerrain(Chunk& chunk) {
     const int transitionRadius = 5; // blend over 5 blocks
     const float biomeDistortStrength = 8.0f;
 
-    const int WIDTH = Chunk::WIDTH;
-    const int HEIGHT = Chunk::HEIGHT;
-    const int DEPTH = Chunk::DEPTH;
+    const int chunkWidth = Chunk::chunkWidth;
+    const int chunkHeight = Chunk::chunkHeight;
+    const int chunkDepth = Chunk::chunkDepth;
     auto& noises = chunk.noises;
     int chunkX = chunk.chunkX;
     int chunkZ = chunk.chunkZ;
     
     // Get the "main" biome for this chunk for feature generation
     float b = noises.biomeNoise.GetNoise(
-        (float)(chunkX * WIDTH) + noises.biomeDistortNoise.GetNoise((float)(chunkX * WIDTH), (float)(chunkZ * DEPTH)) * biomeDistortStrength,
-        (float)(chunkZ * DEPTH) + noises.biomeDistortNoise.GetNoise((float)(chunkX * WIDTH) + 1000.0f, (float)(chunkZ * DEPTH) + 1000.0f) * biomeDistortStrength
+        (float)(chunkX * chunkWidth) + noises.biomeDistortNoise.GetNoise((float)(chunkX * chunkWidth), (float)(chunkZ * chunkDepth)) * biomeDistortStrength,
+        (float)(chunkZ * chunkDepth) + noises.biomeDistortNoise.GetNoise((float)(chunkX * chunkWidth) + 1000.0f, (float)(chunkZ * chunkDepth) + 1000.0f) * biomeDistortStrength
     );
     Chunk::Biome biome = getBiome(b);
 
     // Precompute biome and height values for the blending to avoid redundant noise calls
-    std::vector<std::vector<Chunk::Biome>> biomeCache(WIDTH + 2 * transitionRadius, std::vector<Chunk::Biome>(DEPTH + 2 * transitionRadius));
-    std::vector<std::vector<float>> heightCache(WIDTH + 2 * transitionRadius, std::vector<float>(DEPTH + 2 * transitionRadius));
+    std::vector<std::vector<Chunk::Biome>> biomeCache(chunkWidth + 2 * transitionRadius, std::vector<Chunk::Biome>(chunkDepth + 2 * transitionRadius));
+    std::vector<std::vector<float>> heightCache(chunkWidth + 2 * transitionRadius, std::vector<float>(chunkDepth + 2 * transitionRadius));
 
-    for (int dx = -transitionRadius; dx < WIDTH + transitionRadius; ++dx) {
-        for (int dz = -transitionRadius; dz < DEPTH + transitionRadius; ++dz) {
-            int wx = chunkX * WIDTH + dx;
-            int wz = chunkZ * DEPTH + dz;
+    for (int dx = -transitionRadius; dx < chunkWidth + transitionRadius; ++dx) {
+        for (int dz = -transitionRadius; dz < chunkDepth + transitionRadius; ++dz) {
+            int wx = chunkX * chunkWidth + dx;
+            int wz = chunkZ * chunkDepth + dz;
 
             // Distort biome noise coordinates
             float distortX = noises.biomeDistortNoise.GetNoise((float)wx, (float)wz) * biomeDistortStrength;
@@ -88,10 +88,10 @@ void generateChunkTerrain(Chunk& chunk) {
         }
     }
 
-    for (int x = 0; x < WIDTH; ++x) {
-        for (int z = 0; z < DEPTH; ++z) {
-            int wx = chunkX * WIDTH + x;
-            int wz = chunkZ * DEPTH + z;
+    for (int x = 0; x < chunkWidth; ++x) {
+        for (int z = 0; z < chunkDepth; ++z) {
+            int wx = chunkX * chunkWidth + x;
+            int wz = chunkZ * chunkDepth + z;
 
             // Distort biome noise coordinates for this column
             float distortX = noises.biomeDistortNoise.GetNoise((float)wx, (float)wz) * biomeDistortStrength;
@@ -150,7 +150,7 @@ void generateChunkTerrain(Chunk& chunk) {
 
             int height = static_cast<int>(blendedHeight);
 
-            for (int y = 0; y < HEIGHT; ++y) {
+            for (int y = 0; y < chunkHeight; ++y) {
                 if (y == 0) {
                     chunk.blocks[x][y][z].type = 6; // Bedrock
                 } else if (y > height) {
@@ -160,7 +160,8 @@ void generateChunkTerrain(Chunk& chunk) {
                     switch (finalBiome) {
                         case Chunk::Biome::Plains:
                         case Chunk::Biome::Forest:
-                            chunk.blocks[x][y][z].type = 1; // Grass
+                            // If grass would be generated below y 36, use sand instead
+                            chunk.blocks[x][y][z].type = (y < 36) ? 4 : 1; // Sand or Grass
                             break;
                         case Chunk::Biome::Desert:
                             chunk.blocks[x][y][z].type = 4; // Sand
@@ -194,6 +195,7 @@ void generateChunkTerrain(Chunk& chunk) {
     }
 
     // Biome specific features
+    //Todo: fix all features using the same noise
     chunk.biome = biome;
     switch (biome) {
         case Chunk::Biome::Plains:
@@ -203,7 +205,8 @@ void generateChunkTerrain(Chunk& chunk) {
             generateChunkBiomeFeatures(chunk, 0, 0.93f, 2, 2, "tree", 1);
             break;
         case Chunk::Biome::Desert:
-            generateChunkBiomeFeatures(chunk, 0, 0.97f, 0, 0, "cactus", 4);
+            generateChunkBiomeFeatures(chunk, 0, 0.99f, 0, 0, "cactus2", 4);
+            generateChunkBiomeFeatures(chunk, 0, 0.975f, 0, 0, "cactus", 4);
             break;
     }
 }
@@ -213,13 +216,13 @@ void generateChunkBiomeFeatures(Chunk& chunk, int margin, float treshold, int xO
     const Structure* structure = StructureDB::get(structureName);
     if (!structure) return;
 
-    for (int x = margin; x < Chunk::WIDTH - margin; ++x) {
-        for (int z = margin; z < Chunk::DEPTH - margin; ++z) {
-            float fx = static_cast<float>(chunk.chunkX * Chunk::WIDTH + x);
-            float fz = static_cast<float>(chunk.chunkZ * Chunk::DEPTH + z);
+    for (int x = margin; x < Chunk::chunkWidth - margin; ++x) {
+        for (int z = margin; z < Chunk::chunkDepth - margin; ++z) {
+            float fx = static_cast<float>(chunk.chunkX * Chunk::chunkWidth + x);
+            float fz = static_cast<float>(chunk.chunkZ * Chunk::chunkDepth + z);
             float n = noises.featureNoise.GetNoise(fx, fz);
             if (n > treshold) {
-                int y = Chunk::HEIGHT - 2;
+                int y = Chunk::chunkHeight - 2;
                 while (y > 0 && chunk.blocks[x][y][z].type == 0) --y; {
                     if (chunk.blocks[x][y][z].type == allowedBlockID) {
                         chunk.placeStructure(*structure, x - xOffset, y + 1, z - zOffset);

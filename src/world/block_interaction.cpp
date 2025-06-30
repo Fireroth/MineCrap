@@ -40,13 +40,13 @@ RaycastResult raycast(World* world, const glm::vec3& origin, const glm::vec3& di
         Chunk* chunk = world->getChunk(cx, cz);
 
         if (chunk) {
-            int lx = blockPos.x - cx * Chunk::WIDTH;
+            int lx = blockPos.x - cx * Chunk::chunkWidth;
             int ly = blockPos.y;
-            int lz = blockPos.z - cz * Chunk::DEPTH;
+            int lz = blockPos.z - cz * Chunk::chunkDepth;
 
-            if (lx >= 0 && lx < Chunk::WIDTH &&
-                ly >= 0 && ly < Chunk::HEIGHT &&
-                lz >= 0 && lz < Chunk::DEPTH &&
+            if (lx >= 0 && lx < Chunk::chunkWidth &&
+                ly >= 0 && ly < Chunk::chunkHeight &&
+                lz >= 0 && lz < Chunk::chunkDepth &&
                 chunk->blocks[lx][ly][lz].type != 0)
             {
                 result.hit = true;
@@ -57,9 +57,9 @@ RaycastResult raycast(World* world, const glm::vec3& origin, const glm::vec3& di
                 if (lastChunk) {
                     result.hasPlacePos = true;
                     result.placeBlockPos = {
-                        lastBlockPos.x - lastChunk->chunkX * Chunk::WIDTH,
+                        lastBlockPos.x - lastChunk->chunkX * Chunk::chunkWidth,
                         lastBlockPos.y,
-                        lastBlockPos.z - lastChunk->chunkZ * Chunk::DEPTH
+                        lastBlockPos.z - lastChunk->chunkZ * Chunk::chunkDepth
                     };
                     result.placeChunk = lastChunk;
                 }
@@ -107,7 +107,7 @@ void placeBreakBlockOnClick(World* world, const Camera& camera, char action, uin
     else if (action == 'p') {
         if (!hit.hasPlacePos || !hit.placeChunk) return;
         // Prevent placement below bedrock or above chunk height
-        if (hit.placeBlockPos.y < 0 || hit.placeBlockPos.y >= Chunk::HEIGHT) return;
+        if (hit.placeBlockPos.y < 0 || hit.placeBlockPos.y >= Chunk::chunkHeight) return;
         auto& block = hit.placeChunk->blocks[hit.placeBlockPos.x][hit.placeBlockPos.y][hit.placeBlockPos.z];
         if (block.type != 0) return;
 
@@ -126,7 +126,7 @@ void placeBreakBlockOnClick(World* world, const Camera& camera, char action, uin
         Chunk* neighbor = world->getChunk(cx - 1, cz);
         if (neighbor) neighbor->buildMesh();
     }
-    if (x == Chunk::WIDTH - 1) {
+    if (x == Chunk::chunkWidth - 1) {
         Chunk* neighbor = world->getChunk(cx + 1, cz);
         if (neighbor) neighbor->buildMesh();
     }
@@ -134,7 +134,7 @@ void placeBreakBlockOnClick(World* world, const Camera& camera, char action, uin
         Chunk* neighbor = world->getChunk(cx, cz - 1);
         if (neighbor) neighbor->buildMesh();
     }
-    if (z == Chunk::DEPTH - 1) {
+    if (z == Chunk::chunkDepth - 1) {
         Chunk* neighbor = world->getChunk(cx, cz + 1);
         if (neighbor) neighbor->buildMesh();
     }
@@ -158,9 +158,9 @@ BlockInfo getLookedAtBlockInfo(World* world, const Camera& camera)
     BlockInfo info;
     info.valid = true;
     info.worldPos = glm::ivec3(
-        hit.hitChunk->chunkX * Chunk::WIDTH + hit.hitBlockPos.x,
+        hit.hitChunk->chunkX * Chunk::chunkWidth + hit.hitBlockPos.x,
         hit.hitBlockPos.y,
-        hit.hitChunk->chunkZ * Chunk::DEPTH + hit.hitBlockPos.z
+        hit.hitChunk->chunkZ * Chunk::chunkDepth + hit.hitBlockPos.z
     );
     info.type = hit.hitChunk->blocks[hit.hitBlockPos.x][hit.hitBlockPos.y][hit.hitBlockPos.z].type;
 

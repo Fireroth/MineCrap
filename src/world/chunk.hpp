@@ -12,9 +12,9 @@ class World;
 
 class Chunk {
 public:
-    static const int WIDTH = 16;
-    static const int HEIGHT = 256;
-    static const int DEPTH = 16;
+    static const int chunkWidth = 16;
+    static const int chunkHeight = 256;
+    static const int chunkDepth = 16;
 
     ChunkNoises noises;
 
@@ -35,7 +35,7 @@ public:
     void render(const Camera& camera, GLint uModelLoc);
     void placeStructure(const Structure& structure, int baseX, int baseY, int baseZ);
 
-    Block blocks[WIDTH][HEIGHT][DEPTH];
+    Block blocks[chunkWidth][chunkHeight][chunkDepth];
     int chunkX, chunkZ;
     Biome biome;
 

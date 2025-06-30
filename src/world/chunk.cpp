@@ -24,7 +24,7 @@ Chunk::Chunk(int x, int z, World* worldPtr)
     auto it = pendingBlockPlacements.find(key);
     if (it != pendingBlockPlacements.end()) {
         for (const auto& pb : it->second) {
-            if (pb.x >= 0 && pb.x < WIDTH && pb.y >= 0 && pb.y < HEIGHT && pb.z >= 0 && pb.z < DEPTH) {
+            if (pb.x >= 0 && pb.x < chunkWidth && pb.y >= 0 && pb.y < chunkHeight && pb.z >= 0 && pb.z < chunkDepth) {
                 blocks[pb.x][pb.y][pb.z].type = pb.type;
             }
         }
@@ -58,24 +58,24 @@ void Chunk::placeStructure(const Structure& structure, int baseX, int baseY, int
                 int chunkOffsetX = 0, chunkOffsetZ = 0;
                 int localX = wx, localZ = wz;
                 if (wx < 0) {
-                    chunkOffsetX = (wx / WIDTH) - (wx % WIDTH != 0 ? 1 : 0);
-                    localX = wx - chunkOffsetX * WIDTH;
-                } else if (wx >= WIDTH) {
-                    chunkOffsetX = wx / WIDTH;
-                    localX = wx - chunkOffsetX * WIDTH;
+                    chunkOffsetX = (wx / chunkWidth) - (wx % chunkWidth != 0 ? 1 : 0);
+                    localX = wx - chunkOffsetX * chunkWidth;
+                } else if (wx >= chunkWidth) {
+                    chunkOffsetX = wx / chunkWidth;
+                    localX = wx - chunkOffsetX * chunkWidth;
                 }
                 if (wz < 0) {
-                    chunkOffsetZ = (wz / DEPTH) - (wz % DEPTH != 0 ? 1 : 0);
-                    localZ = wz - chunkOffsetZ * DEPTH;
-                } else if (wz >= DEPTH) {
-                    chunkOffsetZ = wz / DEPTH;
-                    localZ = wz - chunkOffsetZ * DEPTH;
+                    chunkOffsetZ = (wz / chunkDepth) - (wz % chunkDepth != 0 ? 1 : 0);
+                    localZ = wz - chunkOffsetZ * chunkDepth;
+                } else if (wz >= chunkDepth) {
+                    chunkOffsetZ = wz / chunkDepth;
+                    localZ = wz - chunkOffsetZ * chunkDepth;
                 }
 
                 int targetChunkX = chunkX + chunkOffsetX;
                 int targetChunkZ = chunkZ + chunkOffsetZ;
 
-                if (wy >= 0 && wy < HEIGHT) {
+                if (wy >= 0 && wy < chunkHeight) {
                     Chunk* targetChunk = nullptr;
                     if (chunkOffsetX == 0 && chunkOffsetZ == 0) {
                         targetChunk = this;
@@ -83,8 +83,8 @@ void Chunk::placeStructure(const Structure& structure, int baseX, int baseY, int
                         targetChunk = world->getChunk(targetChunkX, targetChunkZ);
                     }
                     if (targetChunk &&
-                        localX >= 0 && localX < WIDTH &&
-                        localZ >= 0 && localZ < DEPTH) {
+                        localX >= 0 && localX < chunkWidth &&
+                        localZ >= 0 && localZ < chunkDepth) {
                         targetChunk->blocks[localX][wy][localZ].type = blockType;
                         affectedChunks.insert(targetChunk);
                     } else {
@@ -135,9 +135,9 @@ void Chunk::buildMesh() {
     std::vector<unsigned int> indices;
     unsigned int indexOffset = 0;
 
-    for (int x = 0; x < WIDTH; ++x) {
-        for (int y = 0; y < HEIGHT; ++y) {
-            for (int z = 0; z < DEPTH; ++z) {
+    for (int x = 0; x < chunkWidth; ++x) {
+        for (int y = 0; y < chunkHeight; ++y) {
+            for (int z = 0; z < chunkDepth; ++z) {
                 const uint8_t& type = blocks[x][y][z].type;
                 if (type == 0) continue;
 
@@ -194,11 +194,11 @@ bool Chunk::isBlockVisible(int x, int y, int z, int face) const {
     int nz = z + offsets[face][2];
 
     // Check height bounds
-    if (ny < 0 || ny >= HEIGHT)
+    if (ny < 0 || ny >= chunkHeight)
         return true;
 
     // If neighbor is within current chunk
-    if (nx >= 0 && nx < WIDTH && nz >= 0 && nz < DEPTH) {
+    if (nx >= 0 && nx < chunkWidth && nz >= 0 && nz < chunkDepth) {
         //return blocks[nx][ny][nz].type == 0;
 
         // ---- Temporary (maybe) ----
@@ -220,18 +220,18 @@ bool Chunk::isBlockVisible(int x, int y, int z, int face) const {
 
         if (lx < 0) {
             neighborChunkX -= 1;
-            lx += WIDTH;
-        } else if (lx >= WIDTH) {
+            lx += chunkWidth;
+        } else if (lx >= chunkWidth) {
             neighborChunkX += 1;
-            lx -= WIDTH;
+            lx -= chunkWidth;
         }
 
         if (lz < 0) {
             neighborChunkZ -= 1;
-            lz += DEPTH;
-        } else if (lz >= DEPTH) {
+            lz += chunkDepth;
+        } else if (lz >= chunkDepth) {
             neighborChunkZ += 1;
-            lz -= DEPTH;
+            lz -= chunkDepth;
         }
 
         Chunk* neighbor = world->getChunk(neighborChunkX, neighborChunkZ);
@@ -287,7 +287,7 @@ void Chunk::addFace(std::vector<float>& vertices, std::vector<unsigned int>& ind
 }
 
 void Chunk::render(const Camera& camera, GLint uModelLoc) {
-    glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(chunkX * WIDTH, 0, chunkZ * DEPTH));
+    glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(chunkX * chunkWidth, 0, chunkZ * chunkDepth));
     glUniformMatrix4fv(uModelLoc, 1, GL_FALSE, &model[0][0]);
 
     glBindVertexArray(VAO);

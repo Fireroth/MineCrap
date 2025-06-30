@@ -146,9 +146,7 @@ void Renderer::renderCrosshair(float aspectRatio) {
         glUniform1f(uAspectLoc, aspectRatio);
     }
     glBindVertexArray(crosshairVAO);
-
     glDrawArrays(GL_LINES, 0, 4);
-
     glBindVertexArray(0);
 }
 
