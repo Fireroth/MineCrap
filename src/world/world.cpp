@@ -46,9 +46,9 @@ void World::updateChunksAroundPlayer(const glm::vec3& playerPos, int radius) {
         // Unload chunks outside radius
         std::vector<std::pair<int, int>> toRemove;
         for (const auto& [coord, chunk] : chunks) {
-            int dx = coord.first - playerChunkX;
-            int dz = coord.second - playerChunkZ;
-            if (std::abs(dx) > radius || std::abs(dz) > radius) {
+            int chunkOffsetX = coord.first - playerChunkX;
+            int chunkOffsetZ = coord.second - playerChunkZ;
+            if (std::abs(chunkOffsetX) > radius || std::abs(chunkOffsetZ) > radius) {
                 toRemove.push_back(coord);
             }
         }
@@ -61,9 +61,9 @@ void World::updateChunksAroundPlayer(const glm::vec3& playerPos, int radius) {
         std::vector<std::pair<int, int>> positions;
         for (int x = -radius; x <= radius; ++x) {
             for (int z = -radius; z <= radius; ++z) {
-                int cx = playerChunkX + x;
-                int cz = playerChunkZ + z;
-                std::pair<int, int> pos = {cx, cz};
+                int chunkX = playerChunkX + x;
+                int chunkZ = playerChunkZ + z;
+                std::pair<int, int> pos = {chunkX, chunkZ};
                 if (chunks.find(pos) == chunks.end()) {
                     positions.push_back(pos);
                 }
@@ -71,9 +71,9 @@ void World::updateChunksAroundPlayer(const glm::vec3& playerPos, int radius) {
         }
         std::sort(positions.begin(), positions.end(),
             [playerChunkX, playerChunkZ](const std::pair<int, int>& a, const std::pair<int, int>& b) {
-                int da = (a.first - playerChunkX) * (a.first - playerChunkX) + (a.second - playerChunkZ) * (a.second - playerChunkZ);
-                int db = (b.first - playerChunkX) * (b.first - playerChunkX) + (b.second - playerChunkZ) * (b.second - playerChunkZ);
-                return da < db;
+                int distanceA = (a.first - playerChunkX) * (a.first - playerChunkX) + (a.second - playerChunkZ) * (a.second - playerChunkZ);
+                int distanceB = (b.first - playerChunkX) * (b.first - playerChunkX) + (b.second - playerChunkZ) * (b.second - playerChunkZ);
+                return distanceA < distanceB;
             }
         );
         for (const auto& pos : positions) {
@@ -89,10 +89,10 @@ void World::updateChunksAroundPlayer(const glm::vec3& playerPos, int radius) {
             Chunk* newChunk = new Chunk(pos.first, pos.second, this);
             chunks[pos] = newChunk;
             newChunk->buildMesh();
-            static const int dx[4] = {-1, 1, 0, 0};
-            static const int dz[4] = {0, 0, -1, 1};
+            static const int neighborChunkOffsetX[4] = {-1, 1, 0, 0};
+            static const int neighborChunkOffsetZ[4] = {0, 0, -1, 1};
             for (int i = 0; i < 4; ++i) {
-                auto neighbor = getChunk(pos.first + dx[i], pos.second + dz[i]);
+                auto neighbor = getChunk(pos.first + neighborChunkOffsetX[i], pos.second + neighborChunkOffsetZ[i]);
                 if (neighbor) neighbor->buildMesh();
             }
         }
@@ -106,8 +106,8 @@ void World::render(const Camera& camera, GLint uModelLoc) {
 }
 
 Chunk* World::getChunk(int x, int z) const {
-    auto it = chunks.find({x, z});
-    if (it != chunks.end())
-        return it->second;
+    auto iterator = chunks.find({x, z});
+    if (iterator != chunks.end())
+        return iterator->second;
     return nullptr;
 }

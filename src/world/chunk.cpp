@@ -21,14 +21,14 @@ Chunk::Chunk(int x, int z, World* worldPtr)
 
     // Apply any pending block placements for this chunk
     auto key = std::make_pair(chunkX, chunkZ);
-    auto it = pendingBlockPlacements.find(key);
-    if (it != pendingBlockPlacements.end()) {
-        for (const auto& pb : it->second) {
+    auto iterator = pendingBlockPlacements.find(key);
+    if (iterator != pendingBlockPlacements.end()) {
+        for (const auto& pb : iterator->second) {
             if (pb.x >= 0 && pb.x < chunkWidth && pb.y >= 0 && pb.y < chunkHeight && pb.z >= 0 && pb.z < chunkDepth) {
                 blocks[pb.x][pb.y][pb.z].type = pb.type;
             }
         }
-        pendingBlockPlacements.erase(it);
+        pendingBlockPlacements.erase(iterator);
         buildMesh();
     }
 }
@@ -50,32 +50,32 @@ void Chunk::placeStructure(const Structure& structure, int baseX, int baseY, int
             for (int x = 0; x < structWidth; ++x) {
                 uint8_t blockType = structure.layers[y][z][x];
                 if (blockType == 0) continue;
-                int wx = baseX + x;
-                int wy = baseY + y;
-                int wz = baseZ + z;
+                int worldX = baseX + x;
+                int worldY = baseY + y;
+                int worldZ = baseZ + z;
 
                 // Compute which chunk this block belongs to
                 int chunkOffsetX = 0, chunkOffsetZ = 0;
-                int localX = wx, localZ = wz;
-                if (wx < 0) {
-                    chunkOffsetX = (wx / chunkWidth) - (wx % chunkWidth != 0 ? 1 : 0);
-                    localX = wx - chunkOffsetX * chunkWidth;
-                } else if (wx >= chunkWidth) {
-                    chunkOffsetX = wx / chunkWidth;
-                    localX = wx - chunkOffsetX * chunkWidth;
+                int localX = worldX, localZ = worldZ;
+                if (worldX < 0) {
+                    chunkOffsetX = (worldX / chunkWidth) - (worldX % chunkWidth != 0 ? 1 : 0);
+                    localX = worldX - chunkOffsetX * chunkWidth;
+                } else if (worldX >= chunkWidth) {
+                    chunkOffsetX = worldX / chunkWidth;
+                    localX = worldX - chunkOffsetX * chunkWidth;
                 }
-                if (wz < 0) {
-                    chunkOffsetZ = (wz / chunkDepth) - (wz % chunkDepth != 0 ? 1 : 0);
-                    localZ = wz - chunkOffsetZ * chunkDepth;
-                } else if (wz >= chunkDepth) {
-                    chunkOffsetZ = wz / chunkDepth;
-                    localZ = wz - chunkOffsetZ * chunkDepth;
+                if (worldZ < 0) {
+                    chunkOffsetZ = (worldZ / chunkDepth) - (worldZ % chunkDepth != 0 ? 1 : 0);
+                    localZ = worldZ - chunkOffsetZ * chunkDepth;
+                } else if (worldZ >= chunkDepth) {
+                    chunkOffsetZ = worldZ / chunkDepth;
+                    localZ = worldZ - chunkOffsetZ * chunkDepth;
                 }
 
                 int targetChunkX = chunkX + chunkOffsetX;
                 int targetChunkZ = chunkZ + chunkOffsetZ;
 
-                if (wy >= 0 && wy < chunkHeight) {
+                if (worldY >= 0 && worldY < chunkHeight) {
                     Chunk* targetChunk = nullptr;
                     if (chunkOffsetX == 0 && chunkOffsetZ == 0) {
                         targetChunk = this;
@@ -85,12 +85,12 @@ void Chunk::placeStructure(const Structure& structure, int baseX, int baseY, int
                     if (targetChunk &&
                         localX >= 0 && localX < chunkWidth &&
                         localZ >= 0 && localZ < chunkDepth) {
-                        targetChunk->blocks[localX][wy][localZ].type = blockType;
+                        targetChunk->blocks[localX][worldY][localZ].type = blockType;
                         affectedChunks.insert(targetChunk);
                     } else {
                         // Chunk not loaded, defer placement
                         auto key = std::make_pair(targetChunkX, targetChunkZ);
-                        pendingBlockPlacements[key].push_back({localX, wy, localZ, blockType});
+                        pendingBlockPlacements[key].push_back({localX, worldY, localZ, blockType});
                     }
                 }
             }
@@ -105,16 +105,16 @@ void Chunk::placeStructure(const Structure& structure, int baseX, int baseY, int
 void Chunk::buildMesh() {
     // Defer mesh generation if any neighbor chunk is missing
     for (int face = 0; face < 6; ++face) {
-        int nx = 0, ny = 0, nz = 0;
+        int neighborX = 0, neighborY = 0, neighborZ = 0;
         switch (face) {
-            case 0: nx = chunkX;     ny = 0; nz = chunkZ + 1; break; // front
-            case 1: nx = chunkX;     ny = 0; nz = chunkZ - 1; break; // back
-            case 2: nx = chunkX - 1; ny = 0; nz = chunkZ;     break; // left
-            case 3: nx = chunkX + 1; ny = 0; nz = chunkZ;     break; // right
+            case 0: neighborX = chunkX;     neighborY = 0; neighborZ = chunkZ + 1; break; // front
+            case 1: neighborX = chunkX;     neighborY = 0; neighborZ = chunkZ - 1; break; // back
+            case 2: neighborX = chunkX - 1; neighborY = 0; neighborZ = chunkZ;     break; // left
+            case 3: neighborX = chunkX + 1; neighborY = 0; neighborZ = chunkZ;     break; // right
             case 4: continue; // top face (no neighbor needed)
             case 5: continue; // bottom face (no neighbor needed)
         }
-        if (world->getChunk(nx, nz) == nullptr) { // Neighbor chunk missing = skip mesh generation for now
+        if (world->getChunk(neighborX, neighborZ) == nullptr) { // Neighbor chunk missing = skip mesh generation for now
             return;
         }
     }
@@ -189,20 +189,20 @@ bool Chunk::isBlockVisible(int x, int y, int z, int face) const {
         { 0, -1,  0}   // bottom
     };
 
-    int nx = x + offsets[face][0];
-    int ny = y + offsets[face][1];
-    int nz = z + offsets[face][2];
+    int neighborX = x + offsets[face][0];
+    int neighborY = y + offsets[face][1];
+    int neighborZ = z + offsets[face][2];
 
     // Check height bounds
-    if (ny < 0 || ny >= chunkHeight)
+    if (neighborY < 0 || neighborY >= chunkHeight)
         return true;
 
     // If neighbor is within current chunk
-    if (nx >= 0 && nx < chunkWidth && nz >= 0 && nz < chunkDepth) {
-        //return blocks[nx][ny][nz].type == 0;
+    if (neighborX >= 0 && neighborX < chunkWidth && neighborZ >= 0 && neighborZ < chunkDepth) {
+        //return blocks[neighborX][neighborY][neighborZ].type == 0;
 
         // ---- Temporary (maybe) ----
-        uint8_t neighborType = blocks[nx][ny][nz].type;
+        uint8_t neighborType = blocks[neighborX][neighborY][neighborZ].type;
         if (neighborType == 0) return true;
         const BlockDB::BlockInfo* neighborInfo = BlockDB::getBlockInfo(neighborType);
         const BlockDB::BlockInfo* thisInfo = BlockDB::getBlockInfo(blocks[x][y][z].type);
@@ -224,32 +224,32 @@ bool Chunk::isBlockVisible(int x, int y, int z, int face) const {
     } else { // Neighbor is in another chunk
         int neighborChunkX = chunkX;
         int neighborChunkZ = chunkZ;
-        int lx = nx;
-        int lz = nz;
+        int neighborLocalX = neighborX;
+        int neighborLocalZ = neighborZ;
 
-        if (lx < 0) {
+        if (neighborLocalX < 0) {
             neighborChunkX -= 1;
-            lx += chunkWidth;
-        } else if (lx >= chunkWidth) {
+            neighborLocalX += chunkWidth;
+        } else if (neighborLocalX >= chunkWidth) {
             neighborChunkX += 1;
-            lx -= chunkWidth;
+            neighborLocalX -= chunkWidth;
         }
 
-        if (lz < 0) {
+        if (neighborLocalZ < 0) {
             neighborChunkZ -= 1;
-            lz += chunkDepth;
-        } else if (lz >= chunkDepth) {
+            neighborLocalZ += chunkDepth;
+        } else if (neighborLocalZ >= chunkDepth) {
             neighborChunkZ += 1;
-            lz -= chunkDepth;
+            neighborLocalZ -= chunkDepth;
         }
 
         Chunk* neighbor = world->getChunk(neighborChunkX, neighborChunkZ);
         if (!neighbor)
             return true;  // If no neighbor, assume empty
 
-        //return neighbor->blocks[lx][ny][lz].type == 0;
+        //return neighbor->blocks[neighborLocalX][neighborY][neighborLocalZ].type == 0;
         // ---- Temporary (maybe) ----
-        uint8_t neighborType = neighbor->blocks[lx][ny][lz].type;
+        uint8_t neighborType = neighbor->blocks[neighborLocalX][neighborY][neighborLocalZ].type;
         if (neighborType == 0) return true;
         const BlockDB::BlockInfo* neighborInfo = BlockDB::getBlockInfo(neighborType);
         const BlockDB::BlockInfo* thisInfo = BlockDB::getBlockInfo(blocks[x][y][z].type);

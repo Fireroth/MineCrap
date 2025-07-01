@@ -214,9 +214,9 @@ void BlockDB::initialize() {
 }
 
 const BlockDB::BlockInfo* BlockDB::getBlockInfo(const uint8_t& blockName) {
-    auto it = blockData.find(blockName);
-    if (it != blockData.end()) {
-        return &it->second;
+    auto iterator = blockData.find(blockName);
+    if (iterator != blockData.end()) {
+        return &iterator->second;
     }
     return nullptr;
 }

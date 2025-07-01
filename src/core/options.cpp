@@ -24,14 +24,14 @@ void loadOptionsFromFile(const std::string& filename) {
 
 int getOptionInt(const std::string& key, const int defaultValue) {
     if (!loaded) loadOptionsFromFile("options.txt");
-    auto it = optionsMap.find(key);
-    if (it != optionsMap.end()) return it->second;
+    auto iterator = optionsMap.find(key);
+    if (iterator != optionsMap.end()) return iterator->second;
     return defaultValue;
 }
 
 float getOptionFloat(const std::string& key, const float defaultValue) {
     if (!loaded) loadOptionsFromFile("options.txt");
-    auto it = optionsMap.find(key);
-    if (it != optionsMap.end()) return static_cast<float>(it->second);
+    auto iterator = optionsMap.find(key);
+    if (iterator != optionsMap.end()) return static_cast<float>(iterator->second);
     return defaultValue;
 }

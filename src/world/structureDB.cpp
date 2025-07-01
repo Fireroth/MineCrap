@@ -73,8 +73,8 @@ void StructureDB::initialize() {
 }
 
 const Structure* StructureDB::get(const std::string& name) {
-    auto it = structures.find(name);
-    if (it != structures.end())
-        return &it->second;
+    auto iterator = structures.find(name);
+    if (iterator != structures.end())
+        return &iterator->second;
     return nullptr;
 }
