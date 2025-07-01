@@ -206,9 +206,18 @@ bool Chunk::isBlockVisible(int x, int y, int z, int face) const {
         if (neighborType == 0) return true;
         const BlockDB::BlockInfo* neighborInfo = BlockDB::getBlockInfo(neighborType);
         const BlockDB::BlockInfo* thisInfo = BlockDB::getBlockInfo(blocks[x][y][z].type);
+        // Always show all faces of non-full-block blocks
+        if (thisInfo && !thisInfo->fullBlock)
+            return true;
+
+        // Always show face if neighbor is not a full block
+        if (neighborInfo && !neighborInfo->fullBlock)
+            return true;
+
         // Render face if neighbor is transparent and current block is opaque
         if (neighborInfo && thisInfo && neighborInfo->transparent && !thisInfo->transparent)
             return true;
+
         return false;
         // ---------------------------
 
@@ -244,9 +253,19 @@ bool Chunk::isBlockVisible(int x, int y, int z, int face) const {
         if (neighborType == 0) return true;
         const BlockDB::BlockInfo* neighborInfo = BlockDB::getBlockInfo(neighborType);
         const BlockDB::BlockInfo* thisInfo = BlockDB::getBlockInfo(blocks[x][y][z].type);
+
+        // Always show all faces of non-full-block blocks
+        if (thisInfo && !thisInfo->fullBlock)
+            return true;
+
+        // Always show face if neighbor is not a full block
+        if (neighborInfo && !neighborInfo->fullBlock)
+            return true;
+
         // Render face if neighbor is transparent and current block is opaque
         if (neighborInfo && thisInfo && neighborInfo->transparent && !thisInfo->transparent)
             return true;
+            
         return false;
         // ---------------------------
     }
@@ -254,12 +273,30 @@ bool Chunk::isBlockVisible(int x, int y, int z, int face) const {
 
 void Chunk::addFace(std::vector<float>& vertices, std::vector<unsigned int>& indices,
                     int x, int y, int z, int face, const BlockDB::BlockInfo* blockInfo, unsigned int& indexOffset) {
-    static const glm::vec3 faceVertices[6][4] = {
+    static const glm::vec3 cubeFaceVertices[6][4] = {
         {{0,0,1}, {1,0,1}, {1,1,1}, {0,1,1}}, // Front
         {{1,0,0}, {0,0,0}, {0,1,0}, {1,1,0}}, // Back
         {{0,0,0}, {0,0,1}, {0,1,1}, {0,1,0}}, // Left
         {{1,0,1}, {1,0,0}, {1,1,0}, {1,1,1}}, // Right
         {{0,1,1}, {1,1,1}, {1,1,0}, {0,1,0}}, // Top
+        {{0,0,0}, {1,0,0}, {1,0,1}, {0,0,1}}  // Bottom
+    };
+
+    static const glm::vec3 cactusFaceVertices[6][4] = {
+        {{0.1,0,0.9}, {0.9,0,0.9}, {0.9,1,0.9}, {0.1,1,0.9}}, // Front
+        {{0.9,0,0.1}, {0.1,0,0.1}, {0.1,1,0.1}, {0.9,1,0.1}}, // Back
+        {{0.1,0,0.1}, {0.1,0,0.9}, {0.1,1,0.9}, {0.1,1,0.1}}, // Left
+        {{0.9,0,0.9}, {0.9,0,0.1}, {0.9,1,0.1}, {0.9,1,0.9}}, // Right
+        {{0.1,1,0.9}, {0.9,1,0.9}, {0.9,1,0.1}, {0.1,1,0.1}}, // Top
+        {{0.1,0,0.1}, {0.9,0,0.1}, {0.9,0,0.9}, {0.1,0,0.9}}  // Bottom
+    };
+
+    static const glm::vec3 slabFaceVertices[6][4] = {
+        {{0,0,1}, {1,0,1}, {1,0.5f,1}, {0,0.5f,1}}, // Front
+        {{1,0,0}, {0,0,0}, {0,0.5f,0}, {1,0.5f,0}}, // Back
+        {{0,0,0}, {0,0,1}, {0,0.5f,1}, {0,0.5f,0}}, // Left
+        {{1,0,1}, {1,0,0}, {1,0.5f,0}, {1,0.5f,1}}, // Right
+        {{0,0.5f,1}, {1,0.5f,1}, {1,0.5f,0}, {0,0.5f,0}}, // Top
         {{0,0,0}, {1,0,0}, {1,0,1}, {0,0,1}}  // Bottom
     };
 
@@ -270,11 +307,37 @@ void Chunk::addFace(std::vector<float>& vertices, std::vector<unsigned int>& ind
         {0.0f, 1.0f}
     };
 
+    static const glm::vec2 slabUvs[4] = {
+        {0.0f, 0.0f},
+        {1.0f, 0.0f},
+        {1.0f, 0.5f},
+        {0.0f, 0.5f}
+    };
+
+    // Choose face vertices and uvs based on model name
+    const glm::vec3* faceVerts;
+    const glm::vec2* faceUvs;
+    if (blockInfo->modelName == "cactus") {
+        faceVerts = cactusFaceVertices[face];
+        faceUvs = uvs;
+    } else if (blockInfo->modelName == "slab") {
+        faceVerts = slabFaceVertices[face];
+        // Use "slabUvs" for side faces, "uvs" for top/bottom
+        if (face >= 0 && face <= 3) {
+            faceUvs = slabUvs;
+        } else {
+            faceUvs = uvs;
+        }
+    } else {
+        faceVerts = cubeFaceVertices[face];
+        faceUvs = uvs;
+    }
+
     glm::vec2 texOffset = blockInfo->textureCoords[face] / 16.0f;
 
     for (int i = 0; i < 4; ++i) {
-        glm::vec3 pos = faceVertices[face][i] + glm::vec3(x, y, z);
-        glm::vec2 uv = (blockInfo->textureCoords[face] + uvs[i]) / 16.0f;
+        glm::vec3 pos = faceVerts[i] + glm::vec3(x, y, z);
+        glm::vec2 uv = (blockInfo->textureCoords[face] + faceUvs[i]) / 16.0f;
         vertices.insert(vertices.end(), {pos.x, pos.y, pos.z, uv.x, uv.y, static_cast<float>(face)});
     }
 

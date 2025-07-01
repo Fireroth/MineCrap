@@ -14,7 +14,9 @@ void BlockDB::initialize() {
         },
         false, // Transparent
         false, // Liquid
-        "Grass" // Name
+        "Grass", // Name
+        true, // Full block
+        "cube"   // Model
     };
 
     blockData[2] = {
@@ -28,7 +30,9 @@ void BlockDB::initialize() {
         },
         false,
         false,
-        "Dirt"
+        "Dirt",
+        true,
+        "cube"
     };
 
     blockData[3] = {
@@ -42,7 +46,9 @@ void BlockDB::initialize() {
         },
         false,
         false,
-        "Stone"
+        "Stone",
+        true,
+        "cube"
     };
 
     blockData[4] = {
@@ -56,7 +62,9 @@ void BlockDB::initialize() {
         },
         false,
         false,
-        "Sand"
+        "Sand",
+        true,
+        "cube"
     };
 
     blockData[5] = {
@@ -70,7 +78,9 @@ void BlockDB::initialize() {
         },
         false,
         false,
-        "Log"
+        "Log",
+        true,
+        "cube"
     };
 
     blockData[6] = {
@@ -84,7 +94,9 @@ void BlockDB::initialize() {
         },
         false,
         false,
-        "Bedrock"
+        "Bedrock",
+        true,
+        "cube"
     };
 
     blockData[7] = {
@@ -98,7 +110,9 @@ void BlockDB::initialize() {
         },
         false,
         false,
-        "Gravel"
+        "Gravel",
+        true,
+        "cube"
     };
 
     blockData[8] = {
@@ -112,7 +126,9 @@ void BlockDB::initialize() {
         },
         false,
         false,
-        "Bricks"
+        "Bricks",
+        true,
+        "cube"
     };
 
     //Temporary water and lava implementation
@@ -127,7 +143,9 @@ void BlockDB::initialize() {
         },
         true,
         true,
-        "Water"
+        "Water",
+        true,
+        "cube"
     };
 
     blockData[10] = {
@@ -141,7 +159,9 @@ void BlockDB::initialize() {
         },
         true,
         true,
-        "Lava"
+        "Lava",
+        true,
+        "cube"
     };
 
     blockData[11] = {
@@ -155,7 +175,9 @@ void BlockDB::initialize() {
         },
         true,
         false,
-        "Leaves"
+        "Leaves",
+        true,
+        "cube"
     };
 
     blockData[12] = {
@@ -169,7 +191,25 @@ void BlockDB::initialize() {
         },
         false,
         false,
-        "Cactus"
+        "Cactus",
+        false,
+        "cactus"
+    };
+
+    blockData[13] = {
+        {
+            glm::vec2(3.0f, 15.0f),
+            glm::vec2(3.0f, 15.0f),
+            glm::vec2(3.0f, 15.0f),
+            glm::vec2(3.0f, 15.0f),
+            glm::vec2(3.0f, 15.0f),
+            glm::vec2(3.0f, 15.0f)
+        },
+        false,
+        false,
+        "Stone slab",
+        false,
+        "slab"
     };
 }
 
