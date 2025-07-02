@@ -206,16 +206,24 @@ bool Chunk::isBlockVisible(int x, int y, int z, int face) const {
         if (neighborType == 0) return true;
         const BlockDB::BlockInfo* neighborInfo = BlockDB::getBlockInfo(neighborType);
         const BlockDB::BlockInfo* thisInfo = BlockDB::getBlockInfo(blocks[x][y][z].type);
-        // Always show all faces of non-full-block blocks
-        if (thisInfo && !thisInfo->fullBlock)
+        // Always show all faces if either block is leaves
+        if (thisInfo->name == "Leaves")
+            return true;
+
+        // Always show all faces of non full block blocks
+        if (!thisInfo->fullBlock)
             return true;
 
         // Always show face if neighbor is not a full block
-        if (neighborInfo && !neighborInfo->fullBlock)
+        if (!neighborInfo->fullBlock)
             return true;
 
         // Render face if neighbor is transparent and current block is opaque
-        if (neighborInfo && thisInfo && neighborInfo->transparent && !thisInfo->transparent)
+        if (neighborInfo->transparent && !thisInfo->transparent)
+            return true;
+
+        // Render face if neighbor is liquid and current block is non liquid
+        if (neighborInfo->liquid && !thisInfo->liquid)
             return true;
 
         return false;
@@ -254,16 +262,24 @@ bool Chunk::isBlockVisible(int x, int y, int z, int face) const {
         const BlockDB::BlockInfo* neighborInfo = BlockDB::getBlockInfo(neighborType);
         const BlockDB::BlockInfo* thisInfo = BlockDB::getBlockInfo(blocks[x][y][z].type);
 
+        // Always show all faces if either block is leaves
+        if (thisInfo->name == "leaves" || neighborInfo->name == "leaves")
+            return true;
+
         // Always show all faces of non-full-block blocks
-        if (thisInfo && !thisInfo->fullBlock)
+        if (!thisInfo->fullBlock)
             return true;
 
         // Always show face if neighbor is not a full block
-        if (neighborInfo && !neighborInfo->fullBlock)
+        if (!neighborInfo->fullBlock)
             return true;
 
         // Render face if neighbor is transparent and current block is opaque
-        if (neighborInfo && thisInfo && neighborInfo->transparent && !thisInfo->transparent)
+        if (neighborInfo->transparent && !thisInfo->transparent)
+            return true;
+
+        // Render face if neighbor is liquid and current block is non liquid
+        if (neighborInfo->liquid && !thisInfo->liquid)
             return true;
             
         return false;
