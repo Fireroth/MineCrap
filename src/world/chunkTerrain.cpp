@@ -195,7 +195,6 @@ void generateChunkTerrain(Chunk& chunk) {
     }
 
     // Biome specific features
-    //Todo: fix all features using the same noise
     chunk.biome = biome;
     switch (biome) {
         case Chunk::Biome::Plains:

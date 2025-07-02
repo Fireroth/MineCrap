@@ -300,7 +300,16 @@ void Chunk::addFace(std::vector<float>& vertices, std::vector<unsigned int>& ind
         {{0,0,0}, {1,0,0}, {1,0,1}, {0,0,1}}  // Bottom
     };
 
-    static const glm::vec2 uvs[4] = {
+    static const glm::vec3 liquidFaceVertices[6][4] = {
+        {{0,0,1}, {1,0,1}, {1,0.85f,1}, {0,0.85f,1}}, // Front
+        {{1,0,0}, {0,0,0}, {0,0.85f,0}, {1,0.85f,0}}, // Back
+        {{0,0,0}, {0,0,1}, {0,0.85f,1}, {0,0.85f,0}}, // Left
+        {{1,0,1}, {1,0,0}, {1,0.85f,0}, {1,0.85f,1}}, // Right
+        {{0,0.85f,1}, {1,0.85f,1}, {1,0.85f,0}, {0,0.85f,0}}, // Top
+        {{0,0,0}, {1,0,0}, {1,0,1}, {0,0,1}}  // Bottom
+    };
+
+    static const glm::vec2 cubeUvs[4] = {
         {0.0f, 0.0f},
         {1.0f, 0.0f},
         {1.0f, 1.0f},
@@ -314,30 +323,45 @@ void Chunk::addFace(std::vector<float>& vertices, std::vector<unsigned int>& ind
         {0.0f, 0.5f}
     };
 
-    // Choose face vertices and uvs based on model name
-    const glm::vec3* faceVerts;
-    const glm::vec2* faceUvs;
+    static const glm::vec2 liquidUvs[4] = {
+        {0.0f, 0.0f},
+        {1.0f, 0.0f},
+        {1.0f, 0.85f},
+        {0.0f, 0.85f}
+    };
+
+    // Choose face vertices and uvs based on block parameters
+    const glm::vec3* usedFaceVerts;
+    const glm::vec2* usedUvs;
     if (blockInfo->modelName == "cactus") {
-        faceVerts = cactusFaceVertices[face];
-        faceUvs = uvs;
-    } else if (blockInfo->modelName == "slab") {
-        faceVerts = slabFaceVertices[face];
-        // Use "slabUvs" for side faces, "uvs" for top/bottom
+        usedFaceVerts = cactusFaceVertices[face];
+        usedUvs = cubeUvs;
+    } else if (blockInfo->liquid) {
+        usedFaceVerts = liquidFaceVertices[face];
+        // Use "liquidUvs" for side faces, "cubeUvs" for top/bottom
         if (face >= 0 && face <= 3) {
-            faceUvs = slabUvs;
+            usedUvs = liquidUvs;
         } else {
-            faceUvs = uvs;
+            usedUvs = cubeUvs;
+        }
+    } else if (blockInfo->modelName == "slab") {
+        usedFaceVerts = slabFaceVertices[face];
+        // Use "slabUvs" for side faces, "cubeUvs" for top/bottom
+        if (face >= 0 && face <= 3) {
+            usedUvs = slabUvs;
+        } else {
+            usedUvs = cubeUvs;
         }
     } else {
-        faceVerts = cubeFaceVertices[face];
-        faceUvs = uvs;
+        usedFaceVerts = cubeFaceVertices[face];
+        usedUvs = cubeUvs;
     }
 
     glm::vec2 texOffset = blockInfo->textureCoords[face] / 16.0f;
 
     for (int i = 0; i < 4; ++i) {
-        glm::vec3 pos = faceVerts[i] + glm::vec3(x, y, z);
-        glm::vec2 uv = (blockInfo->textureCoords[face] + faceUvs[i]) / 16.0f;
+        glm::vec3 pos = usedFaceVerts[i] + glm::vec3(x, y, z);
+        glm::vec2 uv = (blockInfo->textureCoords[face] + usedUvs[i]) / 16.0f;
         vertices.insert(vertices.end(), {pos.x, pos.y, pos.z, uv.x, uv.y, static_cast<float>(face)});
     }
 

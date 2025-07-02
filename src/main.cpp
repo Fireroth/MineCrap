@@ -7,6 +7,10 @@
 #include "core/input.hpp"
 #include "core/options.hpp"
 
+//Todo: fix all features (structures) using the same noise
+//Todo: fix liquid visible face detection
+//Todo: move model and uvs to separate models.cpp file
+
 GLFWwindow* g_currentGLFWwindow = nullptr;
 GLFWwindow* getCurrentGLFWwindow() { return g_currentGLFWwindow; }
 

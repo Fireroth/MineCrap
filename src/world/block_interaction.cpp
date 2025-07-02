@@ -22,21 +22,22 @@ struct RaycastResult {
 };
 
 
-// Helper function to get AABB for a block model
-AABB getModelAABB(const std::string& modelName) {
-    if (modelName == "cactus") {
+// Helper function to get AABB for a block type
+AABB getModelAABB(uint8_t blockId) {
+    const BlockDB::BlockInfo* info = BlockDB::getBlockInfo(blockId);
+    if (info->liquid) {
+        return {glm::vec3(0.0f, 0.0f, 0.0f),
+                glm::vec3(1.0f, 0.85f, 1.0f)};
+    } else if (info->modelName == "cactus") {
         return {glm::vec3(0.1f, 0.0f, 0.1f),
                 glm::vec3(0.9f, 1.0f, 0.9f)};
-    }
-    else if (modelName == "slab") {
+    } else if (info->modelName == "slab") {
         return {glm::vec3(0.0f, 0.0f, 0.0f),
                 glm::vec3(1.0f, 0.5f, 1.0f)};
-    }
-    else {// full block
+    } else { // full block
         return {glm::vec3(0.0f),
                 glm::vec3(1.0f)};
     }
-    
 }
 
 // Ray-AABB intersection helper
@@ -105,7 +106,7 @@ RaycastResult raycast(World* world, const glm::vec3& origin, const glm::vec3& di
                 uint8_t type = chunk->blocks[localX][localY][localZ].type;
                 if (type != 0) {
                     const BlockDB::BlockInfo* info = BlockDB::getBlockInfo(type);
-                    AABB aabb = getModelAABB(info ? info->modelName : "");
+                    AABB aabb = getModelAABB(type);
                     glm::vec3 boxMin = glm::vec3(blockPos) + aabb.min;
                     glm::vec3 boxMax = glm::vec3(blockPos) + aabb.max;
                     float hitT;
