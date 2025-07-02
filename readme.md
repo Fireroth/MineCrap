@@ -1,5 +1,5 @@
 # MineCrap
-A simple Minecraft clone written in C++<br>
+A somewhat simple voxel game written in C++ with OpenGL 3.3<br>
 <img src="preview/thumb.png" alt="In-game screenshot" width="400"/>
 
 ## 🧱 Building from source
@@ -29,6 +29,7 @@ cmake --build .
 -  Block placing and breaking
 -  Infinite terrain
 -  Biomes
+-  Multiple block models
 
 ## 🛠️ To-Do
 -  Inventory system

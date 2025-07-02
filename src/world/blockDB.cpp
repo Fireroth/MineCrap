@@ -78,7 +78,7 @@ void BlockDB::initialize() {
         },
         false,
         false,
-        "Log",
+        "Oak Log",
         true,
         "cube"
     };
@@ -208,6 +208,38 @@ void BlockDB::initialize() {
         false,
         false,
         "Stone slab",
+        false,
+        "slab"
+    };
+
+    blockData[14] = {
+        {
+            glm::vec2(6.0f, 14.0f),
+            glm::vec2(6.0f, 14.0f),
+            glm::vec2(6.0f, 14.0f),
+            glm::vec2(6.0f, 14.0f),
+            glm::vec2(6.0f, 14.0f),
+            glm::vec2(6.0f, 14.0f)
+        },
+        false,
+        false,
+        "Oak Plank",
+        true,
+        "cube"
+    };
+
+    blockData[15] = {
+        {
+            glm::vec2(6.0f, 14.0f),
+            glm::vec2(6.0f, 14.0f),
+            glm::vec2(6.0f, 14.0f),
+            glm::vec2(6.0f, 14.0f),
+            glm::vec2(6.0f, 14.0f),
+            glm::vec2(6.0f, 14.0f)
+        },
+        false,
+        false,
+        "Oak Plank Slab",
         false,
         "slab"
     };
