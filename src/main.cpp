@@ -14,7 +14,6 @@ extern "C" {
 }
 #endif*/
 
-//Todo: fix all features (structures) using the same noise
 //Todo: fix liquid visible face detection
 
 GLFWwindow* g_currentGLFWwindow = nullptr;

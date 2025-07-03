@@ -198,26 +198,27 @@ void generateChunkTerrain(Chunk& chunk) {
     chunk.biome = biome;
     switch (biome) {
         case Chunk::Biome::Plains:
-            generateChunkBiomeFeatures(chunk, 0, 0.998f, 2, 2, "tree", 1);
-            generateChunkBiomeFeatures(chunk, 0, 0.80f, 0, 0, "grass", 1);
-            generateChunkBiomeFeatures(chunk, 0, 0.70f, 0, 0, "grassShort", 1);
-            generateChunkBiomeFeatures(chunk, 0, 0.67f, 0, 0, "poppy", 1);
-            generateChunkBiomeFeatures(chunk, 0, 0.62f, 0, 0, "dandelion", 1);
+            generateChunkBiomeFeatures(chunk, 0, 0.998f, 2, 2, "tree", 1, 0);
+            generateChunkBiomeFeatures(chunk, 0, 0.83f, 0, 0, "grass", 1, 1);
+            generateChunkBiomeFeatures(chunk, 0, 0.80f, 0, 0, "grassShort", 1, 2);
+            generateChunkBiomeFeatures(chunk, 0, 0.95f, 0, 0, "poppy", 1, 3);
+            generateChunkBiomeFeatures(chunk, 0, 0.95f, 0, 0, "dandelion", 1, 4);
             break;
         case Chunk::Biome::Forest:
-            generateChunkBiomeFeatures(chunk, 0, 0.93f, 2, 2, "tree", 1);
-            generateChunkBiomeFeatures(chunk, 0, 0.8f, 0, 0, "grass", 1);
+            generateChunkBiomeFeatures(chunk, 0, 0.93f, 2, 2, "tree", 1, 0);
+            generateChunkBiomeFeatures(chunk, 0, 0.93f, 0, 0, "grass", 1, 1);
+            generateChunkBiomeFeatures(chunk, 0, 0.93f, 0, 0, "grassShort", 1, 2);
             break;
         case Chunk::Biome::Desert:
-            generateChunkBiomeFeatures(chunk, 0, 0.995f, 0, 0, "cactus2", 4);
-            generateChunkBiomeFeatures(chunk, 0, 0.98f, 0, 0, "cactus", 4);
-            generateChunkBiomeFeatures(chunk, 0, 0.95f, 0, 0, "deadBush", 4);
+            generateChunkBiomeFeatures(chunk, 0, 0.993f, 0, 0, "cactus2", 4, 0);
+            generateChunkBiomeFeatures(chunk, 0, 0.993f, 0, 0, "cactus", 4, 1);
+            generateChunkBiomeFeatures(chunk, 0, 0.98f, 0, 0, "deadBush", 4, 2);
             break;
     }
 }
 
-void generateChunkBiomeFeatures(Chunk& chunk, int margin, float treshold, int xOffset, int zOffset, std::string structureName, int allowedBlockID) {
-    ChunkNoises noises = noiseInit();
+void generateChunkBiomeFeatures(Chunk& chunk, int margin, float treshold, int xOffset, int zOffset, std::string structureName, int allowedBlockID, int seedOffset) {
+    ChunkNoises noises = noiseInit(seedOffset);
     const Structure* structure = StructureDB::get(structureName);
     if (!structure) return;
 

@@ -11,4 +11,4 @@ struct ChunkNoises {
     FastNoiseLite biomeDistortNoise;
 };
 
-ChunkNoises noiseInit();
+ChunkNoises noiseInit(int seedOffset = 0);
