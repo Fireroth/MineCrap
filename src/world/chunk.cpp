@@ -144,9 +144,18 @@ void Chunk::buildMesh() {
                 const BlockDB::BlockInfo* info = BlockDB::getBlockInfo(type);
                 if (!info) continue;
 
-                for (int face = 0; face < 6; ++face) {
-                    if (isBlockVisible(x, y, z, face)) {
-                        addFace(vertices, indices, x, y, z, face, info, indexOffset);
+                // Only render 4 faces for cross model
+                if (info->modelName == "cross") {
+                    for (int face = 0; face < 4; ++face) {
+                        if (isBlockVisible(x, y, z, face)) {
+                            addFace(vertices, indices, x, y, z, face, info, indexOffset);
+                        }
+                    }
+                } else {
+                    for (int face = 0; face < 6; ++face) {
+                        if (isBlockVisible(x, y, z, face)) {
+                            addFace(vertices, indices, x, y, z, face, info, indexOffset);
+                        }
                     }
                 }
             }
@@ -206,23 +215,23 @@ bool Chunk::isBlockVisible(int x, int y, int z, int face) const {
         if (neighborType == 0) return true;
         const BlockDB::BlockInfo* neighborInfo = BlockDB::getBlockInfo(neighborType);
         const BlockDB::BlockInfo* thisInfo = BlockDB::getBlockInfo(blocks[x][y][z].type);
-        // Always show all faces if either block is leaves
-        if (thisInfo->name == "Leaves")
+
+        static int fasterTrees = getOptionInt("faster_trees", 0);
+        if (!fasterTrees && thisInfo->name == "Leaves" || thisInfo->modelName == "cross")
             return true;
 
-        // Always show all faces of non full block blocks
         if (!thisInfo->fullBlock)
             return true;
 
-        // Always show face if neighbor is not a full block
         if (!neighborInfo->fullBlock)
             return true;
 
-        // Render face if neighbor is transparent and current block is opaque
+        if (neighborInfo->modelName == "cross" && thisInfo->liquid)
+            return true;
+
         if (neighborInfo->transparent && !thisInfo->transparent)
             return true;
 
-        // Render face if neighbor is liquid and current block is non liquid
         if (neighborInfo->liquid && !thisInfo->liquid)
             return true;
 
@@ -262,23 +271,22 @@ bool Chunk::isBlockVisible(int x, int y, int z, int face) const {
         const BlockDB::BlockInfo* neighborInfo = BlockDB::getBlockInfo(neighborType);
         const BlockDB::BlockInfo* thisInfo = BlockDB::getBlockInfo(blocks[x][y][z].type);
 
-        // Always show all faces if either block is leaves
-        if (thisInfo->name == "leaves" || neighborInfo->name == "leaves")
+        static int fasterTrees = getOptionInt("faster_trees", 0);
+        if (!fasterTrees && thisInfo->name == "Leaves" || thisInfo->modelName == "cross")
             return true;
 
-        // Always show all faces of non-full-block blocks
         if (!thisInfo->fullBlock)
             return true;
 
-        // Always show face if neighbor is not a full block
         if (!neighborInfo->fullBlock)
             return true;
 
-        // Render face if neighbor is transparent and current block is opaque
+        if (neighborInfo->modelName == "cross" && thisInfo->liquid)
+            return true;
+
         if (neighborInfo->transparent && !thisInfo->transparent)
             return true;
 
-        // Render face if neighbor is liquid and current block is non liquid
         if (neighborInfo->liquid && !thisInfo->liquid)
             return true;
             
@@ -325,6 +333,21 @@ void Chunk::addFace(std::vector<float>& vertices, std::vector<unsigned int>& ind
         {{0,0,0}, {1,0,0}, {1,0,1}, {0,0,1}}  // Bottom
     };
 
+    constexpr float kMin = 0.1f;
+constexpr float kMax = 0.9f;
+
+static const glm::vec3 crossFaceVertices[4][4] = {
+    /* Quad A   ( / diagonal ) */
+    {{kMin, 0.0f, kMax}, {kMax, 0.0f, kMin}, {kMax, 1.0f, kMin}, {kMin, 1.0f, kMax}},
+    /* Back A  ( / diagonal, flipped winding ) */
+    {{kMax, 0.0f, kMin}, {kMin, 0.0f, kMax}, {kMin, 1.0f, kMax}, {kMax, 1.0f, kMin}},
+
+    /* Quad B   ( \ diagonal ) */
+    {{kMin, 0.0f, kMin}, {kMax, 0.0f, kMax}, {kMax, 1.0f, kMax}, {kMin, 1.0f, kMin}},
+    /* Back B  ( \ diagonal, flipped winding ) */
+    {{kMax, 0.0f, kMax}, {kMin, 0.0f, kMin}, {kMin, 1.0f, kMin}, {kMax, 1.0f, kMax}},
+};
+
     static const glm::vec2 cubeUvs[4] = {
         {0.0f, 0.0f},
         {1.0f, 0.0f},
@@ -351,6 +374,9 @@ void Chunk::addFace(std::vector<float>& vertices, std::vector<unsigned int>& ind
     const glm::vec2* usedUvs;
     if (blockInfo->modelName == "cactus") {
         usedFaceVerts = cactusFaceVertices[face];
+        usedUvs = cubeUvs;
+    } else if (blockInfo->modelName == "cross") {
+        usedFaceVerts = crossFaceVertices[face];
         usedUvs = cubeUvs;
     } else if (blockInfo->liquid) {
         usedFaceVerts = liquidFaceVertices[face];

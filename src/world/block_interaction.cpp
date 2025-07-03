@@ -31,6 +31,9 @@ AABB getModelAABB(uint8_t blockId) {
     } else if (info->modelName == "cactus") {
         return {glm::vec3(0.1f, 0.0f, 0.1f),
                 glm::vec3(0.9f, 1.0f, 0.9f)};
+    } else if (info->modelName == "cross") {
+        return {glm::vec3(0.1f, 0.0f, 0.1f),
+                glm::vec3(0.9f, 0.8f, 0.9f)};
     } else if (info->modelName == "slab") {
         return {glm::vec3(0.0f, 0.0f, 0.0f),
                 glm::vec3(1.0f, 0.5f, 1.0f)};

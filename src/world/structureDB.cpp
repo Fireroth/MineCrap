@@ -70,6 +70,31 @@ void StructureDB::initialize() {
         { {12} }
     };
     structures["cactus2"] = Structure("cactus2", cactus2Layers);
+
+    std::vector<StructureLayer> grassLayers = {
+        { {17} }
+    };
+    structures["grass"] = Structure("grass", grassLayers);
+
+    std::vector<StructureLayer> grassShortLayers = {
+        { {18} }
+    };
+    structures["grassShort"] = Structure("grassShort", grassShortLayers);
+
+    std::vector<StructureLayer> deadBushLayers = {
+        { {19} }
+    };
+    structures["deadBush"] = Structure("deadBush", deadBushLayers);
+
+    std::vector<StructureLayer> poppyLayers = {
+        { {20} }
+    };
+    structures["poppy"] = Structure("poppy", poppyLayers);
+
+    std::vector<StructureLayer> dandelionLayers = {
+        { {21} }
+    };
+    structures["dandelion"] = Structure("dandelion", dandelionLayers);
 }
 
 const Structure* StructureDB::get(const std::string& name) {

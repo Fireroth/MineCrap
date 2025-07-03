@@ -199,13 +199,19 @@ void generateChunkTerrain(Chunk& chunk) {
     switch (biome) {
         case Chunk::Biome::Plains:
             generateChunkBiomeFeatures(chunk, 0, 0.998f, 2, 2, "tree", 1);
+            generateChunkBiomeFeatures(chunk, 0, 0.80f, 0, 0, "grass", 1);
+            generateChunkBiomeFeatures(chunk, 0, 0.70f, 0, 0, "grassShort", 1);
+            generateChunkBiomeFeatures(chunk, 0, 0.67f, 0, 0, "poppy", 1);
+            generateChunkBiomeFeatures(chunk, 0, 0.62f, 0, 0, "dandelion", 1);
             break;
         case Chunk::Biome::Forest:
             generateChunkBiomeFeatures(chunk, 0, 0.93f, 2, 2, "tree", 1);
+            generateChunkBiomeFeatures(chunk, 0, 0.8f, 0, 0, "grass", 1);
             break;
         case Chunk::Biome::Desert:
-            generateChunkBiomeFeatures(chunk, 0, 0.99f, 0, 0, "cactus2", 4);
-            generateChunkBiomeFeatures(chunk, 0, 0.975f, 0, 0, "cactus", 4);
+            generateChunkBiomeFeatures(chunk, 0, 0.995f, 0, 0, "cactus2", 4);
+            generateChunkBiomeFeatures(chunk, 0, 0.98f, 0, 0, "cactus", 4);
+            generateChunkBiomeFeatures(chunk, 0, 0.93f, 0, 0, "deadBush", 4);
             break;
     }
 }

@@ -7,9 +7,17 @@
 #include "core/input.hpp"
 #include "core/options.hpp"
 
+/*#ifdef _WIN32
+extern "C" {
+    __declspec(dllexport) unsigned long NvOptimusEnablement = 0x00000001;
+    __declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
+}
+#endif*/
+
 //Todo: fix all features (structures) using the same noise
 //Todo: fix liquid visible face detection
-//Todo: move model and uvs to separate models.cpp file
+//Todo: move models and uvs to separate models.cpp file
+//Todo: fix block parameters for easier visible face detection
 
 GLFWwindow* g_currentGLFWwindow = nullptr;
 GLFWwindow* getCurrentGLFWwindow() { return g_currentGLFWwindow; }

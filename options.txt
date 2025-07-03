@@ -7,3 +7,4 @@ vsync=0
 fog=1
 chunks_to_load_per_frame=1
 hide_console=1
+faster_trees=0

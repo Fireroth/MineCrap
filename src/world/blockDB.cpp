@@ -1,4 +1,7 @@
 #include "blockDB.hpp"
+#include "../core/options.hpp"
+
+static int fasterTrees = getOptionInt("faster_trees", 0);
 
 std::unordered_map<uint8_t, BlockDB::BlockInfo> BlockDB::blockData;
 
@@ -14,7 +17,7 @@ void BlockDB::initialize() {
         },
         false, // Transparent
         false, // Liquid
-        "Grass", // Name
+        "Grass block", // Name
         true, // Full block
         "cube"   // Model
     };
@@ -164,7 +167,25 @@ void BlockDB::initialize() {
         "cube"
     };
 
-    blockData[11] = {
+    if (fasterTrees) {
+        blockData[11] = {
+        {
+            glm::vec2(6.0f, 15.0f),
+            glm::vec2(6.0f, 15.0f),
+            glm::vec2(6.0f, 15.0f),
+            glm::vec2(6.0f, 15.0f),
+            glm::vec2(6.0f, 15.0f),
+            glm::vec2(6.0f, 15.0f)
+        },
+        false,
+        false,
+        "Leaves",
+        true,
+        "cube"
+        };
+
+    } else {
+        blockData[11] = {
         {
             glm::vec2(5.0f, 14.0f),
             glm::vec2(5.0f, 14.0f),
@@ -178,7 +199,8 @@ void BlockDB::initialize() {
         "Leaves",
         true,
         "cube"
-    };
+        };
+    }
 
     blockData[12] = {
         {
@@ -258,6 +280,76 @@ void BlockDB::initialize() {
         "Glass",
         true,
         "cube"
+    };
+
+    blockData[17] = {
+        {
+            glm::vec2(2.0f, 13.0f),
+            glm::vec2(2.0f, 13.0f),
+            glm::vec2(2.0f, 13.0f),
+            glm::vec2(2.0f, 13.0f)
+        },
+        true,
+        false,
+        "Medium Grass",
+        true,
+        "cross"
+    };
+
+    blockData[18] = {
+        {
+            glm::vec2(3.0f, 13.0f),
+            glm::vec2(3.0f, 13.0f),
+            glm::vec2(3.0f, 13.0f),
+            glm::vec2(3.0f, 13.0f)
+        },
+        true,
+        false,
+        "Short Grass",
+        true,
+        "cross"
+    };
+
+    blockData[19] = {
+        {
+            glm::vec2(4.0f, 13.0f),
+            glm::vec2(4.0f, 13.0f),
+            glm::vec2(4.0f, 13.0f),
+            glm::vec2(4.0f, 13.0f)
+        },
+        true,
+        false,
+        "Dead Bush",
+        true,
+        "cross"
+    };
+
+    blockData[20] = {
+        {
+            glm::vec2(5.0f, 13.0f),
+            glm::vec2(5.0f, 13.0f),
+            glm::vec2(5.0f, 13.0f),
+            glm::vec2(5.0f, 13.0f)
+        },
+        true,
+        false,
+        "Poppy",
+        true,
+        "cross"
+    };
+
+    blockData[21] = {
+        {
+            glm::vec2(6.0f, 13.0f),
+            glm::vec2(6.0f, 13.0f),
+            glm::vec2(6.0f, 13.0f),
+            glm::vec2(6.0f, 13.0f)
+        },
+        true,
+        false,
+        "Dandelion",
+        true,
+        "cross"
     };
 }
 
