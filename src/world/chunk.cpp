@@ -6,6 +6,7 @@
 #include "../core/options.hpp"
 #include "noise.hpp"
 #include "chunkTerrain.hpp"
+#include "modelDB.hpp"
 
 struct pendingBlock {
     int x, y, z;
@@ -208,35 +209,27 @@ bool Chunk::isBlockVisible(int x, int y, int z, int face) const {
 
     // If neighbor is within current chunk
     if (neighborX >= 0 && neighborX < chunkWidth && neighborZ >= 0 && neighborZ < chunkDepth) {
-        //return blocks[neighborX][neighborY][neighborZ].type == 0;
 
-        // ---- Temporary (maybe) ----
         uint8_t neighborType = blocks[neighborX][neighborY][neighborZ].type;
-        if (neighborType == 0) return true;
+        if (neighborType == 0)
+            return true;
         const BlockDB::BlockInfo* neighborInfo = BlockDB::getBlockInfo(neighborType);
         const BlockDB::BlockInfo* thisInfo = BlockDB::getBlockInfo(blocks[x][y][z].type);
 
         static int fasterTrees = getOptionInt("faster_trees", 0);
-        if (!fasterTrees && thisInfo->name == "Leaves" || thisInfo->modelName == "cross")
+        if (!fasterTrees && thisInfo->name == "Leaves")
             return true;
 
-        if (!thisInfo->fullBlock)
+        if (neighborInfo->modelName != "cube" || thisInfo->modelName != "cube")
             return true;
 
-        if (!neighborInfo->fullBlock)
-            return true;
-
-        if (neighborInfo->modelName == "cross" && thisInfo->liquid)
+        if (neighborInfo->liquid && !thisInfo->liquid || thisInfo->liquid && !neighborInfo->liquid && face == 4)
             return true;
 
         if (neighborInfo->transparent && !thisInfo->transparent)
             return true;
 
-        if (neighborInfo->liquid && !thisInfo->liquid)
-            return true;
-
         return false;
-        // ---------------------------
 
     } else { // Neighbor is in another chunk
         int neighborChunkX = chunkX;
@@ -264,112 +257,31 @@ bool Chunk::isBlockVisible(int x, int y, int z, int face) const {
         if (!neighbor)
             return true;  // If no neighbor, assume empty
 
-        //return neighbor->blocks[neighborLocalX][neighborY][neighborLocalZ].type == 0;
-        // ---- Temporary (maybe) ----
         uint8_t neighborType = neighbor->blocks[neighborLocalX][neighborY][neighborLocalZ].type;
-        if (neighborType == 0) return true;
+        if (neighborType == 0)
+            return true;
         const BlockDB::BlockInfo* neighborInfo = BlockDB::getBlockInfo(neighborType);
         const BlockDB::BlockInfo* thisInfo = BlockDB::getBlockInfo(blocks[x][y][z].type);
 
         static int fasterTrees = getOptionInt("faster_trees", 0);
-        if (!fasterTrees && thisInfo->name == "Leaves" || thisInfo->modelName == "cross")
+        if (!fasterTrees && thisInfo->name == "Leaves")
             return true;
 
-        if (!thisInfo->fullBlock)
+        if (neighborInfo->modelName != "cube" || thisInfo->modelName != "cube")
             return true;
 
-        if (!neighborInfo->fullBlock)
-            return true;
-
-        if (neighborInfo->modelName == "cross" && thisInfo->liquid)
+        if (neighborInfo->liquid && !thisInfo->liquid || thisInfo->liquid && !neighborInfo->liquid && face == 4)
             return true;
 
         if (neighborInfo->transparent && !thisInfo->transparent)
             return true;
-
-        if (neighborInfo->liquid && !thisInfo->liquid)
-            return true;
             
         return false;
-        // ---------------------------
     }
 }
 
 void Chunk::addFace(std::vector<float>& vertices, std::vector<unsigned int>& indices,
                     int x, int y, int z, int face, const BlockDB::BlockInfo* blockInfo, unsigned int& indexOffset) {
-    static const glm::vec3 cubeFaceVertices[6][4] = {
-        {{0,0,1}, {1,0,1}, {1,1,1}, {0,1,1}}, // Front
-        {{1,0,0}, {0,0,0}, {0,1,0}, {1,1,0}}, // Back
-        {{0,0,0}, {0,0,1}, {0,1,1}, {0,1,0}}, // Left
-        {{1,0,1}, {1,0,0}, {1,1,0}, {1,1,1}}, // Right
-        {{0,1,1}, {1,1,1}, {1,1,0}, {0,1,0}}, // Top
-        {{0,0,0}, {1,0,0}, {1,0,1}, {0,0,1}}  // Bottom
-    };
-
-    static const glm::vec3 cactusFaceVertices[6][4] = {
-        {{0.1,0,0.9}, {0.9,0,0.9}, {0.9,1,0.9}, {0.1,1,0.9}}, // Front
-        {{0.9,0,0.1}, {0.1,0,0.1}, {0.1,1,0.1}, {0.9,1,0.1}}, // Back
-        {{0.1,0,0.1}, {0.1,0,0.9}, {0.1,1,0.9}, {0.1,1,0.1}}, // Left
-        {{0.9,0,0.9}, {0.9,0,0.1}, {0.9,1,0.1}, {0.9,1,0.9}}, // Right
-        {{0.1,1,0.9}, {0.9,1,0.9}, {0.9,1,0.1}, {0.1,1,0.1}}, // Top
-        {{0.1,0,0.1}, {0.9,0,0.1}, {0.9,0,0.9}, {0.1,0,0.9}}  // Bottom
-    };
-
-    static const glm::vec3 slabFaceVertices[6][4] = {
-        {{0,0,1}, {1,0,1}, {1,0.5f,1}, {0,0.5f,1}}, // Front
-        {{1,0,0}, {0,0,0}, {0,0.5f,0}, {1,0.5f,0}}, // Back
-        {{0,0,0}, {0,0,1}, {0,0.5f,1}, {0,0.5f,0}}, // Left
-        {{1,0,1}, {1,0,0}, {1,0.5f,0}, {1,0.5f,1}}, // Right
-        {{0,0.5f,1}, {1,0.5f,1}, {1,0.5f,0}, {0,0.5f,0}}, // Top
-        {{0,0,0}, {1,0,0}, {1,0,1}, {0,0,1}}  // Bottom
-    };
-
-    static const glm::vec3 liquidFaceVertices[6][4] = {
-        {{0,0,1}, {1,0,1}, {1,0.85f,1}, {0,0.85f,1}}, // Front
-        {{1,0,0}, {0,0,0}, {0,0.85f,0}, {1,0.85f,0}}, // Back
-        {{0,0,0}, {0,0,1}, {0,0.85f,1}, {0,0.85f,0}}, // Left
-        {{1,0,1}, {1,0,0}, {1,0.85f,0}, {1,0.85f,1}}, // Right
-        {{0,0.85f,1}, {1,0.85f,1}, {1,0.85f,0}, {0,0.85f,0}}, // Top
-        {{0,0,0}, {1,0,0}, {1,0,1}, {0,0,1}}  // Bottom
-    };
-
-    constexpr float kMin = 0.1f;
-constexpr float kMax = 0.9f;
-
-static const glm::vec3 crossFaceVertices[4][4] = {
-    /* Quad A   ( / diagonal ) */
-    {{kMin, 0.0f, kMax}, {kMax, 0.0f, kMin}, {kMax, 1.0f, kMin}, {kMin, 1.0f, kMax}},
-    /* Back A  ( / diagonal, flipped winding ) */
-    {{kMax, 0.0f, kMin}, {kMin, 0.0f, kMax}, {kMin, 1.0f, kMax}, {kMax, 1.0f, kMin}},
-
-    /* Quad B   ( \ diagonal ) */
-    {{kMin, 0.0f, kMin}, {kMax, 0.0f, kMax}, {kMax, 1.0f, kMax}, {kMin, 1.0f, kMin}},
-    /* Back B  ( \ diagonal, flipped winding ) */
-    {{kMax, 0.0f, kMax}, {kMin, 0.0f, kMin}, {kMin, 1.0f, kMin}, {kMax, 1.0f, kMax}},
-};
-
-    static const glm::vec2 cubeUvs[4] = {
-        {0.0f, 0.0f},
-        {1.0f, 0.0f},
-        {1.0f, 1.0f},
-        {0.0f, 1.0f}
-    };
-
-    static const glm::vec2 slabUvs[4] = {
-        {0.0f, 0.0f},
-        {1.0f, 0.0f},
-        {1.0f, 0.5f},
-        {0.0f, 0.5f}
-    };
-
-    static const glm::vec2 liquidUvs[4] = {
-        {0.0f, 0.0f},
-        {1.0f, 0.0f},
-        {1.0f, 0.85f},
-        {0.0f, 0.85f}
-    };
-
-    // Choose face vertices and uvs based on block parameters
     const glm::vec3* usedFaceVerts;
     const glm::vec2* usedUvs;
     if (blockInfo->modelName == "cactus") {

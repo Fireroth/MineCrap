@@ -18,7 +18,6 @@ void BlockDB::initialize() {
         false, // Transparent
         false, // Liquid
         "Grass block", // Name
-        true, // Full block
         "cube"   // Model
     };
 
@@ -34,7 +33,6 @@ void BlockDB::initialize() {
         false,
         false,
         "Dirt",
-        true,
         "cube"
     };
 
@@ -50,7 +48,6 @@ void BlockDB::initialize() {
         false,
         false,
         "Stone",
-        true,
         "cube"
     };
 
@@ -66,7 +63,6 @@ void BlockDB::initialize() {
         false,
         false,
         "Sand",
-        true,
         "cube"
     };
 
@@ -82,7 +78,6 @@ void BlockDB::initialize() {
         false,
         false,
         "Oak Log",
-        true,
         "cube"
     };
 
@@ -98,7 +93,6 @@ void BlockDB::initialize() {
         false,
         false,
         "Bedrock",
-        true,
         "cube"
     };
 
@@ -114,7 +108,6 @@ void BlockDB::initialize() {
         false,
         false,
         "Gravel",
-        true,
         "cube"
     };
 
@@ -130,7 +123,6 @@ void BlockDB::initialize() {
         false,
         false,
         "Bricks",
-        true,
         "cube"
     };
 
@@ -147,7 +139,6 @@ void BlockDB::initialize() {
         true,
         true,
         "Water",
-        true,
         "cube"
     };
 
@@ -163,7 +154,6 @@ void BlockDB::initialize() {
         true,
         true,
         "Lava",
-        true,
         "cube"
     };
 
@@ -180,7 +170,6 @@ void BlockDB::initialize() {
         false,
         false,
         "Leaves",
-        true,
         "cube"
         };
 
@@ -197,7 +186,6 @@ void BlockDB::initialize() {
         true,
         false,
         "Leaves",
-        true,
         "cube"
         };
     }
@@ -214,7 +202,6 @@ void BlockDB::initialize() {
         false,
         false,
         "Cactus",
-        false,
         "cactus"
     };
 
@@ -230,7 +217,6 @@ void BlockDB::initialize() {
         false,
         false,
         "Stone slab",
-        false,
         "slab"
     };
 
@@ -246,7 +232,6 @@ void BlockDB::initialize() {
         false,
         false,
         "Oak Plank",
-        true,
         "cube"
     };
 
@@ -262,7 +247,6 @@ void BlockDB::initialize() {
         false,
         false,
         "Oak Plank Slab",
-        false,
         "slab"
     };
 
@@ -278,7 +262,6 @@ void BlockDB::initialize() {
         true,
         false,
         "Glass",
-        true,
         "cube"
     };
 
@@ -292,7 +275,6 @@ void BlockDB::initialize() {
         true,
         false,
         "Medium Grass",
-        true,
         "cross"
     };
 
@@ -306,7 +288,6 @@ void BlockDB::initialize() {
         true,
         false,
         "Short Grass",
-        true,
         "cross"
     };
 
@@ -320,7 +301,6 @@ void BlockDB::initialize() {
         true,
         false,
         "Dead Bush",
-        true,
         "cross"
     };
 
@@ -334,7 +314,6 @@ void BlockDB::initialize() {
         true,
         false,
         "Poppy",
-        true,
         "cross"
     };
 
@@ -348,7 +327,6 @@ void BlockDB::initialize() {
         true,
         false,
         "Dandelion",
-        true,
         "cross"
     };
 }

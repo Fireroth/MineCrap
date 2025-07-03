@@ -16,8 +16,6 @@ extern "C" {
 
 //Todo: fix all features (structures) using the same noise
 //Todo: fix liquid visible face detection
-//Todo: move models and uvs to separate models.cpp file
-//Todo: fix block parameters for easier visible face detection
 
 GLFWwindow* g_currentGLFWwindow = nullptr;
 GLFWwindow* getCurrentGLFWwindow() { return g_currentGLFWwindow; }

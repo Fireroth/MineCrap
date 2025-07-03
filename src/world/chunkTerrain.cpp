@@ -211,7 +211,7 @@ void generateChunkTerrain(Chunk& chunk) {
         case Chunk::Biome::Desert:
             generateChunkBiomeFeatures(chunk, 0, 0.995f, 0, 0, "cactus2", 4);
             generateChunkBiomeFeatures(chunk, 0, 0.98f, 0, 0, "cactus", 4);
-            generateChunkBiomeFeatures(chunk, 0, 0.93f, 0, 0, "deadBush", 4);
+            generateChunkBiomeFeatures(chunk, 0, 0.95f, 0, 0, "deadBush", 4);
             break;
     }
 }

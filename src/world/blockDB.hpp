@@ -11,7 +11,6 @@ public:
         bool transparent;
         bool liquid;
         std::string name;
-        bool fullBlock;
         std::string modelName;
     };
 
