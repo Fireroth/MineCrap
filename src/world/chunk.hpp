@@ -33,6 +33,7 @@ public:
 
     void buildMesh();
     void render(const Camera& camera, GLint uModelLoc);
+    void renderCross(const Camera& camera, GLint uModelLoc);
     void placeStructure(const Structure& structure, int baseX, int baseY, int baseZ);
 
     Block blocks[chunkWidth][chunkHeight][chunkDepth];
@@ -43,7 +44,9 @@ private:
     World* world;
 
     GLuint VAO, VBO, EBO;
+    GLuint crossVAO, crossVBO, crossEBO;
     GLsizei indexCount;
+    GLsizei crossIndexCount;
 
     void addFace(std::vector<float>& vertices, std::vector<unsigned int>& indices,
                  int x, int y, int z, int face, const BlockDB::BlockInfo* blockInfo, unsigned int& indexOffset);

@@ -6,6 +6,7 @@
 class Renderer {
 public:
     GLint uModelLoc, uViewLoc, uProjLoc, uAtlasLoc, uAspectLoc, uFogDensityLoc, uFogStartLoc, uFogColorLoc, uCamPosLoc;
+    GLint uCrossModelLoc, uCrossViewLoc, uCrossProjLoc, uCrossAtlasLoc;
     Renderer();
     ~Renderer();
 
@@ -22,6 +23,7 @@ public:
 
 private:
     GLuint shaderProgram, textureAtlas;
+    GLuint crossShaderProgram;
     GLuint crosshairVAO, crosshairVBO, crosshairShaderProgram;
     GLuint createShader(const char* source, GLenum shaderType);
     GLuint createShaderProgram(const char* vertexSource, const char* fragmentSource);

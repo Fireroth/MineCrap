@@ -14,6 +14,7 @@ public:
 
     void generateChunks(int radius);
     void render(const Camera& camera, GLint uModelLoc);
+    void renderCross(const Camera& camera, GLint uCrossModelLoc);
 
     void updateChunksAroundPlayer(const glm::vec3& playerPos, int radius);
 

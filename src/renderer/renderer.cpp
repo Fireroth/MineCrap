@@ -36,16 +36,26 @@ void Renderer::init()
     std::string vertexSource = loadShaderSource("shaders/vertex.glsl");
     std::string fragmentSource = loadShaderSource("shaders/fragment.glsl");
     shaderProgram = createShaderProgram(vertexSource.c_str(), fragmentSource.c_str());
+
+    std::string crossVertexSource = loadShaderSource("shaders/cross_vertex.glsl");
+    std::string crossFragmentSource = loadShaderSource("shaders/cross_fragment.glsl");
+    crossShaderProgram = createShaderProgram(crossVertexSource.c_str(), crossFragmentSource.c_str());
     
     std::string crosshairVertexSource = loadShaderSource("shaders/crosshair_vertex.glsl");
     std::string crosshairFragmentSource = loadShaderSource("shaders/crosshair_fragment.glsl");
     crosshairShaderProgram = createShaderProgram(crosshairVertexSource.c_str(), crosshairFragmentSource.c_str());
 
+    uAspectLoc = glGetUniformLocation(crosshairShaderProgram, "aspectRatio");
+
+    uCrossModelLoc = glGetUniformLocation(crossShaderProgram, "model");
+    uCrossViewLoc = glGetUniformLocation(shaderProgram, "view");
+    uCrossProjLoc = glGetUniformLocation(shaderProgram, "projection");
+    uCrossAtlasLoc = glGetUniformLocation(shaderProgram, "atlas");
+
     uModelLoc = glGetUniformLocation(shaderProgram, "model");
     uViewLoc = glGetUniformLocation(shaderProgram, "view");
     uProjLoc = glGetUniformLocation(shaderProgram, "projection");
     uAtlasLoc = glGetUniformLocation(shaderProgram, "atlas");
-    uAspectLoc = glGetUniformLocation(crosshairShaderProgram, "aspectRatio");
     uFogDensityLoc = glGetUniformLocation(shaderProgram, "fogDensity");
     uFogStartLoc = glGetUniformLocation(shaderProgram, "fogStartDistance");
     uFogColorLoc = glGetUniformLocation(shaderProgram, "fogColor");
@@ -89,8 +99,6 @@ void Renderer::renderWorld(const Camera& camera, float aspectRatio, float deltaT
     static int renderDist = getOptionInt("render_distance", 7) + 1; // +1 to account for invisible "mesh helper" chunk
     world.updateChunksAroundPlayer(camera.getPosition(), renderDist);
 
-    glUseProgram(shaderProgram);
-
     GLFWwindow* getCurrentGLFWwindow();
     GLFWwindow* window = getCurrentGLFWwindow();
     static float baseFov = getOptionFloat("fov", 60.0f);
@@ -114,6 +122,11 @@ void Renderer::renderWorld(const Camera& camera, float aspectRatio, float deltaT
     float lerpFactor = 1.0f - expf(-fovLerpSpeed * deltaTime);
     currentFov = currentFov + (targetFov - currentFov) * lerpFactor;
 
+     // -------------------------------- Render main --------------------------------
+
+    glUseProgram(shaderProgram);
+    glEnable(GL_CULL_FACE);
+
     glm::mat4 projection = glm::perspective(glm::radians(currentFov), aspectRatio, 0.1f, 5000.0f);
     glUniformMatrix4fv(uViewLoc, 1, GL_FALSE, &camera.getViewMatrix()[0][0]);
     glUniformMatrix4fv(uProjLoc, 1, GL_FALSE, &projection[0][0]);
@@ -136,6 +149,34 @@ void Renderer::renderWorld(const Camera& camera, float aspectRatio, float deltaT
     }
 
     world.render(camera, uModelLoc);
+
+    // -------------------------------- Render cross --------------------------------
+
+    glUseProgram(crossShaderProgram);
+    glDisable(GL_CULL_FACE);
+
+    glm::mat4 crossProjection = glm::perspective(glm::radians(currentFov), aspectRatio, 0.1f, 5000.0f);
+    glUniformMatrix4fv(uCrossViewLoc, 1, GL_FALSE, &camera.getViewMatrix()[0][0]);
+    glUniformMatrix4fv(uCrossProjLoc, 1, GL_FALSE, &crossProjection[0][0]);
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, textureAtlas);
+    glUniform1i(uCrossAtlasLoc, 0);
+
+    if (uCamPosLoc != -1) {
+        glm::vec3 camPos = camera.getPosition();
+        glUniform3fv(uCamPosLoc, 1, glm::value_ptr(camPos));
+    }
+
+    if (fogEnabled) {
+        glUniform1f(uFogDensityLoc, fogDensity);
+        glUniform1f(uFogStartLoc, fogStartDistance);
+        glUniform3fv(uFogColorLoc, 1, glm::value_ptr(fogColor));
+    } else {
+        glUniform1f(uFogDensityLoc, 0.0f); // Disable fog
+    }
+    
+    world.renderCross(camera, uCrossModelLoc);
 }
 
 void Renderer::renderCrosshair(float aspectRatio) {

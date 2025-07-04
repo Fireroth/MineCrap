@@ -16,6 +16,7 @@ static std::map<std::pair<int, int>, std::vector<pendingBlock >> pendingBlockPla
 
 Chunk::Chunk(int x, int z, World* worldPtr)
     : chunkX(x), chunkZ(z), world(worldPtr), VAO(0), VBO(0), EBO(0), indexCount(0)
+    , crossVAO(0), crossVBO(0), crossEBO(0), crossIndexCount(0)
 {
     noises = noiseInit();
     generateChunkTerrain(*this);
@@ -38,6 +39,9 @@ Chunk::~Chunk() {
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
     glDeleteBuffers(1, &EBO);
+    glDeleteVertexArrays(1, &crossVAO);
+    glDeleteBuffers(1, &crossVBO);
+    glDeleteBuffers(1, &crossEBO);
 }
 
 void Chunk::placeStructure(const Structure& structure, int baseX, int baseY, int baseZ) {
@@ -132,9 +136,25 @@ void Chunk::buildMesh() {
         glDeleteBuffers(1, &EBO);
         EBO = 0;
     }
+
+    if (crossVAO != 0) {
+        glDeleteVertexArrays(1, &crossVAO);
+        crossVAO = 0;
+    }
+    if (crossVBO != 0) {
+        glDeleteBuffers(1, &crossVBO);
+        crossVBO = 0;
+    }
+    if (crossEBO != 0) {
+        glDeleteBuffers(1, &crossEBO);
+        crossEBO = 0;
+    }
     std::vector<float> vertices;
+    std::vector<float> crossVertices;
     std::vector<unsigned int> indices;
+    std::vector<unsigned int> crossIndices;
     unsigned int indexOffset = 0;
+    unsigned int crossIndexOffset = 0;
 
     for (int x = 0; x < chunkWidth; ++x) {
         for (int y = 0; y < chunkHeight; ++y) {
@@ -147,10 +167,8 @@ void Chunk::buildMesh() {
 
                 // Only render 4 faces for cross model
                 if (info->modelName == "cross") {
-                    for (int face = 0; face < 4; ++face) {
-                        if (isBlockVisible(x, y, z, face)) {
-                            addFace(vertices, indices, x, y, z, face, info, indexOffset);
-                        }
+                    for (int face = 0; face < 2; ++face) {
+                        addFace(crossVertices, crossIndices, x, y, z, face, info, crossIndexOffset);
                     }
                 } else {
                     for (int face = 0; face < 6; ++face) {
@@ -164,6 +182,7 @@ void Chunk::buildMesh() {
     }
 
     indexCount = static_cast<GLsizei>(indices.size());
+    crossIndexCount = static_cast<GLsizei>(crossIndices.size());
 
     // Create mesh
     glGenVertexArrays(1, &VAO);
@@ -177,6 +196,29 @@ void Chunk::buildMesh() {
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), indices.data(), GL_STATIC_DRAW);
+
+    // Layout: position (3), uv (2), faceID (1)
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(5 * sizeof(float)));
+    glEnableVertexAttribArray(2);
+
+    glBindVertexArray(0);
+
+    //--------------------------------------------------------------
+    glGenVertexArrays(1, &crossVAO);
+    glGenBuffers(1, &crossVBO);
+    glGenBuffers(1, &crossEBO);
+
+    glBindVertexArray(crossVAO);
+
+    glBindBuffer(GL_ARRAY_BUFFER, crossVBO);
+    glBufferData(GL_ARRAY_BUFFER, crossVertices.size() * sizeof(float), crossVertices.data(), GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, crossEBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, crossIndices.size() * sizeof(unsigned int), crossIndices.data(), GL_STATIC_DRAW);
 
     // Layout: position (3), uv (2), faceID (1)
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
@@ -281,7 +323,7 @@ bool Chunk::isBlockVisible(int x, int y, int z, int face) const {
 }
 
 void Chunk::addFace(std::vector<float>& vertices, std::vector<unsigned int>& indices,
-                    int x, int y, int z, int face, const BlockDB::BlockInfo* blockInfo, unsigned int& indexOffset) {
+                    int x, int y, int z, int face, const BlockDB::BlockInfo* blockInfo, unsigned int& offset) {
     const glm::vec3* usedFaceVerts;
     const glm::vec2* usedUvs;
     if (blockInfo->modelName == "cactus") {
@@ -320,11 +362,11 @@ void Chunk::addFace(std::vector<float>& vertices, std::vector<unsigned int>& ind
     }
 
     indices.insert(indices.end(), {
-        indexOffset, indexOffset + 1, indexOffset + 2,
-        indexOffset + 2, indexOffset + 3, indexOffset
+        offset, offset + 1, offset + 2,
+        offset + 2, offset + 3, offset
     });
 
-    indexOffset += 4;
+    offset += 4;
 }
 
 void Chunk::render(const Camera& camera, GLint uModelLoc) {
@@ -333,5 +375,14 @@ void Chunk::render(const Camera& camera, GLint uModelLoc) {
 
     glBindVertexArray(VAO);
     glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, 0);
+    glBindVertexArray(0);
+}
+
+void Chunk::renderCross(const Camera& camera, GLint uCrossModelLoc) {
+    glm::mat4 crossModel = glm::translate(glm::mat4(1.0f), glm::vec3(chunkX * chunkWidth, 0, chunkZ * chunkDepth));
+    glUniformMatrix4fv(uCrossModelLoc, 1, GL_FALSE, &crossModel[0][0]);
+
+    glBindVertexArray(crossVAO);
+    glDrawElements(GL_TRIANGLES, crossIndexCount, GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
 }

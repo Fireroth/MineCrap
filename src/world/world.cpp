@@ -105,6 +105,12 @@ void World::render(const Camera& camera, GLint uModelLoc) {
     }
 }
 
+void World::renderCross(const Camera& camera, GLint uCrossModelLoc) {
+    for (auto& [coord, chunk] : chunks) {
+        chunk->renderCross(camera, uCrossModelLoc);
+    }
+}
+
 Chunk* World::getChunk(int x, int z) const {
     auto iterator = chunks.find({x, z});
     if (iterator != chunks.end())
