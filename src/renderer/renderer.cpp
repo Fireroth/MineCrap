@@ -26,7 +26,7 @@ void Renderer::init()
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
     glFrontFace(GL_CCW);
-
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glLineWidth(2.0f);
 
     StructureDB::initialize();
@@ -40,6 +40,10 @@ void Renderer::init()
     std::string crossVertexSource = loadShaderSource("shaders/cross_vertex.glsl");
     std::string crossFragmentSource = loadShaderSource("shaders/cross_fragment.glsl");
     crossShaderProgram = createShaderProgram(crossVertexSource.c_str(), crossFragmentSource.c_str());
+
+    std::string liquidVertexSource = loadShaderSource("shaders/liquid_vertex.glsl");
+    std::string liquidFragmentSource = loadShaderSource("shaders/liquid_fragment.glsl");
+    liquidShaderProgram = createShaderProgram(liquidVertexSource.c_str(), liquidFragmentSource.c_str());
     
     std::string crosshairVertexSource = loadShaderSource("shaders/crosshair_vertex.glsl");
     std::string crosshairFragmentSource = loadShaderSource("shaders/crosshair_fragment.glsl");
@@ -51,6 +55,12 @@ void Renderer::init()
     uCrossViewLoc = glGetUniformLocation(shaderProgram, "view");
     uCrossProjLoc = glGetUniformLocation(shaderProgram, "projection");
     uCrossAtlasLoc = glGetUniformLocation(shaderProgram, "atlas");
+
+    uLiquidModelLoc = glGetUniformLocation(liquidShaderProgram, "model");
+    uLiquidViewLoc = glGetUniformLocation(liquidShaderProgram, "view");
+    uLiquidProjLoc = glGetUniformLocation(liquidShaderProgram, "projection");
+    uLiquidAtlasLoc = glGetUniformLocation(liquidShaderProgram, "atlas");
+    uLiquidTimeLoc = glGetUniformLocation(liquidShaderProgram, "time");
 
     uModelLoc = glGetUniformLocation(shaderProgram, "model");
     uViewLoc = glGetUniformLocation(shaderProgram, "view");
@@ -94,7 +104,7 @@ void Renderer::initCrosshair() {
     glBindVertexArray(0);
 }
 
-void Renderer::renderWorld(const Camera& camera, float aspectRatio, float deltaTime) {
+void Renderer::renderWorld(const Camera& camera, float aspectRatio, float deltaTime, float currentFrame) {
     glEnable(GL_DEPTH_TEST);
     static int renderDist = getOptionInt("render_distance", 7) + 1; // +1 to account for invisible "mesh helper" chunk
     world.updateChunksAroundPlayer(camera.getPosition(), renderDist);
@@ -126,6 +136,9 @@ void Renderer::renderWorld(const Camera& camera, float aspectRatio, float deltaT
 
     glUseProgram(shaderProgram);
     glEnable(GL_CULL_FACE);
+
+    glEnable(GL_BLEND);
+    
 
     glm::mat4 projection = glm::perspective(glm::radians(currentFov), aspectRatio, 0.1f, 5000.0f);
     glUniformMatrix4fv(uViewLoc, 1, GL_FALSE, &camera.getViewMatrix()[0][0]);
@@ -177,6 +190,38 @@ void Renderer::renderWorld(const Camera& camera, float aspectRatio, float deltaT
     }
     
     world.renderCross(camera, uCrossModelLoc);
+
+    // -------------------------------- Render liquid --------------------------------
+
+    glUseProgram(liquidShaderProgram);
+    glDisable(GL_CULL_FACE);
+
+
+    glm::mat4 liquidProjection = glm::perspective(glm::radians(currentFov), aspectRatio, 0.1f, 5000.0f);
+    glUniformMatrix4fv(uLiquidViewLoc, 1, GL_FALSE, &camera.getViewMatrix()[0][0]);
+    glUniformMatrix4fv(uLiquidProjLoc, 1, GL_FALSE, &liquidProjection[0][0]);
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, textureAtlas);
+    glUniform1i(uLiquidAtlasLoc, 0);
+    glUniform1f(uLiquidTimeLoc, currentFrame);
+
+    if (uCamPosLoc != -1) {
+        glm::vec3 camPos = camera.getPosition();
+        glUniform3fv(uCamPosLoc, 1, glm::value_ptr(camPos));
+    }
+
+    if (fogEnabled) {
+        glUniform1f(uFogDensityLoc, fogDensity);
+        glUniform1f(uFogStartLoc, fogStartDistance);
+        glUniform3fv(uFogColorLoc, 1, glm::value_ptr(fogColor));
+    } else {
+        glUniform1f(uFogDensityLoc, 0.0f); // Disable fog
+    }
+    
+    world.renderLiquid(camera, uLiquidModelLoc);
+
+    glDisable(GL_BLEND);
 }
 
 void Renderer::renderCrosshair(float aspectRatio) {

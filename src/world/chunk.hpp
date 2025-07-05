@@ -34,6 +34,7 @@ public:
     void buildMesh();
     void render(const Camera& camera, GLint uModelLoc);
     void renderCross(const Camera& camera, GLint uModelLoc);
+    void renderLiquid(const Camera& camera, GLint uLiquidModelLoc);
     void placeStructure(const Structure& structure, int baseX, int baseY, int baseZ);
 
     Block blocks[chunkWidth][chunkHeight][chunkDepth];
@@ -45,8 +46,10 @@ private:
 
     GLuint VAO, VBO, EBO;
     GLuint crossVAO, crossVBO, crossEBO;
+    GLuint liquidVAO, liquidVBO, liquidEBO;
     GLsizei indexCount;
     GLsizei crossIndexCount;
+    GLsizei liquidIndexCount;
 
     void addFace(std::vector<float>& vertices, std::vector<unsigned int>& indices,
                  int x, int y, int z, int face, const BlockDB::BlockInfo* blockInfo, unsigned int& indexOffset);

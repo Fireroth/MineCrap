@@ -111,6 +111,12 @@ void World::renderCross(const Camera& camera, GLint uCrossModelLoc) {
     }
 }
 
+void World::renderLiquid(const Camera& camera, GLint uLiquidModelLoc) {
+    for (auto& [coord, chunk] : chunks) {
+        chunk->renderLiquid(camera, uLiquidModelLoc);
+    }
+}
+
 Chunk* World::getChunk(int x, int z) const {
     auto iterator = chunks.find({x, z});
     if (iterator != chunks.end())

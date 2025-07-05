@@ -167,7 +167,7 @@ void generateChunkTerrain(Chunk& chunk) {
                             chunk.blocks[x][y][z].type = 4; // Sand
                             break;
                     }
-                } else if (y >= height - 2) {
+                } else if (y >= height - 3) {
                     switch (finalBiome) {
                         case Chunk::Biome::Plains:
                         case Chunk::Biome::Forest:

@@ -30,12 +30,12 @@ cmake --build .
 -  Infinite terrain
 -  Biomes
 -  Multiple block models
+-  Transparent and translucent blocks
 
 ## 🛠️ To-Do
 -  Inventory system
 -  Sounds
 -  Frustum culling
--  Transparent blocks
 -  Player physics & collisions
 -  Chunk saving
 

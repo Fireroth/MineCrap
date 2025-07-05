@@ -17,6 +17,7 @@ static std::map<std::pair<int, int>, std::vector<pendingBlock >> pendingBlockPla
 Chunk::Chunk(int x, int z, World* worldPtr)
     : chunkX(x), chunkZ(z), world(worldPtr), VAO(0), VBO(0), EBO(0), indexCount(0)
     , crossVAO(0), crossVBO(0), crossEBO(0), crossIndexCount(0)
+    , liquidVAO(0), liquidVBO(0), liquidEBO(0), liquidIndexCount(0)
 {
     noises = noiseInit();
     generateChunkTerrain(*this);
@@ -42,6 +43,9 @@ Chunk::~Chunk() {
     glDeleteVertexArrays(1, &crossVAO);
     glDeleteBuffers(1, &crossVBO);
     glDeleteBuffers(1, &crossEBO);
+    glDeleteVertexArrays(1, &liquidVAO);
+    glDeleteBuffers(1, &liquidVBO);
+    glDeleteBuffers(1, &liquidEBO);
 }
 
 void Chunk::placeStructure(const Structure& structure, int baseX, int baseY, int baseZ) {
@@ -149,12 +153,29 @@ void Chunk::buildMesh() {
         glDeleteBuffers(1, &crossEBO);
         crossEBO = 0;
     }
+
+    if (liquidVAO != 0) {
+        glDeleteVertexArrays(1, &liquidVAO);
+        liquidVAO = 0;
+    }
+    if (liquidVBO != 0) {
+        glDeleteBuffers(1, &liquidVBO);
+        liquidVBO = 0;
+    }
+    if (liquidEBO != 0) {
+        glDeleteBuffers(1, &liquidEBO);
+        liquidEBO = 0;
+    }
+
     std::vector<float> vertices;
     std::vector<float> crossVertices;
+    std::vector<float> liquidVertices;
     std::vector<unsigned int> indices;
     std::vector<unsigned int> crossIndices;
+    std::vector<unsigned int> liquidIndices;
     unsigned int indexOffset = 0;
     unsigned int crossIndexOffset = 0;
+    unsigned int liquidIndexOffset = 0;
 
     for (int x = 0; x < chunkWidth; ++x) {
         for (int y = 0; y < chunkHeight; ++y) {
@@ -165,10 +186,15 @@ void Chunk::buildMesh() {
                 const BlockDB::BlockInfo* info = BlockDB::getBlockInfo(type);
                 if (!info) continue;
 
-                // Only render 4 faces for cross model
                 if (info->modelName == "cross") {
                     for (int face = 0; face < 2; ++face) {
                         addFace(crossVertices, crossIndices, x, y, z, face, info, crossIndexOffset);
+                    }
+                } else if (info->liquid) {
+                    for (int face = 0; face < 6; ++face) {
+                        if (isBlockVisible(x, y, z, face)) {
+                            addFace(liquidVertices, liquidIndices, x, y, z, face, info, liquidIndexOffset);
+                        }
                     }
                 } else {
                     for (int face = 0; face < 6; ++face) {
@@ -183,6 +209,7 @@ void Chunk::buildMesh() {
 
     indexCount = static_cast<GLsizei>(indices.size());
     crossIndexCount = static_cast<GLsizei>(crossIndices.size());
+    liquidIndexCount = static_cast<GLsizei>(liquidIndices.size());
 
     // Create mesh
     glGenVertexArrays(1, &VAO);
@@ -208,6 +235,31 @@ void Chunk::buildMesh() {
     glBindVertexArray(0);
 
     //--------------------------------------------------------------
+    
+    glGenVertexArrays(1, &liquidVAO);
+    glGenBuffers(1, &liquidVBO);
+    glGenBuffers(1, &liquidEBO);
+
+    glBindVertexArray(liquidVAO);
+
+    glBindBuffer(GL_ARRAY_BUFFER, liquidVBO);
+    glBufferData(GL_ARRAY_BUFFER, liquidVertices.size() * sizeof(float), liquidVertices.data(), GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, liquidEBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, liquidIndices.size() * sizeof(unsigned int), liquidIndices.data(), GL_STATIC_DRAW);
+
+    // Layout: position (3), uv (2), faceID (1)
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(5 * sizeof(float)));
+    glEnableVertexAttribArray(2);
+
+    glBindVertexArray(0);
+
+    //--------------------------------------------------------------
+    
     glGenVertexArrays(1, &crossVAO);
     glGenBuffers(1, &crossVBO);
     glGenBuffers(1, &crossEBO);
@@ -384,5 +436,14 @@ void Chunk::renderCross(const Camera& camera, GLint uCrossModelLoc) {
 
     glBindVertexArray(crossVAO);
     glDrawElements(GL_TRIANGLES, crossIndexCount, GL_UNSIGNED_INT, 0);
+    glBindVertexArray(0);
+}
+
+void Chunk::renderLiquid(const Camera& camera, GLint uLiquidModelLoc) {
+    glm::mat4 liquidModel = glm::translate(glm::mat4(1.0f), glm::vec3(chunkX * chunkWidth, 0, chunkZ * chunkDepth));
+    glUniformMatrix4fv(uLiquidModelLoc, 1, GL_FALSE, &liquidModel[0][0]);
+
+    glBindVertexArray(liquidVAO);
+    glDrawElements(GL_TRIANGLES, liquidIndexCount, GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
 }

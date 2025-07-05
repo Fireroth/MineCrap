@@ -15,9 +15,11 @@ extern "C" {
 #endif*/
 
 //Todo: fix liquid visible face detection
+//Todo: fix basically everything about liquids :}
 
 GLFWwindow* g_currentGLFWwindow = nullptr;
 GLFWwindow* getCurrentGLFWwindow() { return g_currentGLFWwindow; }
+
 
 int main()
 {
@@ -69,7 +71,7 @@ int main()
         processInput(glfwWindow, camera, deltaTime, getSpeedMultiplier(glfwWindow));
 
         window.clear(0.6f, 1.0f, 1.0f, 1.0f); // Light blue background
-        renderer.renderWorld(camera, aspectRatio, deltaTime);
+        renderer.renderWorld(camera, aspectRatio, deltaTime, currentFrame);
         renderer.renderCrosshair(aspectRatio);
         ImGuiOverlay.render(deltaTime, camera, &renderer.world);
 
