@@ -132,16 +132,16 @@ void Renderer::renderWorld(const Camera& camera, float aspectRatio, float deltaT
     float lerpFactor = 1.0f - expf(-fovLerpSpeed * deltaTime);
     currentFov = currentFov + (targetFov - currentFov) * lerpFactor;
 
+    glm::mat4 view = camera.getViewMatrix();
+    glm::mat4 projection = glm::perspective(glm::radians(currentFov), aspectRatio, 0.1f, 5000.0f);
+
      // -------------------------------- Render main --------------------------------
 
     glUseProgram(shaderProgram);
     glEnable(GL_CULL_FACE);
-
     glEnable(GL_BLEND);
     
-
-    glm::mat4 projection = glm::perspective(glm::radians(currentFov), aspectRatio, 0.1f, 5000.0f);
-    glUniformMatrix4fv(uViewLoc, 1, GL_FALSE, &camera.getViewMatrix()[0][0]);
+    glUniformMatrix4fv(uViewLoc, 1, GL_FALSE, &view[0][0]);
     glUniformMatrix4fv(uProjLoc, 1, GL_FALSE, &projection[0][0]);
 
     glActiveTexture(GL_TEXTURE0);
@@ -168,9 +168,8 @@ void Renderer::renderWorld(const Camera& camera, float aspectRatio, float deltaT
     glUseProgram(crossShaderProgram);
     glDisable(GL_CULL_FACE);
 
-    glm::mat4 crossProjection = glm::perspective(glm::radians(currentFov), aspectRatio, 0.1f, 5000.0f);
-    glUniformMatrix4fv(uCrossViewLoc, 1, GL_FALSE, &camera.getViewMatrix()[0][0]);
-    glUniformMatrix4fv(uCrossProjLoc, 1, GL_FALSE, &crossProjection[0][0]);
+    glUniformMatrix4fv(uCrossViewLoc, 1, GL_FALSE, &view[0][0]);
+    glUniformMatrix4fv(uCrossProjLoc, 1, GL_FALSE, &projection[0][0]);
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, textureAtlas);
@@ -194,12 +193,10 @@ void Renderer::renderWorld(const Camera& camera, float aspectRatio, float deltaT
     // -------------------------------- Render liquid --------------------------------
 
     glUseProgram(liquidShaderProgram);
-    glDisable(GL_CULL_FACE);
+    glDepthMask(GL_FALSE);
 
-
-    glm::mat4 liquidProjection = glm::perspective(glm::radians(currentFov), aspectRatio, 0.1f, 5000.0f);
-    glUniformMatrix4fv(uLiquidViewLoc, 1, GL_FALSE, &camera.getViewMatrix()[0][0]);
-    glUniformMatrix4fv(uLiquidProjLoc, 1, GL_FALSE, &liquidProjection[0][0]);
+    glUniformMatrix4fv(uLiquidViewLoc, 1, GL_FALSE, &view[0][0]);
+    glUniformMatrix4fv(uLiquidProjLoc, 1, GL_FALSE, &projection[0][0]);
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, textureAtlas);
@@ -221,6 +218,7 @@ void Renderer::renderWorld(const Camera& camera, float aspectRatio, float deltaT
     
     world.renderLiquid(camera, uLiquidModelLoc);
 
+    glDepthMask(GL_TRUE);
     glDisable(GL_BLEND);
 }
 

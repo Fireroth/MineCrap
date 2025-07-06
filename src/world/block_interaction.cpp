@@ -25,7 +25,7 @@ struct RaycastResult {
 // Helper function to get AABB for a block type
 AABB getModelAABB(uint8_t blockId) {
     const BlockDB::BlockInfo* info = BlockDB::getBlockInfo(blockId);
-    if (info->liquid) {
+    if (info->modelName == "liquid") {
         return {glm::vec3(0.0f, 0.0f, 0.0f),
                 glm::vec3(1.0f, 0.85f, 1.0f)};
     } else if (info->modelName == "cactus") {

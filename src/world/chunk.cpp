@@ -236,17 +236,17 @@ void Chunk::buildMesh() {
 
     //--------------------------------------------------------------
     
-    glGenVertexArrays(1, &liquidVAO);
-    glGenBuffers(1, &liquidVBO);
-    glGenBuffers(1, &liquidEBO);
+    glGenVertexArrays(1, &crossVAO);
+    glGenBuffers(1, &crossVBO);
+    glGenBuffers(1, &crossEBO);
 
-    glBindVertexArray(liquidVAO);
+    glBindVertexArray(crossVAO);
 
-    glBindBuffer(GL_ARRAY_BUFFER, liquidVBO);
-    glBufferData(GL_ARRAY_BUFFER, liquidVertices.size() * sizeof(float), liquidVertices.data(), GL_STATIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, crossVBO);
+    glBufferData(GL_ARRAY_BUFFER, crossVertices.size() * sizeof(float), crossVertices.data(), GL_STATIC_DRAW);
 
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, liquidEBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, liquidIndices.size() * sizeof(unsigned int), liquidIndices.data(), GL_STATIC_DRAW);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, crossEBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, crossIndices.size() * sizeof(unsigned int), crossIndices.data(), GL_STATIC_DRAW);
 
     // Layout: position (3), uv (2), faceID (1)
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
@@ -260,17 +260,17 @@ void Chunk::buildMesh() {
 
     //--------------------------------------------------------------
     
-    glGenVertexArrays(1, &crossVAO);
-    glGenBuffers(1, &crossVBO);
-    glGenBuffers(1, &crossEBO);
+    glGenVertexArrays(1, &liquidVAO);
+    glGenBuffers(1, &liquidVBO);
+    glGenBuffers(1, &liquidEBO);
 
-    glBindVertexArray(crossVAO);
+    glBindVertexArray(liquidVAO);
 
-    glBindBuffer(GL_ARRAY_BUFFER, crossVBO);
-    glBufferData(GL_ARRAY_BUFFER, crossVertices.size() * sizeof(float), crossVertices.data(), GL_STATIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, liquidVBO);
+    glBufferData(GL_ARRAY_BUFFER, liquidVertices.size() * sizeof(float), liquidVertices.data(), GL_STATIC_DRAW);
 
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, crossEBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, crossIndices.size() * sizeof(unsigned int), crossIndices.data(), GL_STATIC_DRAW);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, liquidEBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, liquidIndices.size() * sizeof(unsigned int), liquidIndices.data(), GL_STATIC_DRAW);
 
     // Layout: position (3), uv (2), faceID (1)
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
@@ -314,7 +314,7 @@ bool Chunk::isBlockVisible(int x, int y, int z, int face) const {
         if (!fasterTrees && thisInfo->name == "Leaves")
             return true;
 
-        if (neighborInfo->modelName != "cube" || thisInfo->modelName != "cube")
+        if (neighborInfo->modelName != "cube" && neighborInfo->modelName != "liquid" || thisInfo->modelName != "cube" && thisInfo->modelName != "liquid")
             return true;
 
         if (neighborInfo->liquid && !thisInfo->liquid || thisInfo->liquid && !neighborInfo->liquid && face == 4)
@@ -361,7 +361,7 @@ bool Chunk::isBlockVisible(int x, int y, int z, int face) const {
         if (!fasterTrees && thisInfo->name == "Leaves")
             return true;
 
-        if (neighborInfo->modelName != "cube" || thisInfo->modelName != "cube")
+        if (neighborInfo->modelName != "cube" && neighborInfo->modelName != "liquid" || thisInfo->modelName != "cube" && thisInfo->modelName != "liquid")
             return true;
 
         if (neighborInfo->liquid && !thisInfo->liquid || thisInfo->liquid && !neighborInfo->liquid && face == 4)
@@ -384,7 +384,7 @@ void Chunk::addFace(std::vector<float>& vertices, std::vector<unsigned int>& ind
     } else if (blockInfo->modelName == "cross") {
         usedFaceVerts = crossFaceVertices[face];
         usedUvs = cubeUvs;
-    } else if (blockInfo->liquid) {
+    } else if (blockInfo->modelName == "liquid") {
         usedFaceVerts = liquidFaceVertices[face];
         // Use "liquidUvs" for side faces, "cubeUvs" for top/bottom
         if (face >= 0 && face <= 3) {

@@ -139,7 +139,7 @@ void BlockDB::initialize() {
         true,
         true,
         "Water",
-        "cube"
+        "liquid"
     };
 
     blockData[10] = {
@@ -152,9 +152,9 @@ void BlockDB::initialize() {
             glm::vec2(1.0f, 13.0f)
         },
         true,
-        true,
+        false,
         "Lava",
-        "cube"
+        "liquid"
     };
 
     if (fasterTrees) {
