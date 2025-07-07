@@ -21,7 +21,10 @@ public:
     enum class Biome {
         Plains,
         Desert,
-        Forest
+        Forest,
+        FirForest,
+        FlowerField,
+        MapleForest
     };
 
     struct Block {

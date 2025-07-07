@@ -311,7 +311,7 @@ bool Chunk::isBlockVisible(int x, int y, int z, int face) const {
         const BlockDB::BlockInfo* thisInfo = BlockDB::getBlockInfo(blocks[x][y][z].type);
 
         static int fasterTrees = getOptionInt("faster_trees", 0);
-        if (!fasterTrees && thisInfo->name == "Leaves")
+        if (!fasterTrees && thisInfo->renderFacesInBetween)
             return true;
 
         if (neighborInfo->modelName != "cube" && neighborInfo->modelName != "liquid" || thisInfo->modelName != "cube" && thisInfo->modelName != "liquid")
@@ -358,7 +358,7 @@ bool Chunk::isBlockVisible(int x, int y, int z, int face) const {
         const BlockDB::BlockInfo* thisInfo = BlockDB::getBlockInfo(blocks[x][y][z].type);
 
         static int fasterTrees = getOptionInt("faster_trees", 0);
-        if (!fasterTrees && thisInfo->name == "Leaves")
+        if (!fasterTrees && thisInfo->renderFacesInBetween)
             return true;
 
         if (neighborInfo->modelName != "cube" && neighborInfo->modelName != "liquid" || thisInfo->modelName != "cube" && thisInfo->modelName != "liquid")
@@ -384,6 +384,9 @@ void Chunk::addFace(std::vector<float>& vertices, std::vector<unsigned int>& ind
     } else if (blockInfo->modelName == "cross") {
         usedFaceVerts = crossFaceVertices[face];
         usedUvs = cubeUvs;
+    } else if (blockInfo->modelName == "pebble") {
+        usedFaceVerts = pebbleFaceVertices[face];
+        usedUvs = pebbleUvs;
     } else if (blockInfo->modelName == "liquid") {
         usedFaceVerts = liquidFaceVertices[face];
         // Use "liquidUvs" for side faces, "cubeUvs" for top/bottom

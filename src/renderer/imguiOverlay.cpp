@@ -55,7 +55,7 @@ void ImGuiOverlay::render(float deltaTime, const Camera& camera, World* world) {
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
-    ImGui::SetNextWindowSize(ImVec2(285, 190)); // Width, Height
+    ImGui::SetNextWindowSize(ImVec2(300, 190)); // Width, Height
     
     glm::vec3 pos = camera.getPosition();
     glm::vec3 front = camera.getFront();
@@ -86,7 +86,7 @@ void ImGuiOverlay::render(float deltaTime, const Camera& camera, World* world) {
     int currentId = getSelectedBlockType()-1;
     ImGui::Text("Selected block:");
     ImGui::SameLine();
-    ImGui::SetNextItemWidth(150);
+    ImGui::SetNextItemWidth(165);
     if (ImGui::Combo("##SelectedBlockCombo", &currentId, blockItems.data(), static_cast<int>(blockItems.size()))) {
         setSelectedBlockType(blockIds[currentId]);
     }

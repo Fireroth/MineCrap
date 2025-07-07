@@ -33,10 +33,13 @@ AABB getModelAABB(uint8_t blockId) {
                 glm::vec3(0.9f, 1.0f, 0.9f)};
     } else if (info->modelName == "cross") {
         return {glm::vec3(0.1f, 0.0f, 0.1f),
-                glm::vec3(0.9f, 0.8f, 0.9f)};
+                glm::vec3(0.9f, 0.65f, 0.9f)};
     } else if (info->modelName == "slab") {
         return {glm::vec3(0.0f, 0.0f, 0.0f),
                 glm::vec3(1.0f, 0.5f, 1.0f)};
+    } else if (info->modelName == "pebble") {
+        return {glm::vec3(0.385f, 0.0f, 0.385f),
+                glm::vec3(0.615f, 0.125f, 0.615f)};
     } else { // full block
         return {glm::vec3(0.0f),
                 glm::vec3(1.0f)};

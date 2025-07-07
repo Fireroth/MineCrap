@@ -12,6 +12,7 @@ public:
         bool liquid;
         std::string name;
         std::string modelName;
+        bool renderFacesInBetween;
     };
 
     static void initialize();
