@@ -29,7 +29,7 @@ bool ImGuiOverlay::init(GLFWwindow* window) {
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init("#version 330");
 
-    for (uint8_t id = 1; id <= 254; ++id) {
+    for (uint8_t id = 1; id <= 254; id++) {
         const auto* info = BlockDB::getBlockInfo(id);
         if (info) {
             blockItems.push_back(info->name.c_str());

@@ -34,7 +34,8 @@ int main()
 
     Renderer renderer;
     ImGuiOverlay ImGuiOverlay;
-    BlockDB::initialize();
+    BlockDB::init();
+    StructureDB::init();
     
     Camera camera(
         glm::vec3(0.0f, 51.0f, 0.0f),  // Position

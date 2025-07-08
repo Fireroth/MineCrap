@@ -19,8 +19,8 @@ World::~World() {
 
 void World::generateChunks(int radius) {
     // Create chunks
-    for (int x = -radius; x <= radius; ++x) {
-        for (int z = -radius; z <= radius; ++z) {
+    for (int x = -radius; x <= radius; x++) {
+        for (int z = -radius; z <= radius; z++) {
             std::pair<int, int> pos = {x, z};
             if (chunks.find(pos) == chunks.end()) {
                 chunks[pos] = new Chunk(x, z, this);
@@ -59,8 +59,8 @@ void World::updateChunksAroundPlayer(const glm::vec3& playerPos, int radius) {
 
         chunkLoadQueue.clear();
         std::vector<std::pair<int, int>> positions;
-        for (int x = -radius; x <= radius; ++x) {
-            for (int z = -radius; z <= radius; ++z) {
+        for (int x = -radius; x <= radius; x++) {
+            for (int z = -radius; z <= radius; z++) {
                 int chunkX = playerChunkX + x;
                 int chunkZ = playerChunkZ + z;
                 std::pair<int, int> pos = {chunkX, chunkZ};
@@ -82,7 +82,7 @@ void World::updateChunksAroundPlayer(const glm::vec3& playerPos, int radius) {
     }
 
     static int chunksToLoadPerFrame = getOptionInt("chunks_to_load_per_frame", 1);
-    for (int i = 0; i < chunksToLoadPerFrame && !chunkLoadQueue.empty(); ++i) {
+    for (int i = 0; i < chunksToLoadPerFrame && !chunkLoadQueue.empty(); i++) {
         auto pos = chunkLoadQueue.front();
         chunkLoadQueue.pop_front();
         if (chunks.find(pos) == chunks.end()) {
@@ -91,7 +91,7 @@ void World::updateChunksAroundPlayer(const glm::vec3& playerPos, int radius) {
             newChunk->buildMesh();
             static const int neighborChunkOffsetX[4] = {-1, 1, 0, 0};
             static const int neighborChunkOffsetZ[4] = {0, 0, -1, 1};
-            for (int i = 0; i < 4; ++i) {
+            for (int i = 0; i < 4; i++) {
                 auto neighbor = getChunk(pos.first + neighborChunkOffsetX[i], pos.second + neighborChunkOffsetZ[i]);
                 if (neighbor) neighbor->buildMesh();
             }
@@ -118,7 +118,7 @@ bool World::isChunkInFrustum(int chunkX, int chunkZ, const Frustum& frustum) {
     float minZ = static_cast<float>(chunkZ * Chunk::chunkDepth);
     float maxZ = minZ + static_cast<float>(Chunk::chunkDepth);
 
-    for (int i = 0; i < 6; ++i) {
+    for (int i = 0; i < 6; i++) {
         const glm::vec4& plane = frustum.planes[i];
         int out = 0;
         out += (glm::dot(plane, glm::vec4(minX, minY, minZ, 1.0f)) < 0.0f) ? 1 : 0;

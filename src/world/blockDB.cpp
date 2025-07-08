@@ -5,7 +5,7 @@ static int fasterTrees = getOptionInt("faster_trees", 0);
 
 std::unordered_map<uint8_t, BlockDB::BlockInfo> BlockDB::blockData;
 
-void BlockDB::initialize() {
+void BlockDB::init() {
     blockData[1] = {
         {
             glm::vec2(0.0f, 15.0f), // front
@@ -684,6 +684,54 @@ void BlockDB::initialize() {
         false,
         false,
         "Maple Plank Slab",
+        "slab",
+        false
+    };
+
+    blockData[41] = {
+        {
+            glm::vec2(5.0f, 14.0f),
+            glm::vec2(5.0f, 14.0f),
+            glm::vec2(5.0f, 14.0f),
+            glm::vec2(5.0f, 14.0f),
+            glm::vec2(5.0f, 14.0f),
+            glm::vec2(5.0f, 14.0f)
+        },
+        false,
+        false,
+        "Leaves Carpet",
+        "carpet",
+        false
+    };
+
+    blockData[42] = {
+        {
+            glm::vec2(0.0f, 14.0f),
+            glm::vec2(0.0f, 14.0f),
+            glm::vec2(0.0f, 14.0f),
+            glm::vec2(0.0f, 14.0f),
+            glm::vec2(0.0f, 14.0f),
+            glm::vec2(0.0f, 14.0f)
+        },
+        false,
+        false,
+        "Stone Bricks",
+        "cube",
+        false
+    };
+
+    blockData[43] = {
+        {
+            glm::vec2(0.0f, 14.0f),
+            glm::vec2(0.0f, 14.0f),
+            glm::vec2(0.0f, 14.0f),
+            glm::vec2(0.0f, 14.0f),
+            glm::vec2(0.0f, 14.0f),
+            glm::vec2(0.0f, 14.0f)
+        },
+        false,
+        false,
+        "Stone Brick Slab",
         "slab",
         false
     };

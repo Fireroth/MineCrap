@@ -5,7 +5,7 @@
 
 class Renderer {
 public:
-    GLint uModelLoc, uViewLoc, uProjLoc, uAtlasLoc, uAspectLoc, uFogDensityLoc, uFogStartLoc, uFogColorLoc, uCamPosLoc;
+    GLint uModelLoc, uViewLoc, uProjLoc, uAtlasLoc, uCrosshairAspectLoc, uFogDensityLoc, uFogStartLoc, uFogColorLoc, uCamPosLoc;
     GLint uCrossModelLoc, uCrossViewLoc, uCrossProjLoc, uCrossAtlasLoc;
     GLint uLiquidModelLoc, uLiquidViewLoc, uLiquidProjLoc, uLiquidAtlasLoc;
     GLint uLiquidTimeLoc, uCrossTimeLoc, uTimeLoc;

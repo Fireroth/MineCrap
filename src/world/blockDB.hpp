@@ -15,7 +15,7 @@ public:
         bool renderFacesInBetween;
     };
 
-    static void initialize();
+    static void init();
     static const BlockInfo* getBlockInfo(const uint8_t& blockName);
 
 private:

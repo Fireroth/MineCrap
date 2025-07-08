@@ -54,9 +54,9 @@ void Chunk::placeStructure(const Structure& structure, int baseX, int baseY, int
     int structWidth = (int)structure.layers[0][0].size();
     std::set<Chunk*> affectedChunks; // Track which chunks are affected
 
-    for (int y = 0; y < structHeight; ++y) {
-        for (int z = 0; z < structDepth; ++z) {
-            for (int x = 0; x < structWidth; ++x) {
+    for (int y = 0; y < structHeight; y++) {
+        for (int z = 0; z < structDepth; z++) {
+            for (int x = 0; x < structWidth; x++) {
                 uint8_t blockType = structure.layers[y][z][x];
                 if (blockType == 0) continue;
                 int worldX = baseX + x;
@@ -113,7 +113,7 @@ void Chunk::placeStructure(const Structure& structure, int baseX, int baseY, int
 
 void Chunk::buildMesh() {
     // Defer mesh generation if any neighbor chunk is missing
-    for (int face = 0; face < 6; ++face) {
+    for (int face = 0; face < 6; face++) {
         int neighborX = 0, neighborY = 0, neighborZ = 0;
         switch (face) {
             case 0: neighborX = chunkX;     neighborY = 0; neighborZ = chunkZ + 1; break; // front
@@ -177,9 +177,9 @@ void Chunk::buildMesh() {
     unsigned int crossIndexOffset = 0;
     unsigned int liquidIndexOffset = 0;
 
-    for (int x = 0; x < chunkWidth; ++x) {
-        for (int y = 0; y < chunkHeight; ++y) {
-            for (int z = 0; z < chunkDepth; ++z) {
+    for (int x = 0; x < chunkWidth; x++) {
+        for (int y = 0; y < chunkHeight; y++) {
+            for (int z = 0; z < chunkDepth; z++) {
                 const uint8_t& type = blocks[x][y][z].type;
                 if (type == 0) continue;
 
@@ -187,17 +187,17 @@ void Chunk::buildMesh() {
                 if (!info) continue;
 
                 if (info->modelName == "cross") {
-                    for (int face = 0; face < 2; ++face) {
+                    for (int face = 0; face < 2; face++) {
                         addFace(crossVertices, crossIndices, x, y, z, face, info, crossIndexOffset);
                     }
                 } else if (info->liquid) {
-                    for (int face = 0; face < 6; ++face) {
+                    for (int face = 0; face < 6; face++) {
                         if (isBlockVisible(x, y, z, face)) {
                             addFace(liquidVertices, liquidIndices, x, y, z, face, info, liquidIndexOffset);
                         }
                     }
                 } else {
-                    for (int face = 0; face < 6; ++face) {
+                    for (int face = 0; face < 6;face++) {
                         if (isBlockVisible(x, y, z, face)) {
                             addFace(vertices, indices, x, y, z, face, info, indexOffset);
                         }
@@ -387,6 +387,13 @@ void Chunk::addFace(std::vector<float>& vertices, std::vector<unsigned int>& ind
     } else if (blockInfo->modelName == "pebble") {
         usedFaceVerts = pebbleFaceVertices[face];
         usedUvs = pebbleUvs;
+    } else if (blockInfo->modelName == "carpet") {
+        usedFaceVerts = carpetFaceVertices[face];
+        if (face >= 0 && face <= 3) {
+            usedUvs = carpetUvs;
+        } else {
+            usedUvs = cubeUvs;
+        }
     } else if (blockInfo->modelName == "liquid") {
         usedFaceVerts = liquidFaceVertices[face];
         // Use "liquidUvs" for side faces, "cubeUvs" for top/bottom
@@ -410,7 +417,7 @@ void Chunk::addFace(std::vector<float>& vertices, std::vector<unsigned int>& ind
 
     glm::vec2 texOffset = blockInfo->textureCoords[face] / 16.0f;
 
-    for (int i = 0; i < 4; ++i) {
+    for (int i = 0; i < 4; i++) {
         glm::vec3 pos = usedFaceVerts[i] + glm::vec3(x, y, z);
         glm::vec2 uv = (blockInfo->textureCoords[face] + usedUvs[i]) / 16.0f;
         vertices.insert(vertices.end(), {pos.x, pos.y, pos.z, uv.x, uv.y, static_cast<float>(face)});

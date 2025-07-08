@@ -31,7 +31,7 @@ cmake --build .
 -  Biomes
 -  Multiple block models
 -  Transparent and translucent blocks
--  Frustum culling
+-  Frustum Culling
 
 ## 🛠️ To-Do
 -  Inventory system

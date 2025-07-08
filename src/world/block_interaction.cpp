@@ -40,6 +40,9 @@ AABB getModelAABB(uint8_t blockId) {
     } else if (info->modelName == "pebble") {
         return {glm::vec3(0.385f, 0.0f, 0.385f),
                 glm::vec3(0.615f, 0.125f, 0.615f)};
+    } else if (info->modelName == "carpet") {
+        return {glm::vec3(0.0f, 0.0f, 0.0f),
+                glm::vec3(1.0f, 0.05f, 1.0f)};
     } else { // full block
         return {glm::vec3(0.0f),
                 glm::vec3(1.0f)};
@@ -50,7 +53,7 @@ AABB getModelAABB(uint8_t blockId) {
 bool rayAABBIntersect( const glm::vec3& rayOrigin, const glm::vec3& rayDir, const glm::vec3& boxMin, const glm::vec3& boxMax, float& hitDist, float maxRayDist) {
     float nearestEntry = 0.0f;
     float farthestExit = maxRayDist;
-    for (int axis = 0; axis < 3; ++axis) {
+    for (int axis = 0; axis < 3; axis++) {
         float inverseDir = 1.0f / rayDir[axis];
         float entryDist = (boxMin[axis] - rayOrigin[axis]) * inverseDir;
         float exitDist  = (boxMax[axis] - rayOrigin[axis]) * inverseDir;
@@ -91,13 +94,13 @@ RaycastResult raycast(World* world, const glm::vec3& origin, const glm::vec3& di
     glm::ivec3 step = glm::sign(dir);
 
     glm::vec3 sideDist;
-    for (int i = 0; i < 3; ++i) {
+    for (int i = 0; i < 3; i++) {
         float offset = (step[i] > 0 ? (blockPos[i] + 1.0f - rayPos[i]) : (rayPos[i] - blockPos[i]));
         sideDist[i] = offset * deltaDist[i];
     }
 
     float traveledDist = 0.0f;
-    for (int i = 0; i < 128 && traveledDist <= maxDist; ++i) {
+    for (int i = 0; i < 128 && traveledDist <= maxDist; i++) {
         int chunkX = worldToChunkCoord(blockPos.x, Chunk::chunkWidth);
         int chunkZ = worldToChunkCoord(blockPos.z, Chunk::chunkDepth);
         Chunk* chunk = world->getChunk(chunkX, chunkZ);

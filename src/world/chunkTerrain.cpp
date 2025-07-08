@@ -84,8 +84,8 @@ void generateChunkTerrain(Chunk& chunk) {
     std::vector<std::vector<Chunk::Biome>> biomeCache(chunkWidth + 2 * transitionRadius, std::vector<Chunk::Biome>(chunkDepth + 2 * transitionRadius));
     std::vector<std::vector<float>> heightCache(chunkWidth + 2 * transitionRadius, std::vector<float>(chunkDepth + 2 * transitionRadius));
 
-    for (int localOffsetX = -transitionRadius; localOffsetX < chunkWidth + transitionRadius; ++localOffsetX) {
-        for (int localOffsetZ = -transitionRadius; localOffsetZ < chunkDepth + transitionRadius; ++localOffsetZ) {
+    for (int localOffsetX = -transitionRadius; localOffsetX < chunkWidth + transitionRadius; localOffsetX++) {
+        for (int localOffsetZ = -transitionRadius; localOffsetZ < chunkDepth + transitionRadius; localOffsetZ++) {
             int worldX = chunkX * chunkWidth + localOffsetX;
             int worldZ = chunkZ * chunkDepth + localOffsetZ;
 
@@ -113,8 +113,8 @@ void generateChunkTerrain(Chunk& chunk) {
         }
     }
 
-    for (int x = 0; x < chunkWidth; ++x) {
-        for (int z = 0; z < chunkDepth; ++z) {
+    for (int x = 0; x < chunkWidth; x++) {
+        for (int z = 0; z < chunkDepth; z++) {
             int worldX = chunkX * chunkWidth + x;
             int worldZ = chunkZ * chunkDepth + z;
 
@@ -128,8 +128,8 @@ void generateChunkTerrain(Chunk& chunk) {
 
             // Blending
             bool hasDifferentBiome = false;
-            for (int localOffsetX = -transitionRadius; localOffsetX <= transitionRadius && !hasDifferentBiome; ++localOffsetX) {
-                for (int localOffsetZ = -transitionRadius; localOffsetZ <= transitionRadius && !hasDifferentBiome; ++localOffsetZ) {
+            for (int localOffsetX = -transitionRadius; localOffsetX <= transitionRadius && !hasDifferentBiome; localOffsetX++) {
+                for (int localOffsetZ = -transitionRadius; localOffsetZ <= transitionRadius && !hasDifferentBiome; localOffsetZ++) {
                     Chunk::Biome nBiome = biomeCache[x + localOffsetX + transitionRadius][z + localOffsetZ + transitionRadius];
                     if (nBiome != centerBiome) {
                         hasDifferentBiome = true;
@@ -144,8 +144,8 @@ void generateChunkTerrain(Chunk& chunk) {
                 float totalWeight = 0.0f;
                 std::map<Chunk::Biome, float> biomeWeights;
 
-                for (int localOffsetX = -transitionRadius; localOffsetX <= transitionRadius; ++localOffsetX) {
-                    for (int localOffsetZ = -transitionRadius; localOffsetZ <= transitionRadius; ++localOffsetZ) {
+                for (int localOffsetX = -transitionRadius; localOffsetX <= transitionRadius; localOffsetX++) {
+                    for (int localOffsetZ = -transitionRadius; localOffsetZ <= transitionRadius; localOffsetZ++) {
                         float dist2 = static_cast<float>(localOffsetX * localOffsetX + localOffsetZ * localOffsetZ);
                         float weight = 1.0f / (dist2 + 1.0f);
 
@@ -175,7 +175,7 @@ void generateChunkTerrain(Chunk& chunk) {
 
             int height = static_cast<int>(blendedHeight);
 
-            for (int y = 0; y < chunkHeight; ++y) {
+            for (int y = 0; y < chunkHeight; y++) {
                 if (y == 0) {
                     chunk.blocks[x][y][z].type = 6; // Bedrock
                 } else if (y > height) {
@@ -286,8 +286,8 @@ void generateChunkBiomeFeatures(Chunk& chunk, int margin, float treshold, int xO
     const Structure* structure = StructureDB::get(structureName);
     if (!structure) return;
 
-    for (int x = margin; x < Chunk::chunkWidth - margin; ++x) {
-        for (int z = margin; z < Chunk::chunkDepth - margin; ++z) {
+    for (int x = margin; x < Chunk::chunkWidth - margin; x++) {
+        for (int z = margin; z < Chunk::chunkDepth - margin; z++) {
             float worldX = static_cast<float>(chunk.chunkX * Chunk::chunkWidth + x);
             float worldZ = static_cast<float>(chunk.chunkZ * Chunk::chunkDepth + z);
             float n = noises.featureNoise.GetNoise(worldX, worldZ);

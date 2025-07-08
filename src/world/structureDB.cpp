@@ -2,7 +2,7 @@
 
 std::unordered_map<std::string, Structure> StructureDB::structures;
 
-void StructureDB::initialize() {
+void StructureDB::init() {
     std::vector<StructureLayer> treeLayers = {
         {
             {0,0,0,0,0},

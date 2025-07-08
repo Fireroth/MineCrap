@@ -29,8 +29,6 @@ void Renderer::init()
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glLineWidth(2.0f);
 
-    StructureDB::initialize();
-
     world.generateChunks(2); // Generate initial chunks around the 0,0
 
     std::string vertexSource = loadShaderSource("shaders/vertex.glsl");
@@ -49,7 +47,7 @@ void Renderer::init()
     std::string crosshairFragmentSource = loadShaderSource("shaders/crosshair_fragment.glsl");
     crosshairShaderProgram = createShaderProgram(crosshairVertexSource.c_str(), crosshairFragmentSource.c_str());
 
-    uAspectLoc = glGetUniformLocation(crosshairShaderProgram, "aspectRatio");
+    uCrosshairAspectLoc = glGetUniformLocation(crosshairShaderProgram, "aspectRatio");
 
     uCrossModelLoc = glGetUniformLocation(crossShaderProgram, "model");
     uCrossViewLoc = glGetUniformLocation(crossShaderProgram, "view");
@@ -228,8 +226,8 @@ void Renderer::renderCrosshair(float aspectRatio) {
     glDisable(GL_DEPTH_TEST);
     glUseProgram(crosshairShaderProgram);
     
-    if (uAspectLoc != -1) {
-        glUniform1f(uAspectLoc, aspectRatio);
+    if (uCrosshairAspectLoc != -1) {
+        glUniform1f(uCrosshairAspectLoc, aspectRatio);
     }
     glBindVertexArray(crosshairVAO);
     glDrawArrays(GL_LINES, 0, 4);

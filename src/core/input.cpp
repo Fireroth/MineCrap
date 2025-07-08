@@ -136,7 +136,7 @@ void processInput(GLFWwindow* window, Camera& camera, float deltaTime, float spe
     fPressedLastFrame = fPressedThisFrame;
 
     // Block selection with number keys 1-9
-    for (int i = 1; i <= 9; ++i) {
+    for (int i = 1; i <= 9; i++) {
         if (glfwGetKey(window, GLFW_KEY_1 + (i - 1)) == GLFW_PRESS) {
             selectedBlockType = static_cast<uint8_t>(i);
         }
