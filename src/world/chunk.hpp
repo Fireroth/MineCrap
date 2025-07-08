@@ -31,7 +31,7 @@ public:
         uint8_t type;
     };
 
-    Chunk(int x, int z, World* worldRef);
+    Chunk(int x, int z, World* worldPtr);
     ~Chunk();
 
     void buildMesh();
@@ -58,6 +58,4 @@ private:
                  int x, int y, int z, int face, const BlockDB::BlockInfo* blockInfo, unsigned int& indexOffset);
 
     bool isBlockVisible(int x, int y, int z, int face) const;
-
-    friend class World; // Allow World to access private members (yay, a friend)
 };

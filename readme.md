@@ -31,13 +31,14 @@ cmake --build .
 -  Biomes
 -  Multiple block models
 -  Transparent and translucent blocks
+-  Frustum culling
 
 ## 🛠️ To-Do
 -  Inventory system
 -  Sounds
--  Frustum culling
 -  Player physics & collisions
 -  Chunk saving
+-  Lighting
 
 ## 📚 Libraries used
 - [glfw](https://www.glfw.org/) – Window and input handling  

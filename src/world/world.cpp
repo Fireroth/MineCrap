@@ -1,4 +1,4 @@
-#include <glm/glm.hpp>
+#include <glm/gtc/matrix_access.hpp>
 #include <iostream>
 #include <cmath>
 #include <deque>
@@ -99,21 +99,58 @@ void World::updateChunksAroundPlayer(const glm::vec3& playerPos, int radius) {
     }
 }
 
-void World::render(const Camera& camera, GLint uModelLoc) {
+Frustum World::extractFrustumPlanes(const glm::mat4& projView) {
+    Frustum frustum;
+    frustum.planes[0] = glm::row(projView, 3) + glm::row(projView, 0); // Left
+    frustum.planes[1] = glm::row(projView, 3) - glm::row(projView, 0); // Right
+    frustum.planes[2] = glm::row(projView, 3) + glm::row(projView, 1); // Bottom
+    frustum.planes[3] = glm::row(projView, 3) - glm::row(projView, 1); // Top
+    frustum.planes[4] = glm::row(projView, 3) + glm::row(projView, 2); // Near
+    frustum.planes[5] = glm::row(projView, 3) - glm::row(projView, 2); // Far
+    return frustum;
+}
+
+bool World::isChunkInFrustum(int chunkX, int chunkZ, const Frustum& frustum) {
+    float minX = static_cast<float>(chunkX * Chunk::chunkWidth);
+    float maxX = minX + static_cast<float>(Chunk::chunkWidth);
+    float minY = 0.0f;
+    float maxY = static_cast<float>(Chunk::chunkHeight);
+    float minZ = static_cast<float>(chunkZ * Chunk::chunkDepth);
+    float maxZ = minZ + static_cast<float>(Chunk::chunkDepth);
+
+    for (int i = 0; i < 6; ++i) {
+        const glm::vec4& plane = frustum.planes[i];
+        int out = 0;
+        out += (glm::dot(plane, glm::vec4(minX, minY, minZ, 1.0f)) < 0.0f) ? 1 : 0;
+        out += (glm::dot(plane, glm::vec4(maxX, minY, minZ, 1.0f)) < 0.0f) ? 1 : 0;
+        out += (glm::dot(plane, glm::vec4(minX, maxY, minZ, 1.0f)) < 0.0f) ? 1 : 0;
+        out += (glm::dot(plane, glm::vec4(maxX, maxY, minZ, 1.0f)) < 0.0f) ? 1 : 0;
+        out += (glm::dot(plane, glm::vec4(minX, minY, maxZ, 1.0f)) < 0.0f) ? 1 : 0;
+        out += (glm::dot(plane, glm::vec4(maxX, minY, maxZ, 1.0f)) < 0.0f) ? 1 : 0;
+        out += (glm::dot(plane, glm::vec4(minX, maxY, maxZ, 1.0f)) < 0.0f) ? 1 : 0;
+        out += (glm::dot(plane, glm::vec4(maxX, maxY, maxZ, 1.0f)) < 0.0f) ? 1 : 0;
+        if (out == 8) return false;
+    }
+    return true;
+}
+
+void World::render(const Camera& camera, GLint uModelLoc, const Frustum& frustum) {
     for (auto& [coord, chunk] : chunks) {
-        chunk->render(camera, uModelLoc);
+        if (isChunkInFrustum(coord.first, coord.second, frustum))
+            chunk->render(camera, uModelLoc);
     }
 }
 
-void World::renderCross(const Camera& camera, GLint uCrossModelLoc) {
+void World::renderCross(const Camera& camera, GLint uCrossModelLoc, const Frustum& frustum) {
     for (auto& [coord, chunk] : chunks) {
-        chunk->renderCross(camera, uCrossModelLoc);
+        if (isChunkInFrustum(coord.first, coord.second, frustum))
+            chunk->renderCross(camera, uCrossModelLoc);
     }
 }
-
-void World::renderLiquid(const Camera& camera, GLint uLiquidModelLoc) {
+void World::renderLiquid(const Camera& camera, GLint uLiquidModelLoc, const Frustum& frustum) {
     for (auto& [coord, chunk] : chunks) {
-        chunk->renderLiquid(camera, uLiquidModelLoc);
+        if (isChunkInFrustum(coord.first, coord.second, frustum))
+            chunk->renderLiquid(camera, uLiquidModelLoc);
     }
 }
 

@@ -52,9 +52,9 @@ void Renderer::init()
     uAspectLoc = glGetUniformLocation(crosshairShaderProgram, "aspectRatio");
 
     uCrossModelLoc = glGetUniformLocation(crossShaderProgram, "model");
-    uCrossViewLoc = glGetUniformLocation(shaderProgram, "view");
-    uCrossProjLoc = glGetUniformLocation(shaderProgram, "projection");
-    uCrossAtlasLoc = glGetUniformLocation(shaderProgram, "atlas");
+    uCrossViewLoc = glGetUniformLocation(crossShaderProgram, "view");
+    uCrossProjLoc = glGetUniformLocation(crossShaderProgram, "projection");
+    uCrossAtlasLoc = glGetUniformLocation(crossShaderProgram, "atlas");
 
     uLiquidModelLoc = glGetUniformLocation(liquidShaderProgram, "model");
     uLiquidViewLoc = glGetUniformLocation(liquidShaderProgram, "view");
@@ -134,8 +134,10 @@ void Renderer::renderWorld(const Camera& camera, float aspectRatio, float deltaT
 
     glm::mat4 view = camera.getViewMatrix();
     glm::mat4 projection = glm::perspective(glm::radians(currentFov), aspectRatio, 0.1f, 5000.0f);
+    
+    Frustum frustum = World::extractFrustumPlanes(projection * view);
 
-     // -------------------------------- Render main --------------------------------
+    // -------------------------------- Render main --------------------------------
 
     glUseProgram(shaderProgram);
     glEnable(GL_CULL_FACE);
@@ -161,7 +163,7 @@ void Renderer::renderWorld(const Camera& camera, float aspectRatio, float deltaT
         glUniform1f(uFogDensityLoc, 0.0f); // Disable fog
     }
 
-    world.render(camera, uModelLoc);
+    world.render(camera, uModelLoc, frustum);
 
     // -------------------------------- Render cross --------------------------------
 
@@ -188,7 +190,7 @@ void Renderer::renderWorld(const Camera& camera, float aspectRatio, float deltaT
         glUniform1f(uFogDensityLoc, 0.0f); // Disable fog
     }
     
-    world.renderCross(camera, uCrossModelLoc);
+    world.renderCross(camera, uCrossModelLoc, frustum);
 
     // -------------------------------- Render liquid --------------------------------
 
@@ -216,7 +218,7 @@ void Renderer::renderWorld(const Camera& camera, float aspectRatio, float deltaT
         glUniform1f(uFogDensityLoc, 0.0f); // Disable fog
     }
     
-    world.renderLiquid(camera, uLiquidModelLoc);
+    world.renderLiquid(camera, uLiquidModelLoc, frustum);
 
     glDepthMask(GL_TRUE);
     glDisable(GL_BLEND);
