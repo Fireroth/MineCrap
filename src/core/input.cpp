@@ -5,6 +5,7 @@
 
 static bool firstMouse = true;
 static bool cursorCaptured = true;
+bool inventoryOpen = false;
 static Camera* g_camera = nullptr;
 static World* g_world = nullptr;
 static float lastX;
@@ -80,7 +81,6 @@ void setupInputCallbacks(GLFWwindow* window, Camera* camera, World* world)
     glfwSetCursorPosCallback(window, mouse_callback);
     glfwSetMouseButtonCallback(window, mouse_button_callback);
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-    cursorCaptured = true;
 }
 
 // Speed multiplier
@@ -116,12 +116,17 @@ void processInput(GLFWwindow* window, Camera& camera, float deltaTime, float spe
     static bool escPressedLastFrame = false;
     bool escPressedThisFrame = glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS;
 
-    if (escPressedThisFrame && !escPressedLastFrame)
-    {
-        cursorCaptured = !cursorCaptured;
-        glfwSetInputMode(window, GLFW_CURSOR,
-                         cursorCaptured ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
-        firstMouse = true; // Reset mouse position capture
+    if (escPressedThisFrame && !escPressedLastFrame) {
+        if (inventoryOpen) {
+            inventoryOpen = !inventoryOpen;
+            cursorCaptured = !cursorCaptured;
+            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        } else {
+            cursorCaptured = !cursorCaptured;
+            glfwSetInputMode(window, GLFW_CURSOR,
+                            cursorCaptured ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
+            firstMouse = true; // Reset mouse position capture
+        }
     }
     escPressedLastFrame = escPressedThisFrame;
 
@@ -134,6 +139,23 @@ void processInput(GLFWwindow* window, Camera& camera, float deltaTime, float spe
         glPolygonMode(GL_FRONT_AND_BACK, wireframeEnabled ? GL_LINE : GL_FILL);
     }
     fPressedLastFrame = fPressedThisFrame;
+
+    // Toggle inventory with E key
+    static bool ePressedLastFrame = false;
+    bool ePressedThisFrame = glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS;
+    if (ePressedThisFrame && !ePressedLastFrame) {
+        inventoryOpen = !inventoryOpen;
+        if (inventoryOpen) {
+            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+            cursorCaptured = false;
+            firstMouse = true;
+        } else {
+            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+            cursorCaptured = true;
+            firstMouse = true;
+        }
+    }
+    ePressedLastFrame = ePressedThisFrame;
 
     // Block selection with number keys 1-9
     for (int i = 1; i <= 9; i++) {

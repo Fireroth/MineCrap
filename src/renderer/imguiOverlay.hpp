@@ -3,6 +3,8 @@
 #include <vector>
 #include "../core/camera.hpp"
 
+extern bool inventoryOpen;
+
 class ImGuiOverlay {
 public:
     ImGuiOverlay();

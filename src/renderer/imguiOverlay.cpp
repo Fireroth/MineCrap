@@ -55,7 +55,8 @@ void ImGuiOverlay::render(float deltaTime, const Camera& camera, World* world) {
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
-    ImGui::SetNextWindowSize(ImVec2(300, 190)); // Width, Height
+    ImGui::SetNextWindowSize(ImVec2(280, 150)); // Width, Height
+    ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
     
     glm::vec3 pos = camera.getPosition();
     glm::vec3 front = camera.getFront();
@@ -65,7 +66,10 @@ void ImGuiOverlay::render(float deltaTime, const Camera& camera, World* world) {
     int chunkX = static_cast<int>(std::floor(pos.x / 16.0f));
     int chunkZ = static_cast<int>(std::floor(pos.z / 16.0f));
 
-    ImGui::Begin("Debug");
+    ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.1f, 0.1f, 0.1f, 0.5f));
+    ImGui::Begin("Debug",
+                nullptr,
+                ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
     ImGui::Text("FPS: %.1f", fpsDisplay);
     ImGui::Text("Camera Pos: %.2f, %.2f, %.2f", pos.x, pos.y, pos.z);
     ImGui::Text("Camera Front: %.2f, %.2f, %.2f", front.x, front.y, front.z);
@@ -82,16 +86,47 @@ void ImGuiOverlay::render(float deltaTime, const Camera& camera, World* world) {
         ImGui::Text("Block position: undefined");
     }
 
-    // Dropdown for block selection
-    int currentId = getSelectedBlockType()-1;
-    ImGui::Text("Selected block:");
-    ImGui::SameLine();
-    ImGui::SetNextItemWidth(165);
-    if (ImGui::Combo("##SelectedBlockCombo", &currentId, blockItems.data(), static_cast<int>(blockItems.size()))) {
-        setSelectedBlockType(blockIds[currentId]);
-    }
-
+    ImGui::PopStyleColor();
     ImGui::End();
+
+    // ---------------- Inventory window ----------------
+    if (inventoryOpen) {
+        ImGuiIO& io = ImGui::GetIO();
+        float winWidth = 465.0f;
+        float winHeight = io.DisplaySize.y * 0.5f;
+        ImVec2 invPos(
+            io.DisplaySize.x * 0.5f - winWidth * 0.5f,
+            io.DisplaySize.y * 0.5f - winHeight * 0.5f
+        );
+        ImGui::SetNextWindowPos(invPos, ImGuiCond_Always);
+        ImGui::SetNextWindowSize(ImVec2(winWidth, winHeight), ImGuiCond_Always);
+        ImGui::Begin("##Inventory",
+                nullptr,
+                ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
+        int currentId = getSelectedBlockType()-1;
+
+        ImVec2 buttonSize(140, 23);
+        for (size_t i = 0; i < blockItems.size(); ++i) {
+            bool isSelected = (getSelectedBlockType() == blockIds[i]);
+            if (isSelected) {
+                ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.5f, 1.0f, 1.0f, 0.4f));
+                ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.6f, 1.0f, 1.0f, 0.8f));
+                ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.5f, 1.0f, 1.0f, 0.4f));
+            }
+            if (ImGui::Button(blockItems[i], buttonSize)) {
+                setSelectedBlockType(blockIds[i]);
+            }
+            if (isSelected) {
+                ImGui::PopStyleColor(3);
+            }
+            // Place three buttons per line
+            if (i % 3 != 2 && i + 1 < blockItems.size()) {
+                ImGui::SameLine();
+            }
+        }
+        ImGui::End();
+
+    }
 
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
