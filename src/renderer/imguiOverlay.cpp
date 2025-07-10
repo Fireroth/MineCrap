@@ -52,7 +52,7 @@ void ImGuiOverlay::render(float deltaTime, const Camera& camera, World* world) {
         fpsTimer = 0.0f;
     }
     
-    if (!(inventoryOpen || debugOpen)) return;
+    //if (!(inventoryOpen || debugOpen)) return;
 
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
