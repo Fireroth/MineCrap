@@ -29,12 +29,14 @@ ipch
 ## Getting files created in JSON/Schemas/Catalog/ from a VS2022 update
 JSON/
 
-## Commonly used CMake directories
+## Commonly used CMake directories & CMake CPM cache
 build*/
+.cache
 
-## Xcode artifacts
+## Xcode & macOS artifacts
 project.xcworkspace
 xcuserdata
+examples/*/*.dSYM
 
 ## Emscripten artifacts
 examples/*.o.tmp
@@ -53,6 +55,8 @@ cmake-build-*
 .vscode
 
 ## Unix executables from our example Makefiles
+examples/example_apple_metal/example_apple_metal
+examples/example_apple_opengl2/example_apple_opengl2
 examples/example_glfw_metal/example_glfw_metal
 examples/example_glfw_opengl2/example_glfw_opengl2
 examples/example_glfw_opengl3/example_glfw_opengl3

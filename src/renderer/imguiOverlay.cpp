@@ -60,7 +60,6 @@ void ImGuiOverlay::render(float deltaTime, const Camera& camera, World* world) {
 
     // ---------------- Debug window ----------------
     if (debugOpen) {
-
         ImGui::SetNextWindowSize(ImVec2(320, 0)); // Width, Height
         ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
         
@@ -135,7 +134,6 @@ void ImGuiOverlay::render(float deltaTime, const Camera& camera, World* world) {
                 ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.5f, 1.0f, 1.0f, 0.4f));
             }
 
-            ImGui::BeginGroup();
             const auto* blockInfo = BlockDB::getBlockInfo(blockIds[i]);
             int tileX = static_cast<int>(blockInfo->textureCoords[0].x);
             int tileY = static_cast<int>(blockInfo->textureCoords[0].y);
@@ -153,7 +151,6 @@ void ImGuiOverlay::render(float deltaTime, const Camera& camera, World* world) {
             }
             if (ImGui::IsItemHovered())
                 ImGui::SetTooltip(blockItems[i]);
-            ImGui::EndGroup();
 
             if (isSelected) {
                 ImGui::PopStyleColor(3);
