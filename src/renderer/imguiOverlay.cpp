@@ -163,8 +163,6 @@ void ImGuiOverlay::render(float deltaTime, const Camera& camera, World* world) {
         ImGui::End();
     }
 
-    if (inventoryOpen || debugOpen) {
-        ImGui::Render();
-        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-    }
+    ImGui::Render();
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
