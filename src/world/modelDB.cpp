@@ -1,5 +1,5 @@
-#include "modelDB.hpp"
 #include <glm/glm.hpp>
+#include "modelDB.hpp"
 
 // ---------- Face vertices ----------
 const glm::vec3 cubeFaceVertices[6][4] = {

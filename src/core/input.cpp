@@ -6,6 +6,7 @@
 static bool firstMouse = true;
 static bool cursorCaptured = true;
 bool inventoryOpen = false;
+bool debugOpen = false;
 static Camera* g_camera = nullptr;
 static World* g_world = nullptr;
 static float lastX;
@@ -139,6 +140,14 @@ void processInput(GLFWwindow* window, Camera& camera, float deltaTime, float spe
         glPolygonMode(GL_FRONT_AND_BACK, wireframeEnabled ? GL_LINE : GL_FILL);
     }
     fPressedLastFrame = fPressedThisFrame;
+
+    // Toggle debug window with F3 key
+    static bool f3PressedLastFrame = false;
+    bool f3PressedThisFrame = glfwGetKey(window, GLFW_KEY_F3) == GLFW_PRESS;
+    if (f3PressedThisFrame && !f3PressedLastFrame) {
+        debugOpen = !debugOpen;
+    }
+    f3PressedLastFrame = f3PressedThisFrame;
 
     // Toggle inventory with E key
     static bool ePressedLastFrame = false;

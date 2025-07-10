@@ -44,17 +44,15 @@ void World::updateChunksAroundPlayer(const glm::vec3& playerPos, int radius) {
         lastPlayerChunkZ = playerChunkZ;
 
         // Unload chunks outside radius
-        std::vector<std::pair<int, int>> toRemove;
-        for (const auto& [coord, chunk] : chunks) {
-            int chunkOffsetX = coord.first - playerChunkX;
-            int chunkOffsetZ = coord.second - playerChunkZ;
+        for (auto iterator = chunks.begin(); iterator != chunks.end();) {
+            int chunkOffsetX = iterator->first.first - playerChunkX;
+            int chunkOffsetZ = iterator->first.second - playerChunkZ;
             if (std::abs(chunkOffsetX) > radius || std::abs(chunkOffsetZ) > radius) {
-                toRemove.push_back(coord);
+                delete iterator->second;
+                iterator = chunks.erase(iterator);
+            } else {
+                iterator++;
             }
-        }
-        for (const auto& coord : toRemove) {
-            delete chunks[coord];
-            chunks.erase(coord);
         }
 
         chunkLoadQueue.clear();
@@ -85,16 +83,14 @@ void World::updateChunksAroundPlayer(const glm::vec3& playerPos, int radius) {
     for (int i = 0; i < chunksToLoadPerFrame && !chunkLoadQueue.empty(); i++) {
         auto pos = chunkLoadQueue.front();
         chunkLoadQueue.pop_front();
-        if (chunks.find(pos) == chunks.end()) {
-            Chunk* newChunk = new Chunk(pos.first, pos.second, this);
-            chunks[pos] = newChunk;
-            newChunk->buildMesh();
-            static const int neighborChunkOffsetX[4] = {-1, 1, 0, 0};
-            static const int neighborChunkOffsetZ[4] = {0, 0, -1, 1};
-            for (int i = 0; i < 4; i++) {
-                auto neighbor = getChunk(pos.first + neighborChunkOffsetX[i], pos.second + neighborChunkOffsetZ[i]);
-                if (neighbor) neighbor->buildMesh();
-            }
+        Chunk* newChunk = new Chunk(pos.first, pos.second, this);
+        chunks[pos] = newChunk;
+        newChunk->buildMesh();
+        static const int neighborChunkOffsetX[4] = {-1, 1, 0, 0};
+        static const int neighborChunkOffsetZ[4] = {0, 0, -1, 1};
+        for (int i = 0; i < 4; i++) {
+            auto neighbor = getChunk(pos.first + neighborChunkOffsetX[i], pos.second + neighborChunkOffsetZ[i]);
+            if (neighbor) neighbor->buildMesh();  
         }
     }
 }

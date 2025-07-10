@@ -49,51 +49,73 @@ void ImGuiOverlay::render(float deltaTime, const Camera& camera, World* world) {
         frameCount = 0;
         fpsTimer = 0.0f;
     }
+    
+    if (!(inventoryOpen || debugOpen)) return;
 
-    // Start ImGui frame
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
-    ImGui::SetNextWindowSize(ImVec2(280, 150)); // Width, Height
-    ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
-    
-    glm::vec3 pos = camera.getPosition();
-    glm::vec3 front = camera.getFront();
-    BlockInfo blockInfo = getLookedAtBlockInfo(world, camera);
+    // ---------------- Debug window ----------------
+    if (debugOpen) {
+        
 
-    // Calculate chunk coordinates
-    int chunkX = static_cast<int>(std::floor(pos.x / 16.0f));
-    int chunkZ = static_cast<int>(std::floor(pos.z / 16.0f));
+        ImGui::SetNextWindowSize(ImVec2(320, 0)); // Width, Height
+        ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
+        
+        glm::vec3 pos = camera.getPosition();
+        glm::vec3 front = camera.getFront();
+        glm::vec3 up = camera.getUp();
+        BlockInfo blockInfo = getLookedAtBlockInfo(world, camera);
+        float camYaw = camera.getYaw();
+        float camPitch = camera.getPitch();
 
-    ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.1f, 0.1f, 0.1f, 0.5f));
-    ImGui::Begin("Debug",
-                nullptr,
-                ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
-    ImGui::Text("FPS: %.1f", fpsDisplay);
-    ImGui::Text("Camera Pos: %.2f, %.2f, %.2f", pos.x, pos.y, pos.z);
-    ImGui::Text("Camera Front: %.2f, %.2f, %.2f", front.x, front.y, front.z);
-    ImGui::Text("Camera Yaw: %.2f", camera.getYaw());
-    ImGui::Text("Camera Pitch: %.2f", camera.getPitch());
-    ImGui::Text("Chunk: %d, %d", chunkX, chunkZ);
+        // Calculate chunk coordinates
+        int chunkX = static_cast<int>(std::floor(pos.x / 16.0f));
+        int chunkZ = static_cast<int>(std::floor(pos.z / 16.0f));
 
-    if (blockInfo.valid) {
-        const auto* info = BlockDB::getBlockInfo(blockInfo.type);
-        ImGui::Text("Looking at: %s", info->name.c_str());
-        ImGui::Text("Block position: [%d, %d, %d]", blockInfo.worldPos.x, blockInfo.worldPos.y, blockInfo.worldPos.z);
-    } else {
-        ImGui::Text("Looking at: nothing");
-        ImGui::Text("Block position: undefined");
+        ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.1f, 0.1f, 0.1f, 0.5f));
+        ImGui::PushStyleColor(ImGuiCol_Separator, ImVec4(1.0f, 1.0f, 1.0f, 0.7f));
+
+        ImGui::Begin("Debug",
+                    nullptr,
+                    ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
+        ImGui::Text("FPS: %.1f", fpsDisplay);
+        ImGui::Text("Pos: %.2f / %.2f / %.2f", pos.x, pos.y, pos.z);
+        ImGui::Text("Delta Time: %.4f s", deltaTime);
+        ImGui::Text("Chunk: %d, %d", chunkX, chunkZ);
+        ImGui::Separator();
+        ImGui::Text("Camera -> Yaw: %.2f", camYaw);
+        ImGui::Text("Camera -> Pitch: %.2f", camPitch);
+        ImGui::Text("Camera -> Front: %.2f, %.2f, %.2f", front.x, front.y, front.z);
+        ImGui::Text("Camera -> Up: %.2f, %.2f, %.2f", up.x, up.y, up.z);
+        ImGui::Separator();
+        if (blockInfo.valid) {
+            const auto* info = BlockDB::getBlockInfo(blockInfo.type);
+            ImGui::Text("Block -> name: %s", info->name.c_str());
+            ImGui::Text("Block -> ID: %d", blockInfo.type);
+            ImGui::Text("Block -> position: %d / %d / %d", blockInfo.worldPos.x, blockInfo.worldPos.y, blockInfo.worldPos.z);
+            ImGui::Text("Block -> transparent: %s", info->transparent ? "True" : "False");
+            ImGui::Text("Block -> renderFacesInBetween: %s", info->renderFacesInBetween ? "True" : "False");
+            ImGui::Text("Block -> model name: %s", info->modelName);
+        } else {
+            ImGui::Text("Block -> name: Air");
+            ImGui::Text("Block -> ID: 0");
+            ImGui::Text("Block -> position: undefined");
+            ImGui::Text("Block -> transparent: undefined");
+            ImGui::Text("Block -> renderFacesInBetween: undefined");
+            ImGui::Text("Block -> model name: undefined");
+        }
+        ImGui::PopStyleColor(2);
+        ImGui::End();
     }
-
-    ImGui::PopStyleColor();
-    ImGui::End();
 
     // ---------------- Inventory window ----------------
     if (inventoryOpen) {
         ImGuiIO& io = ImGui::GetIO();
         float winWidth = 465.0f;
         float winHeight = io.DisplaySize.y * 0.5f;
+        ImVec2 buttonSize(140, 23);
         ImVec2 invPos(
             io.DisplaySize.x * 0.5f - winWidth * 0.5f,
             io.DisplaySize.y * 0.5f - winHeight * 0.5f
@@ -103,11 +125,10 @@ void ImGuiOverlay::render(float deltaTime, const Camera& camera, World* world) {
         ImGui::Begin("##Inventory",
                 nullptr,
                 ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
-        int currentId = getSelectedBlockType()-1;
 
-        ImVec2 buttonSize(140, 23);
+        uint8_t selectedBlockType = getSelectedBlockType();
         for (size_t i = 0; i < blockItems.size(); ++i) {
-            bool isSelected = (getSelectedBlockType() == blockIds[i]);
+            bool isSelected = (selectedBlockType == blockIds[i]);
             if (isSelected) {
                 ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.5f, 1.0f, 1.0f, 0.4f));
                 ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.6f, 1.0f, 1.0f, 0.8f));
@@ -128,6 +149,8 @@ void ImGuiOverlay::render(float deltaTime, const Camera& camera, World* world) {
 
     }
 
-    ImGui::Render();
-    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+    if (inventoryOpen || debugOpen) {
+        ImGui::Render();
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+    }
 }

@@ -4,6 +4,7 @@
 #include "../core/camera.hpp"
 
 extern bool inventoryOpen;
+extern bool debugOpen;
 
 class ImGuiOverlay {
 public:

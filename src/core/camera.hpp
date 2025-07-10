@@ -12,6 +12,7 @@ public:
 
     glm::vec3 getPosition() const { return position; }
     glm::vec3 getFront() const { return front; }
+    glm::vec3 getUp() const { return up; }
     float getYaw() const { return yaw; }
     float getPitch() const { return pitch; }
 
