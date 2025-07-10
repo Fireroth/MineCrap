@@ -39,7 +39,7 @@ file(GLOB_RECURSE SRC_FILES
     src/*.cpp
 )
 
-add_executable(MineCrap ${SRC_FILES})
+add_executable(MineCrap ${SRC_FILES} App.rc)
 
 target_link_libraries(MineCrap glad glfw glm imgui ${CMAKE_DL_LIBS})
 

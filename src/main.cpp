@@ -61,8 +61,8 @@ int main()
 
     glfwSwapInterval(getOptionInt("vsync", 0));
     
-    ImGuiOverlay.init(glfwWindow);
     renderer.init();
+    ImGuiOverlay.init(glfwWindow, renderer.textureAtlas);
     
     // Main game loop
     while (!window.shouldClose())

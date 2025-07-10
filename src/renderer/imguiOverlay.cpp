@@ -1,4 +1,3 @@
-#include <imgui.h>
 #include <backends/imgui_impl_glfw.h>
 #include <backends/imgui_impl_opengl3.h>
 #include <string>
@@ -11,6 +10,7 @@ const float ImGuiOverlay::fpsRefreshInterval = 0.5f; // 500ms
 
 std::vector<const char*> ImGuiOverlay::blockItems;
 std::vector<uint8_t> ImGuiOverlay::blockIds;
+ImTextureID ImGuiOverlay::texAtlas;
 
 ImGuiOverlay::ImGuiOverlay()
     : fpsTimer(0.0f), frameCount(0), fpsDisplay(0.0f) {}
@@ -21,7 +21,7 @@ ImGuiOverlay::~ImGuiOverlay() {
     ImGui::DestroyContext();
 }
 
-bool ImGuiOverlay::init(GLFWwindow* window) {
+bool ImGuiOverlay::init(GLFWwindow* window, GLuint textureAtlas) {
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO(); (void)io;
@@ -36,6 +36,8 @@ bool ImGuiOverlay::init(GLFWwindow* window) {
             blockIds.push_back(id);
         }
     }
+
+    texAtlas = (ImTextureID)(intptr_t)textureAtlas;
 
     return true;
 }
@@ -58,7 +60,6 @@ void ImGuiOverlay::render(float deltaTime, const Camera& camera, World* world) {
 
     // ---------------- Debug window ----------------
     if (debugOpen) {
-        
 
         ImGui::SetNextWindowSize(ImVec2(320, 0)); // Width, Height
         ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
@@ -82,7 +83,7 @@ void ImGuiOverlay::render(float deltaTime, const Camera& camera, World* world) {
                     ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
         ImGui::Text("FPS: %.1f", fpsDisplay);
         ImGui::Text("Pos: %.2f / %.2f / %.2f", pos.x, pos.y, pos.z);
-        ImGui::Text("Delta Time: %.4f s", deltaTime);
+        ImGui::Text("Delta Time: %.2f ms", deltaTime*1000);
         ImGui::Text("Chunk: %d, %d", chunkX, chunkZ);
         ImGui::Separator();
         ImGui::Text("Camera -> Yaw: %.2f", camYaw);
@@ -113,9 +114,8 @@ void ImGuiOverlay::render(float deltaTime, const Camera& camera, World* world) {
     // ---------------- Inventory window ----------------
     if (inventoryOpen) {
         ImGuiIO& io = ImGui::GetIO();
-        float winWidth = 465.0f;
-        float winHeight = io.DisplaySize.y * 0.5f;
-        ImVec2 buttonSize(140, 23);
+        float winWidth = 425.0f;
+        float winHeight = io.DisplaySize.y * 0.6f;
         ImVec2 invPos(
             io.DisplaySize.x * 0.5f - winWidth * 0.5f,
             io.DisplaySize.y * 0.5f - winHeight * 0.5f
@@ -134,19 +134,36 @@ void ImGuiOverlay::render(float deltaTime, const Camera& camera, World* world) {
                 ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.6f, 1.0f, 1.0f, 0.8f));
                 ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.5f, 1.0f, 1.0f, 0.4f));
             }
-            if (ImGui::Button(blockItems[i], buttonSize)) {
+
+            ImGui::BeginGroup();
+            const auto* blockInfo = BlockDB::getBlockInfo(blockIds[i]);
+            int tileX = static_cast<int>(blockInfo->textureCoords[0].x);
+            int tileY = static_cast<int>(blockInfo->textureCoords[0].y);
+
+            ImVec2 uv0 = ImVec2(
+                (tileX * 16) / (float)256,
+                ((tileY + 1) * 16) / (float)256
+            );
+            ImVec2 uv1 = ImVec2(
+                ((tileX + 1) * 16) / (float)256,
+                (tileY * 16) / (float)256
+            );
+            if (ImGui::ImageButton(blockItems[i], texAtlas, ImVec2(64, 64), uv0, uv1)) {
                 setSelectedBlockType(blockIds[i]);
             }
+            if (ImGui::IsItemHovered())
+                ImGui::SetTooltip(blockItems[i]);
+            ImGui::EndGroup();
+
             if (isSelected) {
                 ImGui::PopStyleColor(3);
             }
-            // Place three buttons per line
-            if (i % 3 != 2 && i + 1 < blockItems.size()) {
+            static int itemsPerRow = 5;
+            if ((i % itemsPerRow) != (itemsPerRow - 1) && i + 1 < blockItems.size()) {
                 ImGui::SameLine();
             }
         }
         ImGui::End();
-
     }
 
     if (inventoryOpen || debugOpen) {

@@ -22,9 +22,10 @@ public:
     float fogDensity;
     float fogStartDistance;
     glm::vec3 fogColor;
+    GLuint textureAtlas;
 
 private:
-    GLuint shaderProgram, textureAtlas;
+    GLuint shaderProgram;
     GLuint crossShaderProgram;
     GLuint liquidShaderProgram;
     GLuint crosshairVAO, crosshairVBO, crosshairShaderProgram;

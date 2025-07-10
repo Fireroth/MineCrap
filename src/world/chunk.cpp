@@ -389,6 +389,7 @@ void Chunk::addFace(std::vector<float>& vertices, std::vector<unsigned int>& ind
         usedUvs = pebbleUvs;
     } else if (blockInfo->modelName == "carpet") {
         usedFaceVerts = carpetFaceVertices[face];
+        // Use "carpetUvs" for side faces, "cubeUvs" for top/bottom
         if (face >= 0 && face <= 3) {
             usedUvs = carpetUvs;
         } else {
@@ -414,8 +415,6 @@ void Chunk::addFace(std::vector<float>& vertices, std::vector<unsigned int>& ind
         usedFaceVerts = cubeFaceVertices[face];
         usedUvs = cubeUvs;
     }
-
-    glm::vec2 texOffset = blockInfo->textureCoords[face] / 16.0f;
 
     for (int i = 0; i < 4; i++) {
         glm::vec3 pos = usedFaceVerts[i] + glm::vec3(x, y, z);
