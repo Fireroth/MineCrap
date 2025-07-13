@@ -1,13 +1,17 @@
 #include <glad/glad.h>
+#include <stb_image.h>
 #include <iostream>
 #include "window.hpp"
-#include "stb_image.h"
 
 Window::Window(int width, int height, const char* title)
     : width(width), height(height), title(title), window(nullptr) {}
 
 Window::~Window() {
-    cleanup();
+    if (window) {
+        glfwDestroyWindow(window);
+        window = nullptr;
+    }
+    glfwTerminate();
 }
 
 void Window::framebufferSizeCallback(GLFWwindow* glfwWindow, int width, int height) {
@@ -25,8 +29,9 @@ void Window::framebufferSizeCallback(GLFWwindow* glfwWindow, int width, int heig
     }
 }
 
-bool Window::init() {
-    if (!glfwInit()) return false;
+void Window::init() {
+    if (!glfwInit()) 
+        exit(EXIT_FAILURE);
 
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -36,7 +41,7 @@ bool Window::init() {
     window = glfwCreateWindow(width, height, title, nullptr, nullptr);
     if (!window) {
         glfwTerminate();
-        return false;
+        exit(EXIT_FAILURE);
     }
 
     setIcon("textures/icon.png");
@@ -45,13 +50,13 @@ bool Window::init() {
 
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
         std::cerr << "Failed to initialize GLAD" << std::endl;
-        return false;
+        exit(EXIT_FAILURE);
     }
 
     glfwSetWindowUserPointer(window, this);
     glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
 
-    return true;
+    glfwSetCursorPos(window, width / 2.0, height / 2.0);
 }
 
 void Window::pollEvents() const {
@@ -65,14 +70,6 @@ void Window::clear(float r, float g, float b, float a) const {
 
 void Window::swapBuffers() const {
     glfwSwapBuffers(window);
-}
-
-void Window::cleanup() {
-    if (window) {
-        glfwDestroyWindow(window);
-        window = nullptr;
-    }
-    glfwTerminate();
 }
 
 bool Window::shouldClose() const {

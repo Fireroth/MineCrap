@@ -8,7 +8,7 @@ public:
     Window(int width, int height, const char* title);
     ~Window();
 
-    bool init();
+    void init();
     void pollEvents() const;
     void clear(float r, float g, float b, float a) const;
     void swapBuffers() const;

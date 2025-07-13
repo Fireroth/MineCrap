@@ -44,8 +44,7 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 }
 
 // Mouse button callback for block breaking and placing
-void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
-{
+void mouse_button_callback(GLFWwindow* window, int button, int action, int mods) {
     if (!cursorCaptured) return;
     if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
         if (g_camera && g_world) {
@@ -69,10 +68,9 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
     }
 }
 
-void setupInputCallbacks(GLFWwindow* window, Camera* camera, World* world)
-{
+void setupInputCallbacks(GLFWwindow* window, Camera* camera, World* world) {
     g_camera = camera;
-    g_world = world; // Store world pointer
+    g_world = world;
     int width, height;
     glfwGetWindowSize(window, &width, &height);
     lastX = static_cast<float>(width) / 2.0f;
@@ -85,20 +83,17 @@ void setupInputCallbacks(GLFWwindow* window, Camera* camera, World* world)
 }
 
 // Speed multiplier
-float getSpeedMultiplier(GLFWwindow* window)
-{
+float getSpeedMultiplier(GLFWwindow* window) {
     return (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS) ? 30.0f : 4.0f;
 }
 
 // Zoom state
-bool getZoomState(GLFWwindow* window)
-{
+bool getZoomState(GLFWwindow* window) {
     return (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS) ? true : false;
 }
 
 // Keyboard movement
-void processInput(GLFWwindow* window, Camera& camera, float deltaTime, float speedMultiplier)
-{
+void processInput(GLFWwindow* window, Camera& camera, float deltaTime, float speedMultiplier) {
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
         camera.processKeyboard("FORWARD", deltaTime, speedMultiplier);
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
@@ -117,7 +112,11 @@ void processInput(GLFWwindow* window, Camera& camera, float deltaTime, float spe
     static bool escPressedLastFrame = false;
     bool escPressedThisFrame = glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS;
 
+    static int width, height;
+    glfwGetWindowSize(window, &width, &height);
+
     if (escPressedThisFrame && !escPressedLastFrame) {
+        glfwSetCursorPos(window, width / 2.0, height / 2.0);
         if (inventoryOpen) {
             inventoryOpen = !inventoryOpen;
             cursorCaptured = !cursorCaptured;
@@ -153,6 +152,7 @@ void processInput(GLFWwindow* window, Camera& camera, float deltaTime, float spe
     static bool ePressedLastFrame = false;
     bool ePressedThisFrame = glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS;
     if (ePressedThisFrame && !ePressedLastFrame) {
+        glfwSetCursorPos(window, width / 2.0, height / 2.0);
         inventoryOpen = !inventoryOpen;
         if (inventoryOpen) {
             glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);

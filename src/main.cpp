@@ -47,8 +47,7 @@ int main()
     );
 
     Window window(windowWidth, windowHeight, "MineCrap");
-    if (!window.init())
-        return -1;
+    window.init();
 
     window.setFramebufferResizeCallback([&aspectRatio](int w, int h, float ar) {
         aspectRatio = ar;
