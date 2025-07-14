@@ -7,7 +7,7 @@ on:
     branches: [ "main" ]
 
 jobs:
-  build-windows:
+  build-windows_x64:
     runs-on: windows-latest
 
     steps:
@@ -21,7 +21,7 @@ jobs:
         -DCMAKE_BUILD_TYPE=Release
         -S .
 
-    - name: Build
+    - name: Build (x64)
       run: cmake --build build --config Release
 
     - name: Run Tests
@@ -31,7 +31,7 @@ jobs:
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: windows-build
+        name: windows-x64-build
         path: bin/Release/**
         if-no-files-found: error
         retention-days: 64

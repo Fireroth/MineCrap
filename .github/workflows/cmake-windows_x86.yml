@@ -1,0 +1,41 @@
+name: CMake Windows x86 Build
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build-windows_x86:
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up MSVC Developer Command Prompt (x86)
+      uses: ilammy/msvc-dev-cmd@v1
+      with:
+        arch: x86
+
+    - name: Configure CMake for x86
+      run: >
+        cmake -B build
+        -A Win32
+        -DCMAKE_BUILD_TYPE=Release
+        -S .
+
+    - name: Build (x86)
+      run: cmake --build build --config Release
+
+    - name: Run Tests
+      working-directory: build
+      run: ctest --build-config Release
+
+    - name: Upload build artifacts (x86)
+      uses: actions/upload-artifact@v4
+      with:
+        name: windows-x86-build
+        path: bin/Release/**
+        if-no-files-found: error
+        retention-days: 64
