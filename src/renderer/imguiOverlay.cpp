@@ -97,7 +97,7 @@ void ImGuiOverlay::render(float deltaTime, const Camera& camera, World* world) {
             ImGui::Text("Block -> position: %d / %d / %d", blockInfo.worldPos.x, blockInfo.worldPos.y, blockInfo.worldPos.z);
             ImGui::Text("Block -> transparent: %s", info->transparent ? "True" : "False");
             ImGui::Text("Block -> renderFacesInBetween: %s", info->renderFacesInBetween ? "True" : "False");
-            ImGui::Text("Block -> model name: %s", info->modelName);
+            ImGui::Text("Block -> model name: %s", info->modelName.c_str());
         } else {
             ImGui::Text("Block -> name: Air");
             ImGui::Text("Block -> ID: 0");
