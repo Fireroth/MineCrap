@@ -1,7 +1,6 @@
 #version 330 core
 
 in vec2 TexCoord;
-in float FaceID;
 in vec3 WorldPos;
 out vec4 FragColor;
 
