@@ -33,13 +33,6 @@ cmake --build .
 -  Transparent and translucent blocks
 -  Frustum Culling
 
-## 🛠️ To-Do
--  Inventory system
--  Sounds
--  Player physics & collisions
--  Chunk saving
--  Lighting
-
 ## 📚 Libraries used
 - [glfw](https://www.glfw.org/) – Window and input handling  
 - [glad](https://github.com/Dav1dde/glad) – GL Loader-Generator
