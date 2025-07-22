@@ -735,6 +735,22 @@ void BlockDB::init() {
         "slab",
         false
     };
+
+    blockData[44] = {
+        {
+            glm::vec2(0.0f, 12.0f),
+            glm::vec2(0.0f, 12.0f),
+            glm::vec2(0.0f, 12.0f),
+            glm::vec2(0.0f, 12.0f),
+            glm::vec2(0.0f, 12.0f),
+            glm::vec2(0.0f, 12.0f)
+        },
+        false,
+        false,
+        "Structure Air",
+        "cube",
+        false
+    };
     
 }
 

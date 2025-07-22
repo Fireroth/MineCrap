@@ -59,6 +59,8 @@ void Chunk::placeStructure(const Structure& structure, int baseX, int baseY, int
             for (int x = 0; x < structWidth; x++) {
                 uint8_t blockType = structure.layers[y][z][x];
                 if (blockType == 0) continue;
+                if (blockType == 44) // Structure air block
+                    blockType = 0;
                 int worldX = baseX + x;
                 int worldY = baseY + y;
                 int worldZ = baseZ + z;

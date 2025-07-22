@@ -234,12 +234,12 @@ void generateChunkTerrain(Chunk& chunk) {
     chunk.biome = biome;
     switch (biome) {
         case Chunk::Biome::Plains:
-            generateChunkBiomeFeatures(chunk, 0, 0.9997f, 4, 3, "puddle", 1, 5, -4);
-            generateChunkBiomeFeatures(chunk, 0, 0.998f, 2, 2, "tree", 1, 0, 0);
-            generateChunkBiomeFeatures(chunk, 0, 0.83f, 0, 0, "grass", 1, 1, 0);
-            generateChunkBiomeFeatures(chunk, 0, 0.80f, 0, 0, "grassShort", 1, 2, 0);
-            generateChunkBiomeFeatures(chunk, 0, 0.96f, 0, 0, "poppy", 1, 3, 0);
-            generateChunkBiomeFeatures(chunk, 0, 0.96f, 0, 0, "dandelion", 1, 4, 0);
+            generateChunkBiomeFeatures(chunk, 0, 0.9997f, 4, 3, "puddle", 1, 0, -4);
+            generateChunkBiomeFeatures(chunk, 0, 0.998f, 2, 2, "tree", 1, 1, 0);
+            generateChunkBiomeFeatures(chunk, 0, 0.83f, 0, 0, "grass", 1, 2, 0);
+            generateChunkBiomeFeatures(chunk, 0, 0.80f, 0, 0, "grassShort", 1, 3, 0);
+            generateChunkBiomeFeatures(chunk, 0, 0.96f, 0, 0, "poppy", 1, 4, 0);
+            generateChunkBiomeFeatures(chunk, 0, 0.96f, 0, 0, "dandelion", 1, 5, 0);
             
             break;
         case Chunk::Biome::Forest:
@@ -295,7 +295,7 @@ void generateChunkBiomeFeatures(Chunk& chunk, int margin, float treshold, int xO
             float n = noises.featureNoise.GetNoise(worldX, worldZ);
             if (n > treshold) {
                 int y = Chunk::chunkHeight - 2;
-                while (y > 0 && chunk.blocks[x][y][z].type == 0) --y; {
+                while (y > 0 && chunk.blocks[x][y][z].type == 0) y--; {
                     if (chunk.blocks[x][y][z].type == allowedBlockID) {
                         chunk.placeStructure(*structure, x - xOffset, (y + 1) + yOffset, z - zOffset);
                     }
