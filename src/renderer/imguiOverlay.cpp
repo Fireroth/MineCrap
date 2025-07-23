@@ -39,6 +39,8 @@ bool ImGuiOverlay::init(GLFWwindow* window, GLuint textureAtlas) {
 
     texAtlas = (ImTextureID)(intptr_t)textureAtlas;
 
+    ImFont* Font = io.Fonts->AddFontFromFileTTF("./Font.ttf", 25.0f);
+
     return true;
 }
 
@@ -60,7 +62,7 @@ void ImGuiOverlay::render(float deltaTime, const Camera& camera, World* world) {
 
     // ---------------- Debug window ----------------
     if (debugOpen) {
-        ImGui::SetNextWindowSize(ImVec2(320, 0)); // Width, Height
+        ImGui::SetNextWindowSize(ImVec2(450, 0)); // Width, Height
         ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
         
         glm::vec3 pos = camera.getPosition();
@@ -113,7 +115,7 @@ void ImGuiOverlay::render(float deltaTime, const Camera& camera, World* world) {
     // ---------------- Inventory window ----------------
     if (inventoryOpen) {
         ImGuiIO& io = ImGui::GetIO();
-        float winWidth = 425.0f;
+        float winWidth = 500.0f;
         float winHeight = io.DisplaySize.y * 0.6f;
         ImVec2 invPos(
             io.DisplaySize.x * 0.5f - winWidth * 0.5f,
@@ -125,40 +127,60 @@ void ImGuiOverlay::render(float deltaTime, const Camera& camera, World* world) {
                 nullptr,
                 ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
 
-        uint8_t selectedBlockType = getSelectedBlockType();
-        for (size_t i = 0; i < blockItems.size(); ++i) {
-            bool isSelected = (selectedBlockType == blockIds[i]);
-            if (isSelected) {
-                ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.5f, 1.0f, 1.0f, 0.4f));
-                ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.6f, 1.0f, 1.0f, 0.8f));
-                ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.5f, 1.0f, 1.0f, 0.4f));
-            }
-
+        std::unordered_map<std::string, std::vector<size_t>> tabMap;
+        for (size_t i = 0; i < blockItems.size(); i++) {
             const auto* blockInfo = BlockDB::getBlockInfo(blockIds[i]);
-            int tileX = static_cast<int>(blockInfo->textureCoords[0].x);
-            int tileY = static_cast<int>(blockInfo->textureCoords[0].y);
+            tabMap[blockInfo->tabName].push_back(i);
+        }
+        
+        if (ImGui::BeginTabBar("InventoryTabs")) {
+            for (auto& [tabName, indices] : tabMap) {
+                if (ImGui::BeginTabItem(tabName.c_str())) {
 
-            ImVec2 uv0 = ImVec2(
-                (tileX * 16) / (float)256,
-                ((tileY + 1) * 16) / (float)256
-            );
-            ImVec2 uv1 = ImVec2(
-                ((tileX + 1) * 16) / (float)256,
-                (tileY * 16) / (float)256
-            );
-            if (ImGui::ImageButton(blockItems[i], texAtlas, ImVec2(64, 64), uv0, uv1)) {
-                setSelectedBlockType(blockIds[i]);
-            }
-            if (ImGui::IsItemHovered())
-                ImGui::SetTooltip(blockItems[i]);
+                    ImGui::BeginChild("BlockGrid", ImVec2(0, 0), false);
 
-            if (isSelected) {
-                ImGui::PopStyleColor(3);
+                    uint8_t selectedBlockType = getSelectedBlockType();
+
+                    for (size_t n = 0; n < indices.size(); n++) {
+                        size_t i = indices[n];
+                        bool isSelected = (selectedBlockType == blockIds[i]);
+                        if (isSelected) {
+                            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.5f, 1.0f, 1.0f, 0.4f));
+                            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.6f, 1.0f, 1.0f, 0.8f));
+                            ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.5f, 1.0f, 1.0f, 0.4f));
+                        }
+
+                        const auto* blockInfo = BlockDB::getBlockInfo(blockIds[i]);
+                        int tileX = static_cast<int>(blockInfo->textureCoords[0].x);
+                        int tileY = static_cast<int>(blockInfo->textureCoords[0].y);
+
+                        ImVec2 uv0 = ImVec2(
+                            (tileX * 16) / 256.0f,
+                            ((tileY + 1) * 16) / 256.0f
+                        );
+                        ImVec2 uv1 = ImVec2(
+                            ((tileX + 1) * 16) / 256.0f,
+                            (tileY * 16) / 256.0f
+                        );
+
+                        if (ImGui::ImageButton(blockItems[i], texAtlas, ImVec2(64, 64), uv0, uv1)) 
+                            setSelectedBlockType(blockIds[i]);
+                            
+                        if (ImGui::IsItemHovered())
+                            ImGui::SetTooltip(blockItems[i]);
+
+                        if (isSelected)
+                            ImGui::PopStyleColor(3);
+
+                        static uint8_t itemsPerRow = 6;
+                        if ((n % itemsPerRow) != (itemsPerRow - 1) && n + 1 < indices.size())
+                            ImGui::SameLine();  
+                    }
+                    ImGui::EndChild();
+                    ImGui::EndTabItem();
+                }
             }
-            static int itemsPerRow = 5;
-            if ((i % itemsPerRow) != (itemsPerRow - 1) && i + 1 < blockItems.size()) {
-                ImGui::SameLine();
-            }
+            ImGui::EndTabBar();
         }
         ImGui::End();
     }

@@ -13,6 +13,7 @@ public:
         std::string name;
         std::string modelName;
         bool renderFacesInBetween;
+        std::string tabName;
     };
 
     static void init();

@@ -17,9 +17,10 @@ void BlockDB::init() {
         },
         false,          // Transparent
         false,          // Liquid
-        "Grass block",  // Name
+        "Grass Block",  // Name
         "cube",         // Model
-        false           // Render faces in between
+        false,          // Render faces in between
+        "Blocks"        // Tab name
     };
 
     blockData[2] = {
@@ -35,7 +36,8 @@ void BlockDB::init() {
         false,
         "Dirt",
         "cube",
-        false
+        false,
+        "Blocks"
     };
 
     blockData[3] = {
@@ -51,7 +53,8 @@ void BlockDB::init() {
         false,
         "Stone",
         "cube",
-        false
+        false,
+        "Blocks"
     };
 
     blockData[4] = {
@@ -67,7 +70,8 @@ void BlockDB::init() {
         false,
         "Sand",
         "cube",
-        false
+        false,
+        "Blocks"
     };
 
     blockData[5] = {
@@ -83,7 +87,8 @@ void BlockDB::init() {
         false,
         "Oak Log",
         "cube",
-        false
+        false,
+        "Blocks"
     };
 
     blockData[6] = {
@@ -99,7 +104,8 @@ void BlockDB::init() {
         false,
         "Bedrock",
         "cube",
-        false
+        false,
+        "Blocks"
     };
 
     blockData[7] = {
@@ -115,7 +121,8 @@ void BlockDB::init() {
         false,
         "Gravel",
         "cube",
-        false
+        false,
+        "Blocks"
     };
 
     blockData[8] = {
@@ -131,7 +138,8 @@ void BlockDB::init() {
         false,
         "Bricks",
         "cube",
-        false
+        false,
+        "Blocks"
     };
 
     //Temporary water and lava implementation
@@ -148,7 +156,8 @@ void BlockDB::init() {
         true,
         "Water",
         "liquid",
-        false
+        false,
+        "Liquids"
     };
 
     blockData[10] = {
@@ -164,41 +173,44 @@ void BlockDB::init() {
         false,
         "Lava",
         "liquid",
-        false
+        false,
+        "Liquids"
     };
 
     if (fasterTrees) {
         blockData[11] = {
-        {
-            glm::vec2(6.0f, 15.0f),
-            glm::vec2(6.0f, 15.0f),
-            glm::vec2(6.0f, 15.0f),
-            glm::vec2(6.0f, 15.0f),
-            glm::vec2(6.0f, 15.0f),
-            glm::vec2(6.0f, 15.0f)
-        },
-        false,
-        false,
-        "Leaves",
-        "cube",
-        false
+            {
+                glm::vec2(6.0f, 15.0f),
+                glm::vec2(6.0f, 15.0f),
+                glm::vec2(6.0f, 15.0f),
+                glm::vec2(6.0f, 15.0f),
+                glm::vec2(6.0f, 15.0f),
+                glm::vec2(6.0f, 15.0f)
+            },
+            false,
+            false,
+            "Leaves",
+            "cube",
+            false,
+            "Blocks"
         };
 
     } else {
         blockData[11] = {
-        {
-            glm::vec2(5.0f, 14.0f),
-            glm::vec2(5.0f, 14.0f),
-            glm::vec2(5.0f, 14.0f),
-            glm::vec2(5.0f, 14.0f),
-            glm::vec2(5.0f, 14.0f),
-            glm::vec2(5.0f, 14.0f)
-        },
-        true,
-        false,
-        "Leaves",
-        "cube",
-        true
+            {
+                glm::vec2(5.0f, 14.0f),
+                glm::vec2(5.0f, 14.0f),
+                glm::vec2(5.0f, 14.0f),
+                glm::vec2(5.0f, 14.0f),
+                glm::vec2(5.0f, 14.0f),
+                glm::vec2(5.0f, 14.0f)
+            },
+            true,
+            false,
+            "Leaves",
+            "cube",
+            true,
+            "Blocks"
         };
     }
 
@@ -215,7 +227,8 @@ void BlockDB::init() {
         false,
         "Cactus",
         "cactus",
-        false
+        false,
+        "Blocks"
     };
 
     blockData[13] = {
@@ -231,7 +244,8 @@ void BlockDB::init() {
         false,
         "Stone slab",
         "slab",
-        false
+        false,
+        "Slabs"
     };
 
     blockData[14] = {
@@ -247,7 +261,8 @@ void BlockDB::init() {
         false,
         "Oak Plank",
         "cube",
-        false
+        false,
+        "Blocks"
     };
 
     blockData[15] = {
@@ -263,7 +278,8 @@ void BlockDB::init() {
         false,
         "Oak Plank Slab",
         "slab",
-        false
+        false,
+        "Slabs"
     };
 
     blockData[16] = {
@@ -279,7 +295,8 @@ void BlockDB::init() {
         false,
         "Glass",
         "cube",
-        false
+        false,
+        "Blocks"
     };
 
     blockData[17] = {
@@ -291,7 +308,8 @@ void BlockDB::init() {
         false,
         "Medium Grass",
         "cross",
-        false
+        false,
+        "Plants"
     };
 
     blockData[18] = {
@@ -303,7 +321,8 @@ void BlockDB::init() {
         false,
         "Short Grass",
         "cross",
-        false
+        false,
+        "Plants"
     };
 
     blockData[19] = {
@@ -315,7 +334,8 @@ void BlockDB::init() {
         false,
         "Dead Bush",
         "cross",
-        false
+        false,
+        "Plants"
     };
 
     blockData[20] = {
@@ -327,7 +347,8 @@ void BlockDB::init() {
         false,
         "Poppy",
         "cross",
-        false
+        false,
+        "Plants"
     };
 
     blockData[21] = {
@@ -339,41 +360,44 @@ void BlockDB::init() {
         false,
         "Dandelion",
         "cross",
-        false
+        false,
+        "Plants"
     };
 
     if (fasterTrees) {
         blockData[22] = {
-        {
-            glm::vec2(8.0f, 13.0f),
-            glm::vec2(8.0f, 13.0f),
-            glm::vec2(8.0f, 13.0f),
-            glm::vec2(8.0f, 13.0f),
-            glm::vec2(8.0f, 13.0f),
-            glm::vec2(8.0f, 13.0f)
-        },
-        false,
-        false,
-        "Fir Leaves",
-        "cube",
-        true
+            {
+                glm::vec2(8.0f, 13.0f),
+                glm::vec2(8.0f, 13.0f),
+                glm::vec2(8.0f, 13.0f),
+                glm::vec2(8.0f, 13.0f),
+                glm::vec2(8.0f, 13.0f),
+                glm::vec2(8.0f, 13.0f)
+            },
+            false,
+            false,
+            "Fir Leaves",
+            "cube",
+            true,
+            "Blocks"
         };
 
     } else {
         blockData[22] = {
-        {
-            glm::vec2(7.0f, 13.0f),
-            glm::vec2(7.0f, 13.0f),
-            glm::vec2(7.0f, 13.0f),
-            glm::vec2(7.0f, 13.0f),
-            glm::vec2(7.0f, 13.0f),
-            glm::vec2(7.0f, 13.0f)
-        },
-        true,
-        false,
-        "Fir Leaves",
-        "cube",
-        true
+            {
+                glm::vec2(7.0f, 13.0f),
+                glm::vec2(7.0f, 13.0f),
+                glm::vec2(7.0f, 13.0f),
+                glm::vec2(7.0f, 13.0f),
+                glm::vec2(7.0f, 13.0f),
+                glm::vec2(7.0f, 13.0f)
+            },
+            true,
+            false,
+            "Fir Leaves",
+            "cube",
+            true,
+            "Blocks"
         };
     };
 
@@ -390,7 +414,8 @@ void BlockDB::init() {
         false,
         "Dark Grass block",
         "cube",
-        false
+        false,
+        "Blocks"
     };
 
     blockData[24] = {
@@ -402,7 +427,8 @@ void BlockDB::init() {
         false,
         "Dark Medium Grass",
         "cross",
-        false
+        false,
+        "Plants"
     };
 
     blockData[25] = {
@@ -418,7 +444,8 @@ void BlockDB::init() {
         false,
         "Pebble",
         "pebble",
-        false
+        false,
+        "Blocks"
     };
 
     blockData[26] = {
@@ -430,7 +457,8 @@ void BlockDB::init() {
         false,
         "Dark Short Grass",
         "cross",
-        false
+        false,
+        "Plants"
     };
 
     blockData[27] = {
@@ -446,7 +474,8 @@ void BlockDB::init() {
         false,
         "Fir Log",
         "cube",
-        false
+        false,
+        "Blocks"
     };
 
     blockData[28] = {
@@ -458,7 +487,8 @@ void BlockDB::init() {
         false,
         "Blue Sage",
         "cross",
-        false
+        false,
+        "Plants"
     };
 
     blockData[29] = {
@@ -470,7 +500,8 @@ void BlockDB::init() {
         false,
         "Pink Anemone",
         "cross",
-        false
+        false,
+        "Plants"
     };
 
     blockData[30] = {
@@ -482,7 +513,8 @@ void BlockDB::init() {
         false,
         "Bistort",
         "cross",
-        false
+        false,
+        "Plants"
     };
 
     blockData[31] = {
@@ -498,7 +530,8 @@ void BlockDB::init() {
         false,
         "Fir Plank",
         "cube",
-        false
+        false,
+        "Blocks"
     };
 
     blockData[32] = {
@@ -514,7 +547,8 @@ void BlockDB::init() {
         false,
         "Fir Plank Slab",
         "slab",
-        false
+        false,
+        "Slabs"
     };
 
     blockData[33] = {
@@ -526,7 +560,8 @@ void BlockDB::init() {
         false,
         "Crocus",
         "cross",
-        false
+        false,
+        "Plants"
     };
 
     blockData[34] = {
@@ -538,7 +573,8 @@ void BlockDB::init() {
         false,
         "Lavender",
         "cross",
-        false
+        false,
+        "Plants"
     };
 
     if (fasterTrees) {
@@ -555,7 +591,8 @@ void BlockDB::init() {
             false,
             "Red Maple Leaves",
             "cube",
-            false
+            false,
+            "Blocks"
         };
 
         blockData[36] = {
@@ -571,7 +608,8 @@ void BlockDB::init() {
             false,
             "Orange Maple Leaves",
             "cube",
-            false
+            false,
+            "Blocks"
         };
 
         blockData[37] = {
@@ -587,7 +625,8 @@ void BlockDB::init() {
             false,
             "Yellow Maple Leaves",
             "cube",
-            false
+            false,
+            "Blocks"
         };
 
     } else {
@@ -604,7 +643,8 @@ void BlockDB::init() {
             false,
             "Red Maple Leaves",
             "cube",
-            true
+            true,
+            "Blocks"
         };
 
         blockData[36] = {
@@ -620,7 +660,8 @@ void BlockDB::init() {
             false,
             "Orange Maple Leaves",
             "cube",
-            true
+            true,
+            "Blocks"
         };
 
         blockData[37] = {
@@ -636,7 +677,8 @@ void BlockDB::init() {
             false,
             "Yellow Maple Leaves",
             "cube",
-            true
+            true,
+            "Blocks"
         };
     };
 
@@ -653,7 +695,8 @@ void BlockDB::init() {
         false,
         "Maple Log",
         "cube",
-        false
+        false,
+        "Blocks"
     };
 
     blockData[39] = {
@@ -669,7 +712,8 @@ void BlockDB::init() {
         false,
         "Maple Plank",
         "cube",
-        false
+        false,
+        "Blocks"
     };
 
     blockData[40] = {
@@ -685,7 +729,8 @@ void BlockDB::init() {
         false,
         "Maple Plank Slab",
         "slab",
-        false
+        false,
+        "Slabs"
     };
 
     blockData[41] = {
@@ -701,7 +746,8 @@ void BlockDB::init() {
         false,
         "Leaves Carpet",
         "carpet",
-        false
+        false,
+        "Blocks"
     };
 
     blockData[42] = {
@@ -717,7 +763,8 @@ void BlockDB::init() {
         false,
         "Stone Bricks",
         "cube",
-        false
+        false,
+        "Blocks"
     };
 
     blockData[43] = {
@@ -733,7 +780,8 @@ void BlockDB::init() {
         false,
         "Stone Brick Slab",
         "slab",
-        false
+        false,
+        "Slabs"
     };
 
     blockData[44] = {
@@ -749,7 +797,93 @@ void BlockDB::init() {
         false,
         "Structure Air",
         "cube",
-        false
+        false,
+        "Internal"
+    };
+
+    blockData[45] = {
+        {
+            glm::vec2(4.0f, 15.0f),
+            glm::vec2(4.0f, 15.0f),
+            glm::vec2(4.0f, 15.0f),
+            glm::vec2(4.0f, 15.0f),
+            glm::vec2(4.0f, 15.0f),
+            glm::vec2(4.0f, 15.0f)
+        },
+        false,
+        false,
+        "Sand Slab",
+        "slab",
+        false,
+        "Slabs"
+    };
+
+    blockData[46] = {
+        {
+            glm::vec2(2.0f, 15.0f),
+            glm::vec2(2.0f, 15.0f),
+            glm::vec2(2.0f, 15.0f),
+            glm::vec2(2.0f, 15.0f),
+            glm::vec2(2.0f, 15.0f),
+            glm::vec2(1.0f, 15.0f)
+        },
+        false,
+        false,
+        "Grass Block Slab",
+        "slab",
+        false,
+        "Slabs"
+    };
+
+    blockData[47] = {
+        {
+            glm::vec2(2.0f, 12.0f),
+            glm::vec2(2.0f, 12.0f),
+            glm::vec2(2.0f, 12.0f),
+            glm::vec2(2.0f, 12.0f),
+            glm::vec2(2.0f, 12.0f),
+            glm::vec2(1.0f, 15.0f)
+        },
+        false,
+        false,
+        "Dark Grass Block Slab",
+        "slab",
+        false,
+        "Slabs"
+    };
+
+    blockData[48] = {
+        {
+            glm::vec2(2.0f, 15.0f),
+            glm::vec2(2.0f, 15.0f),
+            glm::vec2(2.0f, 15.0f),
+            glm::vec2(2.0f, 15.0f),
+            glm::vec2(2.0f, 15.0f),
+            glm::vec2(1.0f, 15.0f)
+        },
+        false,
+        false,
+        "Grass Block (all sides)",
+        "cube",
+        false,
+        "Blocks"
+    };
+
+    blockData[49] = {
+        {
+            glm::vec2(2.0f, 12.0f),
+            glm::vec2(2.0f, 12.0f),
+            glm::vec2(2.0f, 12.0f),
+            glm::vec2(2.0f, 12.0f),
+            glm::vec2(2.0f, 12.0f),
+            glm::vec2(1.0f, 15.0f)
+        },
+        false,
+        false,
+        "Dark Grass Block (all sides)",
+        "cube",
+        false,
+        "Blocks"
     };
     
 }
