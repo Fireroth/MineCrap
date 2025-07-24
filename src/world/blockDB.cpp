@@ -885,6 +885,23 @@ void BlockDB::init() {
         false,
         "Blocks"
     };
+
+    blockData[50] = {
+        {
+            glm::vec2(9.0f, 15.0f),
+            glm::vec2(9.0f, 15.0f),
+            glm::vec2(9.0f, 15.0f),
+            glm::vec2(9.0f, 15.0f),
+            glm::vec2(9.0f, 15.0f),
+            glm::vec2(9.0f, 15.0f)
+        },
+        false,
+        false,
+        "Sand Bricks",
+        "cube",
+        false,
+        "Blocks"
+    };
     
 }
 
