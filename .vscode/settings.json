@@ -71,6 +71,7 @@
         "thread": "cpp",
         "mutex": "cpp",
         "queue": "cpp",
-        "random": "cpp"
+        "random": "cpp",
+        "variant": "cpp"
     }
 }

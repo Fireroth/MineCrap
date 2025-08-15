@@ -16,18 +16,17 @@ extern "C" {
 }
 #endif*/
 
-//--TODO--
-//fix liquid visible face detection
-//fix basically everything about liquids :}
-//Inventory system
-//Sounds
-//Player physics & collisions
-//Chunk saving
-//Lighting
+// --TODO--
+// fix liquid visible face detection
+// fix basically everything about liquids :}
+// Inventory system
+// Sounds
+// Player physics & collisions
+// Chunk saving
+// Lighting
 
 GLFWwindow* g_currentGLFWwindow = nullptr;
 GLFWwindow* getCurrentGLFWwindow() { return g_currentGLFWwindow; }
-
 
 int main()
 {

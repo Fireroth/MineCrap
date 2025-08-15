@@ -19,7 +19,6 @@ Chunk::Biome getBiome(float b) {
         return Chunk::Biome::Desert;
 }
 
-
 // Helper function to get biome parameters
 void getBiomeParams(Chunk::Biome biome, float& heightScale, float& detailWeight, float& power, float& baseHeight) {
     switch (biome) {
@@ -312,3 +311,4 @@ void generateChunkBiomeFeatures(Chunk& chunk, int margin, float treshold, int xO
         }
     }
 }
+

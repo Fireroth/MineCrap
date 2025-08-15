@@ -9,6 +9,7 @@ struct ChunkNoises {
     FastNoiseLite detail2Noise;
     FastNoiseLite featureNoise;
     FastNoiseLite biomeDistortNoise;
+    FastNoiseLite randomNoise;
 };
 
 ChunkNoises noiseInit(int seedOffset = 0);

@@ -7,7 +7,7 @@ extern const glm::vec3 cactusFaceVertices[6][4];
 extern const glm::vec3 slabFaceVertices[6][4];
 extern const glm::vec3 carpetFaceVertices[6][4];
 extern const glm::vec3 liquidFaceVertices[6][4];
-extern const glm::vec3 crossFaceVertices[4][4];
+extern const glm::vec3 crossFaceVertices[2][4];
 extern const glm::vec3 pebbleFaceVertices[6][4];
 
 extern const glm::vec2 cubeUvs[4];

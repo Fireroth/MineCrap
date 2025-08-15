@@ -47,7 +47,7 @@ const glm::vec3 liquidFaceVertices[6][4] = {
     {{0,0,0}, {1,0,0}, {1,0,1}, {0,0,1}}  // Bottom
 };
 
-const glm::vec3 crossFaceVertices[4][4] = {
+const glm::vec3 crossFaceVertices[2][4] = {
     {{0.1f,0,0.9f}, {0.9f,0,0.1f}, {0.9f,1,0.1f}, {0.1f,1,0.9f}},
     {{0.9f,0,0.9f}, {0.1f,0,0.1f}, {0.1f,1,0.1f}, {0.9f,1,0.9f}},
 };

@@ -57,13 +57,33 @@ void Chunk::placeStructure(const Structure& structure, int baseX, int baseY, int
     for (int y = 0; y < structHeight; y++) {
         for (int z = 0; z < structDepth; z++) {
             for (int x = 0; x < structWidth; x++) {
-                uint8_t blockType = structure.layers[y][z][x];
-                if (blockType == 0) continue;
-                if (blockType == 44) // Structure air block
-                    blockType = 0;
+                uint16_t blockCode = structure.layers[y][z][x];
+                uint8_t chance = blockCode / 1000;
+                uint8_t blockType = blockCode % 1000;
+
                 int worldX = baseX + x;
                 int worldY = baseY + y;
                 int worldZ = baseZ + z;
+
+                if (blockType == 0) 
+                    continue;
+                if (blockType == 44) // Structure air block
+                    blockType = 0;
+
+                if (chance > 0) {
+                    float randNoise = noises.randomNoise.GetNoise((float)worldX, (float)worldY, (float)worldZ);
+                    float noiseValue = (randNoise + 1.0f) * 0.5f;
+
+                    bool place = false;
+                    switch (chance) {
+                        case 1: place = !(noiseValue >= (1.0f / 2)); break;  // 1 in 2
+                        case 2: place = !(noiseValue >= (1.0f / 5)); break;  // 1 in 5
+                        case 3: place = !(noiseValue >= (1.0f / 20)); break;  // 1 in 20
+                    }
+                    if (!place) {
+                        blockType = 0;
+                    }
+                }
 
                 // Compute which chunk this block belongs to
                 int chunkOffsetX = 0, chunkOffsetZ = 0;

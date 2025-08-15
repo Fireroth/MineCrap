@@ -5,7 +5,7 @@
 #include <string>
 #include <unordered_map>
 
-using StructureLayer = std::vector<std::vector<uint8_t>>;
+using StructureLayer = std::vector<std::vector<uint16_t>>;
 
 class Structure {
 public:
