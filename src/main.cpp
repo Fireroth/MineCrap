@@ -1,4 +1,6 @@
-#include <windows.h>
+#ifdef _WIN32
+    #include <windows.h>
+#endif
 #include <glad/glad.h>
 #include "renderer/imguiOverlay.hpp"
 #include "core/window.hpp"
@@ -7,37 +9,20 @@
 #include "core/input.hpp"
 #include "core/options.hpp"
 
-// "Far lands" at 4294960.0f
-
-/*#ifdef _WIN32
-extern "C" {
-    __declspec(dllexport) unsigned long NvOptimusEnablement = 0x00000001;
-    __declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
-}
-#endif*/
-
-// --TODO--
-// fix liquid visible face detection
-// fix basically everything about liquids :}
-// Inventory system
-// Sounds
-// Player physics & collisions
-// Chunk saving
-// Lighting
-
 GLFWwindow* g_currentGLFWwindow = nullptr;
 GLFWwindow* getCurrentGLFWwindow() { return g_currentGLFWwindow; }
 
-int main()
-{
+int main() {
     int windowWidth = getOptionInt("window_width", 1280);
     int windowHeight = getOptionInt("window_height", 720);
     float aspectRatio = static_cast<float>(windowWidth) / static_cast<float>(windowHeight);
     float deltaTime = 0.0f;
     float lastFrame = 0.0f;
 
-    HWND hwnd = GetConsoleWindow();
-    ShowWindow(hwnd, getOptionInt("hide_console", 1) ? SW_HIDE : SW_SHOW);
+    #ifdef _WIN32
+        HWND hwnd = GetConsoleWindow();
+        ShowWindow(hwnd, getOptionInt("hide_console", 1) ? SW_HIDE : SW_SHOW);
+    #endif
 
     Renderer renderer;
     ImGuiOverlay ImGuiOverlay;
@@ -69,8 +54,7 @@ int main()
     ImGuiOverlay.init(glfwWindow, renderer.textureAtlas);
     
     // Main game loop
-    while (!window.shouldClose())
-    {
+    while (!window.shouldClose()) {
         float currentFrame = static_cast<float>(glfwGetTime());
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;

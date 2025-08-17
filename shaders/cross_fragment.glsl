@@ -10,8 +10,7 @@ uniform vec3 cameraPos;
 uniform float fogStartDistance;
 uniform float fogDensity;
 
-void main()
-{
+void main() {
     vec4 texColor = texture(atlas, TexCoord);
 
     if (texColor.a == 0.0)

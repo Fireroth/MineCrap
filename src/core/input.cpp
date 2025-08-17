@@ -22,12 +22,10 @@ void setSelectedBlockType(uint8_t type) {
 }
 
 // Mouse movement
-void mouse_callback(GLFWwindow* window, double xpos, double ypos)
-{
+void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
     if (!cursorCaptured) return;
 
-    if (firstMouse)
-    {
+    if (firstMouse) {
         lastX = static_cast<float>(xpos);
         lastY = static_cast<float>(ypos);
         firstMouse = false;

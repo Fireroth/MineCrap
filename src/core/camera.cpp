@@ -2,18 +2,15 @@
 #include "camera.hpp"
 
 Camera::Camera(glm::vec3 position, glm::vec3 up, float yaw, float pitch)
-    : position(position), worldUp(up), yaw(yaw), pitch(pitch), movementSpeed(2.5f), mouseSensitivity(0.1f)
-{
+    : position(position), worldUp(up), yaw(yaw), pitch(pitch), movementSpeed(2.5f), mouseSensitivity(0.1f) {
     updateCameraVectors();
 }
 
-glm::mat4 Camera::getViewMatrix() const
-{
+glm::mat4 Camera::getViewMatrix() const {
     return glm::lookAt(position, position + front, up);
 }
 
-void Camera::processKeyboard(const char *direction, float deltaTime, float speedMultiplier)
-{
+void Camera::processKeyboard(const char *direction, float deltaTime, float speedMultiplier) {
     float acceleration = movementSpeed * speedMultiplier * 11.0f;
     glm::vec3 accel(0.0f);
 
@@ -33,8 +30,7 @@ void Camera::processKeyboard(const char *direction, float deltaTime, float speed
     applyAcceleration(accel, deltaTime);
 }
 
-void Camera::processMouseMovement(float xOffset, float yOffset)
-{
+void Camera::processMouseMovement(float xOffset, float yOffset) {
     xOffset *= mouseSensitivity;
     yOffset *= mouseSensitivity;
 
@@ -51,8 +47,7 @@ void Camera::processMouseMovement(float xOffset, float yOffset)
     updateCameraVectors();
 }
 
-void Camera::updateCameraVectors()
-{
+void Camera::updateCameraVectors() {
     glm::vec3 newFront;
     newFront.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
     newFront.y = sin(glm::radians(pitch));
@@ -62,8 +57,7 @@ void Camera::updateCameraVectors()
     up = glm::normalize(glm::cross(right, front));
 }
 
-void Camera::updateVelocity(float deltaTime)
-{
+void Camera::updateVelocity(float deltaTime) {
     position += velocity * deltaTime;
 
     float drag = 9.0f;
@@ -73,7 +67,6 @@ void Camera::updateVelocity(float deltaTime)
         velocity = glm::vec3(0.0f);
 }
 
-void Camera::applyAcceleration(const glm::vec3& acceleration, float deltaTime)
-{
+void Camera::applyAcceleration(const glm::vec3& acceleration, float deltaTime) {
     velocity += acceleration * deltaTime;
 }

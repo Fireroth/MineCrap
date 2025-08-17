@@ -1,5 +1,6 @@
 #include "structureDB.hpp"
 
+// Chances of block spawning
 // 1xxx = 1 in 2
 // 2xxx = 1 in5
 // 3xxx = 1 in 20

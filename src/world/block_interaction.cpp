@@ -110,8 +110,7 @@ RaycastResult raycast(World* world, const glm::vec3& origin, const glm::vec3& di
             int localZ = blockPos.z - chunkZ * Chunk::chunkDepth;
             if (localX >= 0 && localX < Chunk::chunkWidth &&
                 localY >= 0 && localY < Chunk::chunkHeight &&
-                localZ >= 0 && localZ < Chunk::chunkDepth)
-            {
+                localZ >= 0 && localZ < Chunk::chunkDepth) {
                 uint8_t type = chunk->blocks[localX][localY][localZ].type;
                 if (type != 0) {
                     const BlockDB::BlockInfo* info = BlockDB::getBlockInfo(type);
@@ -135,8 +134,7 @@ RaycastResult raycast(World* world, const glm::vec3& origin, const glm::vec3& di
                             int placeLocalZ = placeWorldPos.z - placeChunkZ * Chunk::chunkDepth;
                             if (placeLocalX >= 0 && placeLocalX < Chunk::chunkWidth &&
                                 placeLocalY >= 0 && placeLocalY < Chunk::chunkHeight &&
-                                placeLocalZ >= 0 && placeLocalZ < Chunk::chunkDepth)
-                            {
+                                placeLocalZ >= 0 && placeLocalZ < Chunk::chunkDepth) {
                                 result.hasPlacePos = true;
                                 result.placeBlockPos = glm::ivec3(placeLocalX, placeLocalY, placeLocalZ);
                                 result.placeChunk = placeChunk;
@@ -167,8 +165,7 @@ RaycastResult raycast(World* world, const glm::vec3& origin, const glm::vec3& di
     return result;
 }
 
-void placeBreakBlockOnClick(World* world, const Camera& camera, char action, uint8_t blockType)
-{
+void placeBreakBlockOnClick(World* world, const Camera& camera, char action, uint8_t blockType) {
     glm::vec3 origin = camera.getPosition();
     glm::vec3 dir = camera.getFront();
 
@@ -229,8 +226,7 @@ struct BlockInfo {
     uint8_t type;
 };
 
-BlockInfo getLookedAtBlockInfo(World* world, const Camera& camera)
-{
+BlockInfo getLookedAtBlockInfo(World* world, const Camera& camera) {
     glm::vec3 origin = camera.getPosition();
     glm::vec3 dir = camera.getFront();
 

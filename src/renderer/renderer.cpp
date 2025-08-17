@@ -10,8 +10,7 @@
 
 Renderer::Renderer() : shaderProgram(0), textureAtlas(0), crosshairVAO(0), crosshairVBO(0) {}
 
-Renderer::~Renderer()
-{
+Renderer::~Renderer() {
     glDeleteTextures(1, &textureAtlas);
     glDeleteProgram(shaderProgram);
 
@@ -20,8 +19,7 @@ Renderer::~Renderer()
     glDeleteProgram(crosshairShaderProgram);
 }
 
-void Renderer::init()
-{
+void Renderer::init() {
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
@@ -234,18 +232,15 @@ void Renderer::renderCrosshair(float aspectRatio) {
     glBindVertexArray(0);
 }
 
-GLuint Renderer::createShader(const char *source, GLenum shaderType)
-{
+GLuint Renderer::createShader(const char *source, GLenum shaderType) {
     return ::createShader(source, shaderType);
 }
 
-GLuint Renderer::createShaderProgram(const char *vertexSource, const char *fragmentSource)
-{
+GLuint Renderer::createShaderProgram(const char *vertexSource, const char *fragmentSource) {
     return ::createShaderProgram(vertexSource, fragmentSource);
 }
 
-void Renderer::loadTextureAtlas(const std::string& path)
-{
+void Renderer::loadTextureAtlas(const std::string& path) {
     int width, height, channels;
     stbi_set_flip_vertically_on_load(true);
     unsigned char* data = stbi_load(path.c_str(), &width, &height, &channels, 4);

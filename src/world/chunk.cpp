@@ -14,11 +14,11 @@ struct pendingBlock {
 };
 static std::map<std::pair<int, int>, std::vector<pendingBlock >> pendingBlockPlacements;
 
-Chunk::Chunk(int x, int z, World* worldPtr)
-    : chunkX(x), chunkZ(z), world(worldPtr), VAO(0), VBO(0), EBO(0), indexCount(0)
-    , crossVAO(0), crossVBO(0), crossEBO(0), crossIndexCount(0)
-    , liquidVAO(0), liquidVBO(0), liquidEBO(0), liquidIndexCount(0)
-{
+Chunk::Chunk(int x, int z, World* worldPtr) :
+    chunkX(x), chunkZ(z), world(worldPtr), VAO(0), VBO(0), EBO(0), indexCount(0),
+    crossVAO(0), crossVBO(0), crossEBO(0), crossIndexCount(0),
+    liquidVAO(0), liquidVBO(0), liquidEBO(0), liquidIndexCount(0) {
+
     noises = noiseInit();
     generateChunkTerrain(*this);
 
