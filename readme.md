@@ -15,12 +15,12 @@ cd MineCrap
 
 Run CMake
 ```
-cmake ./
+cmake -B build ./
 ```
 
 Build the project
 ```
-cmake --build .
+cmake --build build --config Release
 ```
 
 ## ✨ Features
