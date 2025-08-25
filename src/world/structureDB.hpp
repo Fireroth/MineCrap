@@ -19,7 +19,6 @@ public:
 
 class StructureDB {
 public:
-    static void init();
     static const Structure* get(const std::string& name);
 
 private:

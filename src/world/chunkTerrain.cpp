@@ -237,66 +237,66 @@ void generateChunkTerrain(Chunk& chunk) {
     chunk.biome = biome;
     switch (biome) {
         case Chunk::Biome::Plains:
-            //(chunk, margin, treshold, xOffset, zOffset, structureName, allowedBlockID, seedOffset, yOffset)
-            generateChunkBiomeFeatures(chunk, 0, 0.9997f, 4, 3, "puddle", 1, 0, -4);
-            generateChunkBiomeFeatures(chunk, 0, 0.998f, 2, 2, "tree", 1, 1, 0);
-            generateChunkBiomeFeatures(chunk, 0, 0.83f, 0, 0, "grass", 1, 2, 0);
-            generateChunkBiomeFeatures(chunk, 0, 0.80f, 0, 0, "grassShort", 1, 3, 0);
-            generateChunkBiomeFeatures(chunk, 0, 0.96f, 0, 0, "poppy", 1, 4, 0);
-            generateChunkBiomeFeatures(chunk, 0, 0.96f, 0, 0, "dandelion", 1, 5, 0);
+            //(chunk, treshold, xOffset, zOffset, structureName, allowedBlockID, seedOffset, yOffset)
+            generateChunkBiomeFeatures(chunk, 0.9997f, 4, 3, "puddle", 1, 0, -4);
+            generateChunkBiomeFeatures(chunk, 0.998f, 2, 2, "tree", 1, 1, 0);
+            generateChunkBiomeFeatures(chunk, 0.83f, 0, 0, "grass", 1, 2, 0);
+            generateChunkBiomeFeatures(chunk, 0.80f, 0, 0, "grassShort", 1, 3, 0);
+            generateChunkBiomeFeatures(chunk, 0.96f, 0, 0, "poppy", 1, 4, 0);
+            generateChunkBiomeFeatures(chunk, 0.96f, 0, 0, "dandelion", 1, 5, 0);
             break;
         case Chunk::Biome::Forest:
-            generateChunkBiomeFeatures(chunk, 0, 0.93f, 2, 2, "tree", 1, 0, 0);
-            generateChunkBiomeFeatures(chunk, 0, 0.93f, 0, 0, "grass", 1, 1, 0);
-            generateChunkBiomeFeatures(chunk, 0, 0.93f, 0, 0, "grassShort", 1, 2, 0);
-            generateChunkBiomeFeatures(chunk, 0, 0.92f, 0, 0, "leavesCarpet", 1, 3, 0);
+            generateChunkBiomeFeatures(chunk, 0.93f, 2, 2, "tree", 1, 0, 0);
+            generateChunkBiomeFeatures(chunk, 0.93f, 0, 0, "grass", 1, 1, 0);
+            generateChunkBiomeFeatures(chunk, 0.93f, 0, 0, "grassShort", 1, 2, 0);
+            generateChunkBiomeFeatures(chunk, 0.92f, 0, 0, "leavesCarpet", 1, 3, 0);
             break;
         case Chunk::Biome::Desert:
-            generateChunkBiomeFeatures(chunk, 0, 0.993f, 0, 0, "cactus2", 4, 0, 0);
-            generateChunkBiomeFeatures(chunk, 0, 0.993f, 0, 0, "cactus", 4, 1, 0);
-            generateChunkBiomeFeatures(chunk, 0, 0.98f, 0, 0, "deadBush", 4, 2, 0);
-            generateChunkBiomeFeatures(chunk, 0, 0.99999f, 8, 8, "pyramid", 4, 3, -1);
+            generateChunkBiomeFeatures(chunk, 0.993f, 0, 0, "cactus2", 4, 0, 0);
+            generateChunkBiomeFeatures(chunk, 0.993f, 0, 0, "cactus", 4, 1, 0);
+            generateChunkBiomeFeatures(chunk, 0.98f, 0, 0, "deadBush", 4, 2, 0);
+            generateChunkBiomeFeatures(chunk, 0.99999f, 8, 8, "pyramid", 4, 3, -1);
             break;
         case Chunk::Biome::FirForest:
-            generateChunkBiomeFeatures(chunk, 0, 0.985f, 4, 4, "firTree", 23, 0, 0);
-            generateChunkBiomeFeatures(chunk, 0, 0.99f, 4, 4, "smallFirTree", 23, 1, 0);
-            generateChunkBiomeFeatures(chunk, 0, 0.80f, 0, 0, "darkGrass", 23, 2, 0);
-            generateChunkBiomeFeatures(chunk, 0, 0.88f, 0, 0, "darkGrassShort", 23, 3, 0);
-            generateChunkBiomeFeatures(chunk, 0, 0.93f, 0, 0, "pebble", 23, 4, 0);
+            generateChunkBiomeFeatures(chunk, 0.985f, 4, 4, "firTree", 23, 0, 0);
+            generateChunkBiomeFeatures(chunk, 0.99f, 4, 4, "smallFirTree", 23, 1, 0);
+            generateChunkBiomeFeatures(chunk, 0.80f, 0, 0, "darkGrass", 23, 2, 0);
+            generateChunkBiomeFeatures(chunk, 0.88f, 0, 0, "darkGrassShort", 23, 3, 0);
+            generateChunkBiomeFeatures(chunk, 0.93f, 0, 0, "pebble", 23, 4, 0);
             break;
         case Chunk::Biome::FlowerField:
-            generateChunkBiomeFeatures(chunk, 0, 0.97f, 0, 0, "lavender", 1, 0, 0);
-            generateChunkBiomeFeatures(chunk, 0, 0.97f, 0, 0, "crocus", 1, 1, 0);
-            generateChunkBiomeFeatures(chunk, 0, 0.97f, 0, 0, "bistort", 1, 2, 0);
-            generateChunkBiomeFeatures(chunk, 0, 0.97f, 0, 0, "pinkAnemone", 1, 3, 0);
-            generateChunkBiomeFeatures(chunk, 0, 0.97f, 0, 0, "blueSage", 1, 4, 0);
-            generateChunkBiomeFeatures(chunk, 0, 0.97f, 0, 0, "poppy", 1, 5, 0);
-            generateChunkBiomeFeatures(chunk, 0, 0.97f, 0, 0, "dandelion", 1, 6, 0);
-            generateChunkBiomeFeatures(chunk, 0, 0.97f, 0, 0, "grass", 1, 7, 0);
-            generateChunkBiomeFeatures(chunk, 0, 0.97f, 0, 0, "grassShort", 1, 8, 0);
-            generateChunkBiomeFeatures(chunk, 0, 0.97f, 1, 1, "tinyTree", 1, 9, 0);
+            generateChunkBiomeFeatures(chunk, 0.97f, 0, 0, "lavender", 1, 0, 0);
+            generateChunkBiomeFeatures(chunk, 0.97f, 0, 0, "crocus", 1, 1, 0);
+            generateChunkBiomeFeatures(chunk, 0.97f, 0, 0, "bistort", 1, 2, 0);
+            generateChunkBiomeFeatures(chunk, 0.97f, 0, 0, "pinkAnemone", 1, 3, 0);
+            generateChunkBiomeFeatures(chunk, 0.97f, 0, 0, "blueSage", 1, 4, 0);
+            generateChunkBiomeFeatures(chunk, 0.97f, 0, 0, "poppy", 1, 5, 0);
+            generateChunkBiomeFeatures(chunk, 0.97f, 0, 0, "dandelion", 1, 6, 0);
+            generateChunkBiomeFeatures(chunk, 0.97f, 0, 0, "grass", 1, 7, 0);
+            generateChunkBiomeFeatures(chunk, 0.97f, 0, 0, "grassShort", 1, 8, 0);
+            generateChunkBiomeFeatures(chunk, 0.97f, 1, 1, "tinyTree", 1, 9, 0);
             break;
         case Chunk::Biome::MapleForest:
-            generateChunkBiomeFeatures(chunk, 0, 0.986f, 2, 2, "redMaple", 1, 0, 0);
-            generateChunkBiomeFeatures(chunk, 0, 0.986f, 2, 2, "orangeMaple", 1, 1, 0);
-            generateChunkBiomeFeatures(chunk, 0, 0.986f, 2, 2, "yellowMaple", 1, 2, 0);
-            generateChunkBiomeFeatures(chunk, 0, 0.90f, 0, 0, "grass", 1, 3, 0);
-            generateChunkBiomeFeatures(chunk, 0, 0.90f, 0, 0, "grassShort", 1, 4, 0);
-            generateChunkBiomeFeatures(chunk, 0, 0.96f, 0, 0, "poppy", 1, 5, 0);
-            generateChunkBiomeFeatures(chunk, 0, 0.96f, 0, 0, "dandelion", 1, 6, 0);
-            generateChunkBiomeFeatures(chunk, 0, 0.93f, 0, 0, "leavesCarpet", 1, 7, 0);
-            generateChunkBiomeFeatures(chunk, 0, 0.99f, 2, 2, "greenMaple", 1, 8, 0);
+            generateChunkBiomeFeatures(chunk, 0.986f, 2, 2, "redMaple", 1, 0, 0);
+            generateChunkBiomeFeatures(chunk, 0.986f, 2, 2, "orangeMaple", 1, 1, 0);
+            generateChunkBiomeFeatures(chunk, 0.986f, 2, 2, "yellowMaple", 1, 2, 0);
+            generateChunkBiomeFeatures(chunk, 0.90f, 0, 0, "grass", 1, 3, 0);
+            generateChunkBiomeFeatures(chunk, 0.90f, 0, 0, "grassShort", 1, 4, 0);
+            generateChunkBiomeFeatures(chunk, 0.96f, 0, 0, "poppy", 1, 5, 0);
+            generateChunkBiomeFeatures(chunk, 0.96f, 0, 0, "dandelion", 1, 6, 0);
+            generateChunkBiomeFeatures(chunk, 0.93f, 0, 0, "leavesCarpet", 1, 7, 0);
+            generateChunkBiomeFeatures(chunk, 0.99f, 2, 2, "greenMaple", 1, 8, 0);
             break;
     }
 }
 
-void generateChunkBiomeFeatures(Chunk& chunk, int margin, float treshold, int xOffset, int zOffset, std::string structureName, int allowedBlockID, int seedOffset, int yOffset) {
+void generateChunkBiomeFeatures(Chunk& chunk, float treshold, int xOffset, int zOffset, std::string structureName, int allowedBlockID, int seedOffset, int yOffset) {
     ChunkNoises noises = noiseInit(seedOffset);
     const Structure* structure = StructureDB::get(structureName);
     if (!structure) return;
 
-    for (int x = margin; x < Chunk::chunkWidth - margin; x++) {
-        for (int z = margin; z < Chunk::chunkDepth - margin; z++) {
+    for (int x = 0; x < Chunk::chunkWidth; x++) {
+        for (int z = 0; z < Chunk::chunkDepth; z++) {
             float worldX = static_cast<float>(chunk.chunkX * Chunk::chunkWidth + x);
             float worldZ = static_cast<float>(chunk.chunkZ * Chunk::chunkDepth + z);
             float n = noises.featureNoise.GetNoise(worldX, worldZ);
