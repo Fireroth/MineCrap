@@ -9,6 +9,8 @@ public:
     GLint uCrossModelLoc, uCrossViewLoc, uCrossProjLoc, uCrossAtlasLoc;
     GLint uLiquidModelLoc, uLiquidViewLoc, uLiquidProjLoc, uLiquidAtlasLoc;
     GLint uLiquidTimeLoc, uCrossTimeLoc, uTimeLoc;
+    GLint uLiquidFogDensityLoc, uLiquidFogStartLoc, uLiquidFogColorLoc, uLiquidCamPosLoc;
+    GLint uCrossFogDensityLoc, uCrossFogStartLoc, uCrossFogColorLoc, uCrossCamPosLoc;
     Renderer();
     ~Renderer();
 

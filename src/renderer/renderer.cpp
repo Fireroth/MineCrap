@@ -51,12 +51,20 @@ void Renderer::init() {
     uCrossViewLoc = glGetUniformLocation(crossShaderProgram, "view");
     uCrossProjLoc = glGetUniformLocation(crossShaderProgram, "projection");
     uCrossAtlasLoc = glGetUniformLocation(crossShaderProgram, "atlas");
+    uCrossFogDensityLoc = glGetUniformLocation(crossShaderProgram, "fogDensity");
+    uCrossFogStartLoc = glGetUniformLocation(crossShaderProgram, "fogStartDistance");
+    uCrossFogColorLoc = glGetUniformLocation(crossShaderProgram, "fogColor");
+    uCrossCamPosLoc = glGetUniformLocation(crossShaderProgram, "cameraPos");
 
     uLiquidModelLoc = glGetUniformLocation(liquidShaderProgram, "model");
     uLiquidViewLoc = glGetUniformLocation(liquidShaderProgram, "view");
     uLiquidProjLoc = glGetUniformLocation(liquidShaderProgram, "projection");
     uLiquidAtlasLoc = glGetUniformLocation(liquidShaderProgram, "atlas");
     uLiquidTimeLoc = glGetUniformLocation(liquidShaderProgram, "time");
+    uLiquidFogDensityLoc = glGetUniformLocation(liquidShaderProgram, "fogDensity");
+    uLiquidFogStartLoc = glGetUniformLocation(liquidShaderProgram, "fogStartDistance");
+    uLiquidFogColorLoc = glGetUniformLocation(liquidShaderProgram, "fogColor");
+    uLiquidCamPosLoc = glGetUniformLocation(liquidShaderProgram, "cameraPos");
 
     uModelLoc = glGetUniformLocation(shaderProgram, "model");
     uViewLoc = glGetUniformLocation(shaderProgram, "view");
@@ -173,17 +181,17 @@ void Renderer::renderWorld(const Camera& camera, float aspectRatio, float deltaT
     glBindTexture(GL_TEXTURE_2D, textureAtlas);
     glUniform1i(uCrossAtlasLoc, 0);
 
-    if (uCamPosLoc != -1) {
+    if (uCrossCamPosLoc != -1) {
         glm::vec3 camPos = camera.getPosition();
-        glUniform3fv(uCamPosLoc, 1, glm::value_ptr(camPos));
+        glUniform3fv(uCrossCamPosLoc, 1, glm::value_ptr(camPos));
     }
 
     if (fogEnabled) {
-        glUniform1f(uFogDensityLoc, fogDensity);
-        glUniform1f(uFogStartLoc, fogStartDistance);
-        glUniform3fv(uFogColorLoc, 1, glm::value_ptr(fogColor));
+        glUniform1f(uCrossFogDensityLoc, fogDensity);
+        glUniform1f(uCrossFogStartLoc, fogStartDistance);
+        glUniform3fv(uCrossFogColorLoc, 1, glm::value_ptr(fogColor));
     } else {
-        glUniform1f(uFogDensityLoc, 0.0f); // Disable fog
+        glUniform1f(uCrossFogDensityLoc, 0.0f); // Disable fog
     }
     
     world.renderCross(camera, uCrossModelLoc, frustum);
@@ -201,19 +209,19 @@ void Renderer::renderWorld(const Camera& camera, float aspectRatio, float deltaT
     glUniform1i(uLiquidAtlasLoc, 0);
     glUniform1f(uLiquidTimeLoc, currentFrame);
 
-    if (uCamPosLoc != -1) {
+    if (uLiquidCamPosLoc != -1) {
         glm::vec3 camPos = camera.getPosition();
-        glUniform3fv(uCamPosLoc, 1, glm::value_ptr(camPos));
+        glUniform3fv(uLiquidCamPosLoc, 1, glm::value_ptr(camPos));
     }
 
     if (fogEnabled) {
-        glUniform1f(uFogDensityLoc, fogDensity);
-        glUniform1f(uFogStartLoc, fogStartDistance);
-        glUniform3fv(uFogColorLoc, 1, glm::value_ptr(fogColor));
+        glUniform1f(uLiquidFogDensityLoc, fogDensity);
+        glUniform1f(uLiquidFogStartLoc, fogStartDistance);
+        glUniform3fv(uLiquidFogColorLoc, 1, glm::value_ptr(fogColor));
     } else {
-        glUniform1f(uFogDensityLoc, 0.0f); // Disable fog
+        glUniform1f(uLiquidFogDensityLoc, 0.0f); // Disable fog
     }
-    
+
     world.renderLiquid(camera, uLiquidModelLoc, frustum);
 
     glDepthMask(GL_TRUE);
