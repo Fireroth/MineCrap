@@ -53,12 +53,70 @@ void ImGuiOverlay::render(float deltaTime, const Camera& camera, World* world) {
         frameCount = 0;
         fpsTimer = 0.0f;
     }
-    
-    //if (!(inventoryOpen || debugOpen)) return;
 
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
+
+    // ---------------- Pause menu screen ----------------
+    if (pauseMenuOpen) {
+        debugOpen = false;
+        inventoryOpen = false;
+
+        ImGuiIO& io = ImGui::GetIO();
+
+        ImGui::SetNextWindowPos(ImVec2(0, 0));
+        ImGui::SetNextWindowSize(io.DisplaySize);
+
+        ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.0f, 0.0f, 0.0f, 0.7f));
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+
+        ImGui::Begin("Pause Menu",
+                    nullptr,
+                    ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse |
+                    ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus);
+        
+        ImVec2 windowSize = ImGui::GetWindowSize();
+
+        ImVec2 buttonSize(200, 50);
+        float spacing = 20.0f;
+
+        float titleHeight = ImGui::CalcTextSize("Paused").y * 2.0f;
+        float totalHeight = titleHeight + (buttonSize.y * 3) + (spacing * 2);
+
+        float startY = (windowSize.y - totalHeight) * 0.5f;
+        float centerX = (windowSize.x - buttonSize.x) * 0.5f;
+
+        ImGui::SetCursorPos(ImVec2((windowSize.x - ImGui::CalcTextSize("Paused").x) * 0.5f, startY));
+
+        ImGui::Text("Paused");
+
+        startY += titleHeight;
+
+        ImGui::SetCursorPos(ImVec2(centerX, startY));
+        if (ImGui::Button("Resume", buttonSize)) {
+            pauseMenuOpen = false;
+            cursorCaptured = true;
+            glfwSetInputMode(glfwGetCurrentContext(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        }
+
+        ImGui::SetCursorPos(ImVec2(centerX, startY + buttonSize.y + spacing));
+        if (ImGui::Button("Settings", buttonSize)) {
+            // Settings page TODO
+        }
+
+        ImGui::SetCursorPos(ImVec2(centerX, startY + 2*(buttonSize.y + spacing)));
+        if (ImGui::Button("Quit", buttonSize)) {
+            glfwSetWindowShouldClose(glfwGetCurrentContext(), true);
+        }
+        
+        ImGui::End();
+
+        ImGui::PopStyleVar(3);
+        ImGui::PopStyleColor();
+    }
 
     // ---------------- Debug window ----------------
     if (debugOpen) {

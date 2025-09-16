@@ -4,9 +4,10 @@
 #include "../world/world.hpp"
 
 static bool firstMouse = true;
-static bool cursorCaptured = true;
+bool cursorCaptured = true;
 bool inventoryOpen = false;
 bool debugOpen = false;
+bool pauseMenuOpen = false;
 static Camera* g_camera = nullptr;
 static World* g_world = nullptr;
 static float lastX;
@@ -120,6 +121,7 @@ void processInput(GLFWwindow* window, Camera& camera, float deltaTime, float spe
             cursorCaptured = !cursorCaptured;
             glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
         } else {
+            pauseMenuOpen = !pauseMenuOpen;
             cursorCaptured = !cursorCaptured;
             glfwSetInputMode(window, GLFW_CURSOR,
                             cursorCaptured ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);

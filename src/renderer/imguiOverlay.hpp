@@ -7,6 +7,8 @@
 
 extern bool inventoryOpen;
 extern bool debugOpen;
+extern bool pauseMenuOpen;
+extern bool cursorCaptured;
 
 class ImGuiOverlay {
 public:
