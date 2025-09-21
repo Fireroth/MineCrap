@@ -23,6 +23,23 @@ void loadOptionsFromFile(const std::string& filename) {
     loaded = true;
 }
 
+void saveOption(const std::string& key, int value, const std::string& filename) {
+    optionsMap[key] = value;
+
+    std::ofstream file(filename, std::ios::trunc);
+    if (!file.is_open()) {
+        std::cerr << "Failed to open " << filename << " for writing." << std::endl;
+        return;
+    }
+
+    for (const auto& [key, value] : optionsMap) {
+        file << key << "=" << value << "\n";
+    }
+
+    loaded = false;
+    loadOptionsFromFile(filename);
+}
+
 int getOptionInt(const std::string& key, const int defaultValue) {
     if (!loaded) loadOptionsFromFile("options.txt");
     auto iterator = optionsMap.find(key);

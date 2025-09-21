@@ -73,6 +73,12 @@
         "queue": "cpp",
         "random": "cpp",
         "variant": "cpp",
-        "array": "cpp"
+        "array": "cpp",
+        "any": "cpp",
+        "filesystem": "cpp",
+        "numeric": "cpp",
+        "ranges": "cpp",
+        "span": "cpp",
+        "valarray": "cpp"
     }
 }

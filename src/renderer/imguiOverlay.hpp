@@ -22,6 +22,14 @@ public:
     static std::vector<uint8_t> blockIds;
     static ImTextureID texAtlas;
 
+    enum class PauseMenuPage {
+        Main,
+        Settings,
+        Video
+    };
+
+    PauseMenuPage pauseScreenPage = PauseMenuPage::Main;
+
 private:
     float fpsTimer;
     int frameCount;

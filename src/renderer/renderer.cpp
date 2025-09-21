@@ -110,12 +110,13 @@ void Renderer::initCrosshair() {
 
 void Renderer::renderWorld(const Camera& camera, float aspectRatio, float deltaTime, float currentFrame) {
     glEnable(GL_DEPTH_TEST);
-    static int renderDist = getOptionInt("render_distance", 7) + 1; // +1 to account for invisible "mesh helper" chunk
+    int renderDist = getOptionInt("render_distance", 7) + 1; // +1 to account for invisible "mesh helper" chunk
+    fogStartDistance = ((getOptionFloat("render_distance", 7) + 1) * 16) - 20;
     world.updateChunksAroundPlayer(camera.getPosition(), renderDist);
 
     GLFWwindow* getCurrentGLFWwindow();
     GLFWwindow* window = getCurrentGLFWwindow();
-    static float baseFov = getOptionFloat("fov", 60.0f);
+    float baseFov = getOptionFloat("fov", 60.0f);
     
     float getSpeedMultiplier(GLFWwindow* window);
     bool sprintState = window && getSpeedMultiplier(window) > 5.0f;

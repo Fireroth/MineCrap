@@ -34,12 +34,12 @@ void World::generateChunks(int radius) {
     }
 }
 
-void World::updateChunksAroundPlayer(const glm::vec3& playerPos, int radius) {
+void World::updateChunksAroundPlayer(const glm::vec3& playerPos, int radius, bool force) {
     int playerChunkX = static_cast<int>(std::floor(playerPos.x / Chunk::chunkWidth));
     int playerChunkZ = static_cast<int>(std::floor(playerPos.z / Chunk::chunkDepth));
 
     // Only update if player moved to a new chunk
-    if (playerChunkX != lastPlayerChunkX || playerChunkZ != lastPlayerChunkZ) {
+    if (playerChunkX != lastPlayerChunkX || playerChunkZ != lastPlayerChunkZ || force) {
         lastPlayerChunkX = playerChunkX;
         lastPlayerChunkZ = playerChunkZ;
 

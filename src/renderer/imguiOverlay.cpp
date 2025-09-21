@@ -1,10 +1,12 @@
 #include <backends/imgui_impl_glfw.h>
 #include <backends/imgui_impl_opengl3.h>
 #include <string>
+#include "../world/world.hpp"
 #include "../world/blockDB.hpp"
 #include "ImGuiOverlay.hpp"
 #include "../world/block_interaction.hpp"
 #include "../core/input.hpp"
+#include "../core/options.hpp"
 
 const float ImGuiOverlay::fpsRefreshInterval = 0.5f; // 500ms
 
@@ -83,35 +85,98 @@ void ImGuiOverlay::render(float deltaTime, const Camera& camera, World* world) {
         ImVec2 buttonSize(200, 50);
         float spacing = 20.0f;
 
-        float titleHeight = ImGui::CalcTextSize("Paused").y * 2.0f;
-        float totalHeight = titleHeight + (buttonSize.y * 3) + (spacing * 2);
-
-        float startY = (windowSize.y - totalHeight) * 0.5f;
+        float startY = (windowSize.y - (buttonSize.y * 3 + spacing * 2)) * 0.5f;
         float centerX = (windowSize.x - buttonSize.x) * 0.5f;
 
-        ImGui::SetCursorPos(ImVec2((windowSize.x - ImGui::CalcTextSize("Paused").x) * 0.5f, startY));
+        switch (pauseScreenPage) {
+            case PauseMenuPage::Main: {
+                ImGui::SetCursorPos(ImVec2(centerX, startY));
+                if (ImGui::Button("Resume", buttonSize)) {
+                    pauseMenuOpen = false;
+                    cursorCaptured = true;
+                    glfwSetInputMode(glfwGetCurrentContext(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+                }
 
-        ImGui::Text("Paused");
+                ImGui::SetCursorPos(ImVec2(centerX, startY + buttonSize.y + spacing));
+                if (ImGui::Button("Settings", buttonSize)) {
+                    pauseScreenPage = PauseMenuPage::Settings;
+                }
 
-        startY += titleHeight;
+                ImGui::SetCursorPos(ImVec2(centerX, startY + 2*(buttonSize.y + spacing)));
+                if (ImGui::Button("Quit", buttonSize)) {
+                    glfwSetWindowShouldClose(glfwGetCurrentContext(), true);
+                }
+            } break;
 
-        ImGui::SetCursorPos(ImVec2(centerX, startY));
-        if (ImGui::Button("Resume", buttonSize)) {
-            pauseMenuOpen = false;
-            cursorCaptured = true;
-            glfwSetInputMode(glfwGetCurrentContext(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+            case PauseMenuPage::Settings: {
+                float totalHeight = ImGui::GetTextLineHeightWithSpacing() + spacing + 2 * buttonSize.y + spacing;
+                float startY = (windowSize.y - totalHeight) * 0.5f;
+                float centerX = (windowSize.x - buttonSize.x) * 0.5f;
+
+                ImGui::SetCursorPos(ImVec2(centerX, startY));
+                ImGui::Text("Settings Menu");
+
+                ImGui::SetCursorPos(ImVec2(centerX, startY + ImGui::GetTextLineHeightWithSpacing() + spacing));
+                if (ImGui::Button("Video", buttonSize))
+                    pauseScreenPage = PauseMenuPage::Video;
+
+                ImGui::SetCursorPos(ImVec2(centerX, startY + ImGui::GetTextLineHeightWithSpacing() + spacing + buttonSize.y + spacing));
+                if (ImGui::Button("Back", buttonSize))
+                    pauseScreenPage = PauseMenuPage::Main;
+            } break;
+
+            case PauseMenuPage::Video: {
+                float totalHeight = ImGui::GetTextLineHeightWithSpacing() + spacing + 30 + spacing + buttonSize.y;
+                float startY = (windowSize.y - totalHeight) * 0.5f;
+                float centerX = (windowSize.x - buttonSize.x) * 0.5f;
+
+                ImGui::SetCursorPos(ImVec2(centerX, startY));
+                ImGui::Text("Video Settings");
+
+                int renderDistance = getOptionInt("render_distance", 7);
+                float sliderWidth = 250.0f;
+
+                const char* label = "Render Distance";
+                float labelWidth = ImGui::CalcTextSize(label).x;
+                float spacing = ImGui::GetStyle().ItemInnerSpacing.x;
+                float totalWidth = labelWidth + spacing + sliderWidth;
+                float startX = (windowSize.x - totalWidth) * 0.5f;
+
+                float sliderY = startY + ImGui::GetTextLineHeightWithSpacing() + spacing;
+                ImGui::SetCursorPos(ImVec2(startX, sliderY));
+
+                ImGui::TextUnformatted(label);
+                ImGui::SameLine();
+
+                ImGui::PushItemWidth(sliderWidth);
+                if (ImGui::SliderInt("##RenderDistance", &renderDistance, 1, 32)) {
+                    saveOption("render_distance", renderDistance, "options.txt");
+                    world->updateChunksAroundPlayer(camera.getPosition(), renderDistance, true);
+                }
+                ImGui::PopItemWidth();
+
+                float fov = getOptionFloat("fov", 70.0f);
+                const char* fovLabel = "Field of View";
+                float fovLabelWidth = ImGui::CalcTextSize(fovLabel).x;
+                float fovTotalWidth = fovLabelWidth + spacing + sliderWidth;
+                float fovStartX = (windowSize.x - fovTotalWidth) * 0.5f;
+                float fovSliderY = sliderY + 50;
+                ImGui::SetCursorPos(ImVec2(fovStartX, fovSliderY));
+                ImGui::TextUnformatted(fovLabel);
+                ImGui::SameLine();
+                ImGui::PushItemWidth(sliderWidth);
+                if (ImGui::SliderFloat("##FOV", &fov, 30.0f, 120.0f, "%.1f")) {
+                    saveOption("fov", static_cast<int>(fov), "options.txt");
+                }
+                ImGui::PopItemWidth();
+
+                float backButtonY = fovSliderY + 50;
+                ImGui::SetCursorPos(ImVec2(centerX, backButtonY));
+                if (ImGui::Button("Back", buttonSize))
+                    pauseScreenPage = PauseMenuPage::Settings;
+            } break;
         }
 
-        ImGui::SetCursorPos(ImVec2(centerX, startY + buttonSize.y + spacing));
-        if (ImGui::Button("Settings", buttonSize)) {
-            // Settings page TODO
-        }
-
-        ImGui::SetCursorPos(ImVec2(centerX, startY + 2*(buttonSize.y + spacing)));
-        if (ImGui::Button("Quit", buttonSize)) {
-            glfwSetWindowShouldClose(glfwGetCurrentContext(), true);
-        }
-        
         ImGui::End();
 
         ImGui::PopStyleVar(3);
