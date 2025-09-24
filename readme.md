@@ -32,6 +32,7 @@ cmake --build build --config Release
 -  Multiple block models
 -  Transparent and translucent blocks
 -  Frustum Culling
+-  Player physics & collisions
 
 ## 📚 Libraries used
 - [glfw](https://www.glfw.org/) – Window and input handling  

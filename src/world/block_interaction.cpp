@@ -191,6 +191,31 @@ void placeBreakBlockOnClick(World* world, const Camera& camera, char action, uin
         auto& block = hit.placeChunk->blocks[hit.placeBlockPos.x][hit.placeBlockPos.y][hit.placeBlockPos.z];
         if (block.type != 0) return;
 
+        // Prevent placing inside player
+        AABB blockAABB = getModelAABB(blockType);
+        glm::vec3 blockWorldMin = glm::vec3(
+            hit.placeChunk->chunkX * Chunk::chunkWidth + hit.placeBlockPos.x, 
+            hit.placeBlockPos.y, 
+            hit.placeChunk->chunkZ * Chunk::chunkDepth + hit.placeBlockPos.z
+        ) + blockAABB.min;
+        glm::vec3 blockWorldMax = glm::vec3(
+            hit.placeChunk->chunkX * Chunk::chunkWidth + hit.placeBlockPos.x, 
+            hit.placeBlockPos.y, 
+            hit.placeChunk->chunkZ * Chunk::chunkDepth + hit.placeBlockPos.z
+        ) + blockAABB.max;
+
+        glm::vec3 playerPos = camera.getPosition();
+        float playerRadius = camera.getPlayerRadius();
+        float playerHeight = camera.getPlayerHeight();
+        float eyeHeight = camera.getEyeHeight();
+        glm::vec3 playerAABBMin = glm::vec3(playerPos.x - playerRadius, playerPos.y - eyeHeight, playerPos.z - playerRadius);
+        glm::vec3 playerAABBMax = glm::vec3(playerPos.x + playerRadius, playerPos.y - eyeHeight + playerHeight, playerPos.z + playerRadius);
+
+        bool overlap = (blockWorldMin.x < playerAABBMax.x && blockWorldMax.x > playerAABBMin.x) &&
+                       (blockWorldMin.y < playerAABBMax.y && blockWorldMax.y > playerAABBMin.y) &&
+                       (blockWorldMin.z < playerAABBMax.z && blockWorldMax.z > playerAABBMin.z);
+        if (overlap) return;
+
         block.type = blockType;
         hit.placeChunk->buildMesh();
 

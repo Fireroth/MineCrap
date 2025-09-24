@@ -16,8 +16,15 @@ public:
     float getYaw() const { return yaw; }
     float getPitch() const { return pitch; }
 
-    void updateVelocity(float deltaTime);
+    float getPlayerRadius() const { return playerRadius; }
+    float getPlayerHeight() const { return playerHeight; }
+    float getEyeHeight() const { return eyeHeight; }
+
+    void updateVelocity(float deltaTime, class World* world = nullptr);
+    void updateVelocityFlight(float deltaTime);
     void applyAcceleration(const glm::vec3& acceleration, float deltaTime);
+    void jump();
+    bool isGrounded() const { return grounded; }
 
 private:
     void updateCameraVectors();
@@ -35,4 +42,12 @@ private:
     float mouseSensitivity;
 
     glm::vec3 velocity = glm::vec3(0.0f);
+    bool grounded = false;
+
+    float gravity = -30.0f;
+    float jumpPower = 9.0f;
+    float playerHeight = 1.8f;
+    float eyeHeight = 1.67f;
+    float playerRadius = 0.3f;
+    float stepHeight = 0.51f;
 };

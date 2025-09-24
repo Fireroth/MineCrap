@@ -2,6 +2,7 @@
 #include <backends/imgui_impl_opengl3.h>
 #include <string>
 #include "../world/world.hpp"
+#include "../core/camera.hpp"
 #include "../world/blockDB.hpp"
 #include "ImGuiOverlay.hpp"
 #include "../world/block_interaction.hpp"
@@ -85,7 +86,7 @@ void ImGuiOverlay::render(float deltaTime, const Camera& camera, World* world) {
         ImVec2 buttonSize(200, 50);
         float spacing = 20.0f;
 
-        float startY = (windowSize.y - (buttonSize.y * 3 + spacing * 2)) * 0.5f;
+        float startY = (windowSize.y - (buttonSize.y * 4 + spacing * 2)) * 0.5f;
         float centerX = (windowSize.x - buttonSize.x) * 0.5f;
 
         switch (pauseScreenPage) {
@@ -103,6 +104,11 @@ void ImGuiOverlay::render(float deltaTime, const Camera& camera, World* world) {
                 }
 
                 ImGui::SetCursorPos(ImVec2(centerX, startY + 2*(buttonSize.y + spacing)));
+                if (ImGui::Button("Controls", buttonSize)) {
+                    pauseScreenPage = PauseMenuPage::Controls;
+                }
+
+                ImGui::SetCursorPos(ImVec2(centerX, startY + 3*(buttonSize.y + spacing)));
                 if (ImGui::Button("Quit", buttonSize)) {
                     glfwSetWindowShouldClose(glfwGetCurrentContext(), true);
                 }
@@ -165,7 +171,7 @@ void ImGuiOverlay::render(float deltaTime, const Camera& camera, World* world) {
                 ImGui::TextUnformatted(fovLabel);
                 ImGui::SameLine();
                 ImGui::PushItemWidth(sliderWidth);
-                if (ImGui::SliderFloat("##FOV", &fov, 30.0f, 120.0f, "%.1f")) {
+                if (ImGui::SliderFloat("##FOV", &fov, 10.0f, 110.0f, "%.1f")) {
                     saveOption("fov", static_cast<int>(fov), "options.txt");
                 }
                 ImGui::PopItemWidth();
@@ -174,6 +180,37 @@ void ImGuiOverlay::render(float deltaTime, const Camera& camera, World* world) {
                 ImGui::SetCursorPos(ImVec2(centerX, backButtonY));
                 if (ImGui::Button("Back", buttonSize))
                     pauseScreenPage = PauseMenuPage::Settings;
+            } break;
+
+            case PauseMenuPage::Controls: {
+                ImGuiIO& io = ImGui::GetIO();
+                float infoWidth = 400.0f;
+                float infoHeight = io.DisplaySize.y * 0.6f;
+                float startY = (windowSize.y - infoHeight) * 0.5f;
+                float centerX = (windowSize.x - infoWidth) * 0.5f;
+
+                ImGui::SetCursorPos(ImVec2(centerX, startY));
+                ImGui::BeginChild("ControlsInfo", ImVec2(infoWidth, infoHeight), true);
+                ImGui::Text("Controls");
+                ImGui::Separator();
+                ImGui::Text("W/A/S/D: Move");
+                ImGui::Text("Space: Up/Jump");
+                ImGui::Text("Shift: Down (in Fly mode)");
+                ImGui::Text("F: Toggle Fly Mode");
+                ImGui::Text("G: Toggle Wireframe Mode");
+                ImGui::Text("Ctrl: Sprint");
+                ImGui::Text("E: Open Inventory");
+                ImGui::Text("Esc: Pause Menu");
+                ImGui::Text("Left Mouse: Break Block");
+                ImGui::Text("Right Mouse: Place Block");
+                ImGui::Text("Middle Mouse: Pick Block");
+                ImGui::Text("1-9: Select Block");
+                ImGui::Text("F3: Debug Info");
+                ImGui::EndChild();
+
+                ImGui::SetCursorPos(ImVec2(centerX, startY + infoHeight + spacing));
+                if (ImGui::Button("Back", buttonSize))
+                    pauseScreenPage = PauseMenuPage::Main;
             } break;
         }
 
@@ -194,6 +231,7 @@ void ImGuiOverlay::render(float deltaTime, const Camera& camera, World* world) {
         BlockInfo blockInfo = getLookedAtBlockInfo(world, camera);
         float camYaw = camera.getYaw();
         float camPitch = camera.getPitch();
+        bool grounded = camera.isGrounded();
 
         // Calculate chunk coordinates
         int chunkX = static_cast<int>(std::floor(pos.x / 16.0f));
@@ -206,7 +244,7 @@ void ImGuiOverlay::render(float deltaTime, const Camera& camera, World* world) {
                     nullptr,
                     ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
         ImGui::Text("FPS: %.1f", fpsDisplay);
-        ImGui::Text("Pos: %.2f / %.2f / %.2f", pos.x, pos.y, pos.z);
+        ImGui::Text("Pos: %.2f / %.2f / %.2f", pos.x, pos.y - 1.67f, pos.z);
         ImGui::Text("Delta Time: %.2f ms", deltaTime*1000);
         ImGui::Text("Chunk: %d, %d", chunkX, chunkZ);
         ImGui::Separator();
@@ -214,6 +252,7 @@ void ImGuiOverlay::render(float deltaTime, const Camera& camera, World* world) {
         ImGui::Text("Camera -> Pitch: %.2f", camPitch);
         ImGui::Text("Camera -> Front: %.2f, %.2f, %.2f", front.x, front.y, front.z);
         ImGui::Text("Camera -> Up: %.2f, %.2f, %.2f", up.x, up.y, up.z);
+        ImGui::Text("Camera -> Grounded: %s", grounded ? "True" : "False");
         ImGui::Separator();
         if (blockInfo.valid) {
             const auto* info = BlockDB::getBlockInfo(blockInfo.type);

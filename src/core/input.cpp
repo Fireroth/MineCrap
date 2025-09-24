@@ -13,6 +13,7 @@ static World* g_world = nullptr;
 static float lastX;
 static float lastY;
 static uint8_t selectedBlockType = 1; // Default to grass
+bool flyMode = false;
 
 uint8_t getSelectedBlockType() {
     return selectedBlockType;
@@ -83,7 +84,10 @@ void setupInputCallbacks(GLFWwindow* window, Camera* camera, World* world) {
 
 // Speed multiplier
 float getSpeedMultiplier(GLFWwindow* window) {
-    return (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS) ? 30.0f : 4.0f;
+    if (flyMode)
+        return (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS) ? 30.0f : 4.0f;
+    else
+        return (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS) ? 2.5f : 1.9f;
 }
 
 // Zoom state
@@ -101,12 +105,29 @@ void processInput(GLFWwindow* window, Camera& camera, float deltaTime, float spe
         camera.processKeyboard("LEFT", deltaTime, speedMultiplier);
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
         camera.processKeyboard("RIGHT", deltaTime, speedMultiplier);
-    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
-        camera.processKeyboard("UP", deltaTime, speedMultiplier);
-    if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
-        camera.processKeyboard("DOWN", deltaTime, speedMultiplier);
 
-    camera.updateVelocity(deltaTime);
+    if (flyMode) {
+        if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
+            camera.processKeyboard("DOWN", deltaTime, speedMultiplier);
+        if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
+            camera.processKeyboard("UP", deltaTime, speedMultiplier);
+    }
+    else {
+        static bool spaceLast = false;
+        bool spaceNow = glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS;
+        if (spaceNow && !spaceLast && g_camera) {
+            g_camera->jump();
+        }
+        spaceLast = spaceNow;
+    }
+
+    if (g_world)
+        if (flyMode)
+            camera.updateVelocityFlight(deltaTime);
+        else
+            camera.updateVelocity(deltaTime, g_world);
+    else
+        camera.updateVelocity(deltaTime);
 
     static bool escPressedLastFrame = false;
     bool escPressedThisFrame = glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS;
@@ -130,13 +151,21 @@ void processInput(GLFWwindow* window, Camera& camera, float deltaTime, float spe
     }
     escPressedLastFrame = escPressedThisFrame;
 
-    // Toggle wireframe mode with F key
-    static bool fPressedLastFrame = false;
+    // Toggle wireframe mode with G key
+    static bool gPressedLastFrame = false;
     static bool wireframeEnabled = false;
-    bool fPressedThisFrame = glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS;
-    if (fPressedThisFrame && !fPressedLastFrame) {
+    bool gPressedThisFrame = glfwGetKey(window, GLFW_KEY_G) == GLFW_PRESS;
+    if (gPressedThisFrame && !gPressedLastFrame) {
         wireframeEnabled = !wireframeEnabled;
         glPolygonMode(GL_FRONT_AND_BACK, wireframeEnabled ? GL_LINE : GL_FILL);
+    }
+    gPressedLastFrame = gPressedThisFrame;
+
+    // Toggle flyMode mode with F key
+    static bool fPressedLastFrame = false;
+    bool fPressedThisFrame = glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS;
+    if (fPressedThisFrame && !fPressedLastFrame) {
+        flyMode = !flyMode;
     }
     fPressedLastFrame = fPressedThisFrame;
 

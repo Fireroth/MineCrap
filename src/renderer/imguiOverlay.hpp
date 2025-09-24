@@ -25,7 +25,8 @@ public:
     enum class PauseMenuPage {
         Main,
         Settings,
-        Video
+        Video,
+        Controls
     };
 
     PauseMenuPage pauseScreenPage = PauseMenuPage::Main;
