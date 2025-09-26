@@ -902,6 +902,60 @@ void BlockDB::init() {
         false,
         "Blocks"
     };
+
+    if (fasterTrees) {
+        blockData[51] = {
+            {
+                glm::vec2(2.0f, 10.0f),
+                glm::vec2(2.0f, 10.0f),
+                glm::vec2(2.0f, 10.0f),
+                glm::vec2(2.0f, 10.0f),
+                glm::vec2(2.0f, 10.0f),
+                glm::vec2(2.0f, 10.0f)
+            },
+            false,
+            false,
+            "Green Maple Leaves",
+            "cube",
+            false,
+            "Blocks"
+        };
+
+    } else {
+        blockData[51] = {
+            {
+                glm::vec2(1.0f, 10.0f),
+                glm::vec2(1.0f, 10.0f),
+                glm::vec2(1.0f, 10.0f),
+                glm::vec2(1.0f, 10.0f),
+                glm::vec2(1.0f, 10.0f),
+                glm::vec2(1.0f, 10.0f)
+            },
+            true,
+            false,
+            "Green Maple Leaves",
+            "cube",
+            true,
+            "Blocks"
+        };
+    };
+
+    blockData[52] = {
+        {
+            glm::vec2(1.0f, 10.0f),
+            glm::vec2(1.0f, 10.0f),
+            glm::vec2(1.0f, 10.0f),
+            glm::vec2(1.0f, 10.0f),
+            glm::vec2(1.0f, 10.0f),
+            glm::vec2(1.0f, 10.0f)
+        },
+        false,
+        false,
+        "Green Maple Leaves Carpet",
+        "carpet",
+        false,
+        "Blocks"
+    };
     
 }
 

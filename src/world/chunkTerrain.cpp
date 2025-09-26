@@ -284,7 +284,7 @@ void generateChunkTerrain(Chunk& chunk) {
             generateChunkBiomeFeatures(chunk, 0.90f, 0, 0, "grassShort", 1, 4, 0);
             generateChunkBiomeFeatures(chunk, 0.96f, 0, 0, "poppy", 1, 5, 0);
             generateChunkBiomeFeatures(chunk, 0.96f, 0, 0, "dandelion", 1, 6, 0);
-            generateChunkBiomeFeatures(chunk, 0.93f, 0, 0, "leavesCarpet", 1, 7, 0);
+            generateChunkBiomeFeatures(chunk, 0.93f, 0, 0, "mapleLeavesCarpet", 1, 7, 0);
             generateChunkBiomeFeatures(chunk, 0.99f, 2, 2, "greenMaple", 1, 8, 0);
             break;
     }
