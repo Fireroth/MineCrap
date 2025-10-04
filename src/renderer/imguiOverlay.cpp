@@ -4,7 +4,7 @@
 #include "../world/world.hpp"
 #include "../core/camera.hpp"
 #include "../world/blockDB.hpp"
-#include "ImGuiOverlay.hpp"
+#include "imguiOverlay.hpp"
 #include "../world/block_interaction.hpp"
 #include "../core/input.hpp"
 #include "../core/options.hpp"
@@ -329,7 +329,7 @@ void ImGuiOverlay::render(float deltaTime, const Camera& camera, World* world) {
                             setSelectedBlockType(blockIds[i]);
                             
                         if (ImGui::IsItemHovered())
-                            ImGui::SetTooltip(blockItems[i]);
+                            ImGui::SetTooltip("%s", blockItems[i]);
 
                         if (isSelected)
                             ImGui::PopStyleColor(3);

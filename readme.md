@@ -2,11 +2,23 @@
 A somewhat simple voxel game written in C++ with OpenGL 3.3<br>
 <img src="preview/thumb.png" alt="In-game screenshot" width="400"/>
 
+## ✨ Features
+-  Face Culling
+-  Chunk based world generation
+-  Block placing and breaking
+-  Infinite terrain
+-  Biomes
+-  Multiple block models
+-  Transparent and translucent blocks
+-  Frustum Culling
+-  Player physics & collisions
+
 ## 🧱 Building from source
 Before building the project, ensure you have the following installed:
 - C++ compiler with C++17 (or later) support
 - CMake (version 3.10 or higher)
 
+### Windows
 Clone the repository
 ```
 git clone https://github.com/Fireroth/MineCrap.git
@@ -23,16 +35,22 @@ Build the project
 cmake --build build --config Release
 ```
 
-## ✨ Features
--  Face Culling
--  Chunk based world generation
--  Block placing and breaking
--  Infinite terrain
--  Biomes
--  Multiple block models
--  Transparent and translucent blocks
--  Frustum Culling
--  Player physics & collisions
+### Linux
+Clone the repository
+```
+git clone https://github.com/Fireroth/MineCrap.git
+cd MineCrap
+```
+
+Run CMake
+```
+cmake -B build -DCMAKE_BUILD_TYPE=Release
+```
+
+Build the project
+```
+cmake --build build -j$(nproc)
+```
 
 ## 📚 Libraries used
 - [glfw](https://www.glfw.org/) – Window and input handling  

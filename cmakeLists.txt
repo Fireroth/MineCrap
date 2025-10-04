@@ -14,11 +14,12 @@ add_library(glad STATIC lib/glad/src/glad.c)
 target_include_directories(glad PUBLIC lib/glad/include)
 
 # GLFW
+set(GLFW_BUILD_WAYLAND OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_X11 ON CACHE BOOL "" FORCE)
 add_subdirectory(./lib/glfw)
 
-#GLM
-add_subdirectory(./lib/glm/glm)
-include_directories(${CMAKE_SOURCE_DIR}/lib/glm)
+# GLM
+include_directories(${CMAKE_SOURCE_DIR}/lib/GLM)
 
 # IMGUI
 file(GLOB IMGUI_SOURCES
@@ -39,9 +40,14 @@ file(GLOB_RECURSE SRC_FILES
     src/*.cpp
 )
 
-add_executable(MineCrap ${SRC_FILES} App.rc)
+set(RESOURCE_FILES "")
+if(WIN32)
+        list(APPEND RESOURCE_FILES "${CMAKE_SOURCE_DIR}/App.rc")
+endif()
 
-target_link_libraries(MineCrap glad glfw glm imgui ${CMAKE_DL_LIBS})
+add_executable(MineCrap ${SRC_FILES} ${RESOURCE_FILES})
+
+target_link_libraries(MineCrap glad glfw imgui)
 
 add_custom_command(TARGET MineCrap POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
@@ -53,8 +59,7 @@ add_custom_command(TARGET MineCrap POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
             ${CMAKE_SOURCE_DIR}/structures $<TARGET_FILE_DIR:MineCrap>/structures
     COMMAND ${CMAKE_COMMAND} -E copy
-            "${CMAKE_SOURCE_DIR}/options.txt""$<TARGET_FILE_DIR:MineCrap>/options.txt"
+            "${CMAKE_SOURCE_DIR}/options.txt" "$<TARGET_FILE_DIR:MineCrap>/options.txt" 
     COMMAND ${CMAKE_COMMAND} -E copy
-            "${CMAKE_SOURCE_DIR}/Font.ttf""$<TARGET_FILE_DIR:MineCrap>/Font.ttf"
+            "${CMAKE_SOURCE_DIR}/Font.ttf" "$<TARGET_FILE_DIR:MineCrap>/Font.ttf"
 )
-

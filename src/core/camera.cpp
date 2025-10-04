@@ -1,4 +1,5 @@
 #include <glm/gtc/matrix_transform.hpp>
+#include <cstring>
 #include "camera.hpp"
 #include "../world/world.hpp"
 #include "../world/chunk.hpp"
