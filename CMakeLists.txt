@@ -1,0 +1,65 @@
+cmake_minimum_required(VERSION 3.10)
+project(MineCrap)
+
+set(CMAKE_CXX_STANDARD 17)
+
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_SOURCE_DIR}/bin/Debug)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_DEBUG ${CMAKE_SOURCE_DIR}/bin/Debug)
+
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_SOURCE_DIR}/bin/Release)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE ${CMAKE_SOURCE_DIR}/bin/Release)
+
+# GLAD
+add_library(glad STATIC lib/glad/src/glad.c)
+target_include_directories(glad PUBLIC lib/glad/include)
+
+# GLFW
+set(GLFW_BUILD_WAYLAND OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_X11 ON CACHE BOOL "" FORCE)
+add_subdirectory(./lib/glfw)
+
+# GLM
+include_directories(${CMAKE_SOURCE_DIR}/lib/GLM)
+
+# IMGUI
+file(GLOB IMGUI_SOURCES
+    lib/imgui/*.cpp
+    lib/imgui/backends/imgui_impl_glfw.cpp
+    lib/imgui/backends/imgui_impl_opengl3.cpp
+)
+add_library(imgui STATIC ${IMGUI_SOURCES})
+target_include_directories(imgui PUBLIC lib/imgui lib/imgui/backends)
+
+include_directories(
+    lib/
+    lib/glad/include
+    lib/glfw/include
+)
+
+file(GLOB_RECURSE SRC_FILES
+    src/*.cpp
+)
+
+set(RESOURCE_FILES "")
+if(WIN32)
+        list(APPEND RESOURCE_FILES "${CMAKE_SOURCE_DIR}/App.rc")
+endif()
+
+add_executable(MineCrap ${SRC_FILES} ${RESOURCE_FILES})
+
+target_link_libraries(MineCrap glad glfw imgui)
+
+add_custom_command(TARGET MineCrap POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+            ${CMAKE_SOURCE_DIR}/textures $<TARGET_FILE_DIR:MineCrap>/textures
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+            ${CMAKE_SOURCE_DIR}/shaders $<TARGET_FILE_DIR:MineCrap>/shaders
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+            ${CMAKE_SOURCE_DIR}/sounds $<TARGET_FILE_DIR:MineCrap>/sounds
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+            ${CMAKE_SOURCE_DIR}/structures $<TARGET_FILE_DIR:MineCrap>/structures
+    COMMAND ${CMAKE_COMMAND} -E copy
+            "${CMAKE_SOURCE_DIR}/options.txt" "$<TARGET_FILE_DIR:MineCrap>/options.txt" 
+    COMMAND ${CMAKE_COMMAND} -E copy
+            "${CMAKE_SOURCE_DIR}/Font.ttf" "$<TARGET_FILE_DIR:MineCrap>/Font.ttf"
+)
