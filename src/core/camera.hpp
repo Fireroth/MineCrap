@@ -21,6 +21,7 @@ public:
     float getEyeHeight() const { return eyeHeight; }
 
     void updateVelocity(float deltaTime, class World* world = nullptr);
+    void stepVelocity(float deltaTime, class World* world);
     void updateVelocityFlight(float deltaTime);
     void applyAcceleration(const glm::vec3& acceleration, float deltaTime);
     void jump();
@@ -50,4 +51,10 @@ private:
     float eyeHeight = 1.67f;
     float playerRadius = 0.3f;
     float stepHeight = 0.51f;
+
+    float coyoteTime = 0.12f; // seconds we allow jump after walking off an edge
+    float coyoteTimer = 0.0f;
+    float jumpBufferTime = 0.1f; // seconds to buffer a jump input
+    float jumpBufferTimer = 0.0f;
+    bool jumpBuffered = false;
 };

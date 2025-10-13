@@ -97,6 +97,31 @@ void Camera::updateVelocity(float deltaTime, World* world) {
     // Fix deltaTime spikes (resizing/moving the window)
     if (deltaTime > 0.05f) deltaTime = 0.05f;
 
+    // Substep for stability at low FPS
+    const float maxSubstep = 1.0f / 150.0f;
+    int numSteps = static_cast<int>(ceil(deltaTime / maxSubstep));
+    float subDelta = deltaTime / numSteps;
+
+    for (int i = 0; i < numSteps; ++i) {
+        stepVelocity(subDelta, world);
+    }
+}
+
+void Camera::stepVelocity(float deltaTime, World* world) {
+    if (jumpBuffered) {
+        jumpBufferTimer -= deltaTime;
+        if (jumpBufferTimer <= 0.0f) {
+            jumpBuffered = false;
+            jumpBufferTimer = 0.0f;
+        }
+    }
+    if (!grounded) {
+        coyoteTimer -= deltaTime;
+        if (coyoteTimer < 0.0f) coyoteTimer = 0.0f;
+    } else {
+        coyoteTimer = coyoteTime;
+    }
+
     velocity.y += gravity * deltaTime;
     glm::vec3 proposedPos = position;
     glm::vec3 horizMove = glm::vec3(velocity.x, 0.0f, velocity.z) * deltaTime;
@@ -224,6 +249,15 @@ void Camera::updateVelocity(float deltaTime, World* world) {
         proposedPos.y += velocity.y * deltaTime;
     }
 
+    if (jumpBuffered && (grounded || coyoteTimer > 0.0f)) {
+        velocity.y = jumpPower;
+        grounded = false;
+        jumpBuffered = false;
+        jumpBufferTimer = 0.0f;
+        coyoteTimer = 0.0f;
+        proposedPos.y += 0.001f;
+    }
+
     position = proposedPos;
 
     // drag
@@ -252,8 +286,14 @@ void Camera::applyAcceleration(const glm::vec3& acceleration, float deltaTime) {
 }
 
 void Camera::jump() {
+    jumpBuffered = true;
+    jumpBufferTimer = jumpBufferTime;
+
     if (grounded) {
         velocity.y = jumpPower;
         grounded = false;
+        jumpBuffered = false;
+        jumpBufferTimer = 0.0f;
+        coyoteTimer = 0.0f;
     }
 }
