@@ -2,6 +2,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream>
 #include <set>
+#include <algorithm>
 #include "chunk.hpp"
 #include "../core/options.hpp"
 #include "noise.hpp"
@@ -285,10 +286,10 @@ void Chunk::buildMesh() {
     glBindVertexArray(liquidVAO);
 
     glBindBuffer(GL_ARRAY_BUFFER, liquidVBO);
-    glBufferData(GL_ARRAY_BUFFER, liquidVertices.size() * sizeof(float), liquidVertices.data(), GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, liquidVertices.size() * sizeof(float), liquidVertices.data(), GL_DYNAMIC_DRAW);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, liquidEBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, liquidIndices.size() * sizeof(unsigned int), liquidIndices.data(), GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, liquidIndices.size() * sizeof(unsigned int), liquidIndices.data(), GL_DYNAMIC_DRAW);
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
@@ -298,6 +299,10 @@ void Chunk::buildMesh() {
     glEnableVertexAttribArray(2);
 
     glBindVertexArray(0);
+
+    // Store CPU side copies for sorting
+    liquidVertexDataCPU = std::move(liquidVertices);
+    liquidIndexDataCPU = std::move(liquidIndices);
 }
 
 bool Chunk::isBlockVisible(int x, int y, int z, int face) const {
@@ -469,7 +474,61 @@ void Chunk::renderLiquid(const Camera& camera, GLint uLiquidModelLoc) {
     glm::mat4 liquidModel = glm::translate(glm::mat4(1.0f), glm::vec3(chunkX * chunkWidth, 0, chunkZ * chunkDepth));
     glUniformMatrix4fv(uLiquidModelLoc, 1, GL_FALSE, &liquidModel[0][0]);
 
+    // If there are no liquid indices, nothing to do
+    if (liquidIndexCount == 0 || liquidVertexDataCPU.empty() || liquidIndexDataCPU.empty()) 
+        return;
+
+    glm::vec3 camPosWorld = camera.getPosition();
+    glm::vec3 camPosLocal = camPosWorld - glm::vec3(chunkX * chunkWidth, 0.0f, chunkZ * chunkDepth);
+
+    const size_t stride = 6;
+    const size_t vertsCount = liquidVertexDataCPU.size() / stride;
+
+    struct FaceInfo { size_t baseIdx; float dist2; };
+    std::vector<FaceInfo> faces;
+    faces.reserve(liquidIndexDataCPU.size() / 6);
+
+    auto getVertex = [&](unsigned int idx) -> glm::vec3 {
+        size_t base = static_cast<size_t>(idx) * stride;
+        return glm::vec3(liquidVertexDataCPU[base + 0], liquidVertexDataCPU[base + 1], liquidVertexDataCPU[base + 2]);
+    };
+
+    for (size_t i = 0; i + 5 < liquidIndexDataCPU.size(); i += 6) {
+        unsigned int ia = liquidIndexDataCPU[i + 0];
+        unsigned int ib = liquidIndexDataCPU[i + 1];
+        unsigned int ic = liquidIndexDataCPU[i + 2];
+        unsigned int id = liquidIndexDataCPU[i + 4];
+
+        if (ia >= vertsCount || ib >= vertsCount || ic >= vertsCount || id >= vertsCount) 
+            continue;
+
+        glm::vec3 a = getVertex(ia);
+        glm::vec3 b = getVertex(ib);
+        glm::vec3 c = getVertex(ic);
+        glm::vec3 d = getVertex(id);
+
+        glm::vec3 centroid = (a + b + c + d) / 4.0f;
+        float d2 = glm::dot(centroid - camPosLocal, centroid - camPosLocal);
+
+        faces.push_back({i, d2});
+    }
+
+    // Sort faces back to front
+    std::sort(faces.begin(), faces.end(), [](const FaceInfo& A, const FaceInfo& B) {
+        return A.dist2 > B.dist2;
+    });
+
+    std::vector<unsigned int> sortedIndices;
+    sortedIndices.reserve(faces.size() * 6);
+    for (const auto& f : faces) {
+        for (size_t k = 0; k < 6; ++k) {
+            sortedIndices.push_back(liquidIndexDataCPU[f.baseIdx + k]);
+        }
+    }
+
     glBindVertexArray(liquidVAO);
-    glDrawElements(GL_TRIANGLES, liquidIndexCount, GL_UNSIGNED_INT, 0);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, liquidEBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sortedIndices.size() * sizeof(unsigned int), sortedIndices.data(), GL_DYNAMIC_DRAW);
+    glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(sortedIndices.size()), GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
 }

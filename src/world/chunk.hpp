@@ -54,6 +54,9 @@ private:
     GLsizei crossIndexCount;
     GLsizei liquidIndexCount;
 
+    std::vector<float> liquidVertexDataCPU;
+    std::vector<unsigned int> liquidIndexDataCPU;
+
     void addFace(std::vector<float>& vertices, std::vector<unsigned int>& indices,
                  int x, int y, int z, int face, const BlockDB::BlockInfo* blockInfo, unsigned int& indexOffset);
 

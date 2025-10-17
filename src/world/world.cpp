@@ -144,9 +144,29 @@ void World::renderCross(const Camera& camera, GLint uCrossModelLoc, const Frustu
     }
 }
 void World::renderLiquid(const Camera& camera, GLint uLiquidModelLoc, const Frustum& frustum) {
+    std::vector<std::pair<float, Chunk*>> visible;
+    visible.reserve(chunks.size());
+
+    glm::vec3 camPos = camera.getPosition();
     for (auto& [coord, chunk] : chunks) {
-        if (isChunkInFrustum(coord.first, coord.second, frustum))
-            chunk->renderLiquid(camera, uLiquidModelLoc);
+        if (!isChunkInFrustum(coord.first, coord.second, frustum))
+            continue;
+
+        float cx = (coord.first * Chunk::chunkWidth) + (Chunk::chunkWidth * 0.5f);
+        float cz = (coord.second * Chunk::chunkDepth) + (Chunk::chunkDepth * 0.5f);
+        float dx = camPos.x - cx;
+        float dy = camPos.y;
+        float dz = camPos.z - cz;
+        float dist2 = dx*dx + dy*dy + dz*dz;
+        visible.emplace_back(dist2, chunk);
+    }
+
+    std::sort(visible.begin(), visible.end(), [](const auto& A, const auto& B) {
+        return A.first > B.first;
+    });
+
+    for (auto& p : visible) {
+        p.second->renderLiquid(camera, uLiquidModelLoc);
     }
 }
 

@@ -200,7 +200,6 @@ void Renderer::renderWorld(const Camera& camera, float aspectRatio, float deltaT
     // -------------------------------- Render liquid --------------------------------
 
     glUseProgram(liquidShaderProgram);
-    glDepthMask(GL_FALSE);
 
     glUniformMatrix4fv(uLiquidViewLoc, 1, GL_FALSE, &view[0][0]);
     glUniformMatrix4fv(uLiquidProjLoc, 1, GL_FALSE, &projection[0][0]);
@@ -225,7 +224,6 @@ void Renderer::renderWorld(const Camera& camera, float aspectRatio, float deltaT
 
     world.renderLiquid(camera, uLiquidModelLoc, frustum);
 
-    glDepthMask(GL_TRUE);
     glDisable(GL_BLEND);
 }
 

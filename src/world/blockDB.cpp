@@ -142,7 +142,6 @@ void BlockDB::init() {
         "Blocks"
     };
 
-    //Temporary water and lava implementation
     blockData[9] = {
         {
             glm::vec2(0.0f, 13.0f),
@@ -170,7 +169,7 @@ void BlockDB::init() {
             glm::vec2(1.0f, 13.0f)
         },
         true,
-        false,
+        true,
         "Lava",
         "liquid",
         false,
