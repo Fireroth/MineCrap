@@ -291,12 +291,14 @@ void Chunk::buildMesh() {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, liquidEBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, liquidIndices.size() * sizeof(unsigned int), liquidIndices.data(), GL_DYNAMIC_DRAW);
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(5 * sizeof(float)));
+    glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)(5 * sizeof(float)));
     glEnableVertexAttribArray(2);
+    glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)(6 * sizeof(float)));
+    glEnableVertexAttribArray(3);
 
     glBindVertexArray(0);
 
@@ -417,14 +419,6 @@ void Chunk::addFace(std::vector<float>& vertices, std::vector<unsigned int>& ind
         } else {
             usedUvs = cubeUvs;
         }
-    } else if (blockInfo->modelName == "liquid") {
-        usedFaceVerts = liquidFaceVertices[face];
-        // Use "liquidUvs" for side faces, "cubeUvs" for top/bottom
-        if (face >= 0 && face <= 3) {
-            usedUvs = liquidUvs;
-        } else {
-            usedUvs = cubeUvs;
-        }
     } else if (blockInfo->modelName == "slab") {
         usedFaceVerts = slabFaceVertices[face];
         // Use "slabUvs" for side faces, "cubeUvs" for top/bottom
@@ -438,10 +432,41 @@ void Chunk::addFace(std::vector<float>& vertices, std::vector<unsigned int>& ind
         usedUvs = cubeUvs;
     }
 
-    for (int i = 0; i < 4; i++) {
-        glm::vec3 pos = usedFaceVerts[i] + glm::vec3(x, y, z);
-        glm::vec2 uv = (blockInfo->textureCoords[face] + usedUvs[i]) / 16.0f;
-        vertices.insert(vertices.end(), {pos.x, pos.y, pos.z, uv.x, uv.y, static_cast<float>(face)});
+    bool liquidAbove = false;
+    int aboveY = y + 1;
+
+    if (aboveY >= 0 && aboveY < chunkHeight) {
+        uint8_t aboveType = blocks[x][aboveY][z].type;
+        if (aboveType != 0) {
+            const auto* aboveInfo = BlockDB::getBlockInfo(aboveType);
+            liquidAbove = (aboveInfo && aboveInfo->liquid);
+        }
+    }
+
+    if (blockInfo->modelName == "liquid") {
+        float faceMaxY = std::max({usedFaceVerts[0].y, usedFaceVerts[1].y, usedFaceVerts[2].y, usedFaceVerts[3].y});
+
+        const float eps = 1e-6f;
+        bool isTopFace = (face == 4) && !liquidAbove;
+
+        for (int i = 0; i < 4; ++i) {
+            glm::vec3 pos = usedFaceVerts[i] + glm::vec3(x, y, z);
+            glm::vec2 uv = (blockInfo->textureCoords[face] + usedUvs[i]) / 16.0f;
+
+            float isTop = 0.0f;
+            if (!liquidAbove) {
+                if (isTopFace || (face <= 3 && fabs(usedFaceVerts[i].y - faceMaxY) < eps)) 
+                    isTop = 1.0f;
+            }
+            vertices.insert(vertices.end(), {pos.x, pos.y, pos.z, uv.x, uv.y, static_cast<float>(face), isTop});
+        }
+    } else {
+        for (int i = 0; i < 4; ++i) {
+            glm::vec3 pos = usedFaceVerts[i] + glm::vec3(x, y, z);
+            glm::vec2 uv = (blockInfo->textureCoords[face] + usedUvs[i]) / 16.0f;
+
+            vertices.insert(vertices.end(), {pos.x, pos.y, pos.z, uv.x, uv.y, static_cast<float>(face)});
+        }
     }
 
     indices.insert(indices.end(), {
@@ -481,7 +506,7 @@ void Chunk::renderLiquid(const Camera& camera, GLint uLiquidModelLoc) {
     glm::vec3 camPosWorld = camera.getPosition();
     glm::vec3 camPosLocal = camPosWorld - glm::vec3(chunkX * chunkWidth, 0.0f, chunkZ * chunkDepth);
 
-    const size_t stride = 6;
+    const size_t stride = 7; // pos(3) uv(2) faceID(1) isTop(1)
     const size_t vertsCount = liquidVertexDataCPU.size() / stride;
 
     struct FaceInfo { size_t baseIdx; float dist2; };

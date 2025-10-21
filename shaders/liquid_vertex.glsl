@@ -3,6 +3,7 @@
 layout (location = 0) in vec3 aPos;
 layout (location = 1) in vec2 aTexCoord;
 layout (location = 2) in float aFaceID;
+layout (location = 3) in float aIsTop;
 
 out vec2 TexCoord;
 out float FaceID;
@@ -17,8 +18,11 @@ float pi = 3.1415926535;
 
 void main() {
     vec3 animatedPos = aPos;
-    // Formula taken from WSAL Evan --> https://github.com/EvanatorM/ScuffedMinecraft
-    animatedPos.y += (sin(aPos.x * pi / 2.0 + time) + sin(aPos.z * pi / 2.0 + time * 1.5)) * 0.04;
+    if (aIsTop > 0.5) {
+        animatedPos.y -= 0.18;
+        // Formula taken from WSAL Evan --> https://github.com/EvanatorM/ScuffedMinecraft
+        animatedPos.y += (sin(aPos.x * pi / 2.0 + time) + sin(aPos.z * pi / 2.0 + time * 1.5)) * 0.04;
+    }
 
     vec4 worldPosition = model * vec4(animatedPos, 1.0);
     gl_Position = projection * view * worldPosition;
