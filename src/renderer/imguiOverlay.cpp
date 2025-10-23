@@ -16,7 +16,9 @@ std::vector<uint8_t> ImGuiOverlay::blockIds;
 ImTextureID ImGuiOverlay::texAtlas;
 
 ImGuiOverlay::ImGuiOverlay()
-    : fpsTimer(0.0f), frameCount(0), fpsDisplay(0.0f) {}
+    : fpsTimer(0.0f), frameCount(0), fpsDisplay(0.0f) {
+    prevPauseMenuOpen = false;
+}
 
 ImGuiOverlay::~ImGuiOverlay() {
     ImGui_ImplOpenGL3_Shutdown();
@@ -63,6 +65,9 @@ void ImGuiOverlay::render(float deltaTime, const Camera& camera, World* world) {
 
     // ---------------- Pause menu screen ----------------
     if (pauseMenuOpen) {
+        if (!prevPauseMenuOpen)
+            pauseScreenPage = PauseMenuPage::Main;
+
         debugOpen = false;
         inventoryOpen = false;
 
@@ -120,7 +125,7 @@ void ImGuiOverlay::render(float deltaTime, const Camera& camera, World* world) {
                 float centerX = (windowSize.x - buttonSize.x) * 0.5f;
 
                 ImGui::SetCursorPos(ImVec2(centerX, startY));
-                ImGui::Text("Settings Menu");
+                ImGui::Text("Settings");
 
                 ImGui::SetCursorPos(ImVec2(centerX, startY + ImGui::GetTextLineHeightWithSpacing() + spacing));
                 if (ImGui::Button("Video", buttonSize))
@@ -220,6 +225,8 @@ void ImGuiOverlay::render(float deltaTime, const Camera& camera, World* world) {
         ImGui::PopStyleColor();
     }
 
+    prevPauseMenuOpen = pauseMenuOpen;
+
     // ---------------- Debug window ----------------
     if (debugOpen) {
         ImGui::SetNextWindowSize(ImVec2(450, 0)); // Width, Height
@@ -232,6 +239,8 @@ void ImGuiOverlay::render(float deltaTime, const Camera& camera, World* world) {
         float camYaw = camera.getYaw();
         float camPitch = camera.getPitch();
         bool grounded = camera.isGrounded();
+
+        uint8_t selectedBlockType = getSelectedBlockType();
 
         // Calculate chunk coordinates
         int chunkX = static_cast<int>(std::floor(pos.x / 16.0f));
@@ -270,6 +279,10 @@ void ImGuiOverlay::render(float deltaTime, const Camera& camera, World* world) {
             ImGui::Text("Block -> renderFacesInBetween: undefined");
             ImGui::Text("Block -> model name: undefined");
         }
+        ImGui::Separator();
+        ImGui::Text("Input -> Selected: %s", BlockDB::getBlockInfo(selectedBlockType)->name.c_str());
+        ImGui::Text("Input -> Selected ID: %d", selectedBlockType);
+        
         ImGui::PopStyleColor(2);
         ImGui::End();
     }

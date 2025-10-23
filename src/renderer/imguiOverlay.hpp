@@ -30,6 +30,8 @@ public:
     };
 
     PauseMenuPage pauseScreenPage = PauseMenuPage::Main;
+    
+    bool prevPauseMenuOpen = false;
 
 private:
     float fpsTimer;

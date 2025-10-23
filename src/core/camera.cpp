@@ -98,7 +98,7 @@ void Camera::updateVelocity(float deltaTime, World* world) {
     if (deltaTime > 0.05f) deltaTime = 0.05f;
 
     // Substep for stability at low FPS
-    const float maxSubstep = 1.0f / 150.0f;
+    const float maxSubstep = 1.0f / 200.0f;
     int numSteps = static_cast<int>(ceil(deltaTime / maxSubstep));
     float subDelta = deltaTime / numSteps;
 
