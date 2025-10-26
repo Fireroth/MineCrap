@@ -1,6 +1,7 @@
 #include <backends/imgui_impl_glfw.h>
 #include <backends/imgui_impl_opengl3.h>
 #include <string>
+#include <sstream>
 #include "../world/world.hpp"
 #include "../core/camera.hpp"
 #include "../world/blockDB.hpp"
@@ -15,9 +16,15 @@ std::vector<const char*> ImGuiOverlay::blockItems;
 std::vector<uint8_t> ImGuiOverlay::blockIds;
 ImTextureID ImGuiOverlay::texAtlas;
 
+static std::vector<std::string> consoleLog;
+static char inputBuffer[256] = "";
+static bool scrollToBottom = false;
+
 ImGuiOverlay::ImGuiOverlay()
     : fpsTimer(0.0f), frameCount(0), fpsDisplay(0.0f) {
     prevPauseMenuOpen = false;
+    prevConsoleOpen = false;
+    consoleFocusDelayFrames = 0;
 }
 
 ImGuiOverlay::~ImGuiOverlay() {
@@ -49,7 +56,7 @@ bool ImGuiOverlay::init(GLFWwindow* window, GLuint textureAtlas) {
     return true;
 }
 
-void ImGuiOverlay::render(float deltaTime, const Camera& camera, World* world) {
+void ImGuiOverlay::render(float deltaTime, Camera& camera, World* world) {
     frameCount++;
     fpsTimer += deltaTime;
 
@@ -83,8 +90,12 @@ void ImGuiOverlay::render(float deltaTime, const Camera& camera, World* world) {
 
         ImGui::Begin("Pause Menu",
                     nullptr,
-                    ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse |
-                    ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus);
+                    ImGuiWindowFlags_NoTitleBar | 
+                    ImGuiWindowFlags_NoResize | 
+                    ImGuiWindowFlags_NoMove | 
+                    ImGuiWindowFlags_NoCollapse |
+                    ImGuiWindowFlags_NoBringToFrontOnFocus | 
+                    ImGuiWindowFlags_NoNavFocus);
         
         ImVec2 windowSize = ImGui::GetWindowSize();
 
@@ -211,6 +222,7 @@ void ImGuiOverlay::render(float deltaTime, const Camera& camera, World* world) {
                 ImGui::Text("Middle Mouse: Pick Block");
                 ImGui::Text("1-9: Select Block");
                 ImGui::Text("F3: Debug Info");
+                ImGui::Text("T: Console");
                 ImGui::EndChild();
 
                 ImGui::SetCursorPos(ImVec2(centerX, startY + infoHeight + spacing));
@@ -242,18 +254,22 @@ void ImGuiOverlay::render(float deltaTime, const Camera& camera, World* world) {
 
         uint8_t selectedBlockType = getSelectedBlockType();
 
-        // Calculate chunk coordinates
-        int chunkX = static_cast<int>(std::floor(pos.x / 16.0f));
-        int chunkZ = static_cast<int>(std::floor(pos.z / 16.0f));
+        float eyeHeight = camera.getEyeHeight();
+        glm::vec3 feetPos = glm::vec3(pos.x, pos.y - eyeHeight, pos.z);
+        int chunkX = static_cast<int>(std::floor(feetPos.x / 16.0f));
+        int chunkZ = static_cast<int>(std::floor(feetPos.z / 16.0f));
 
         ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.1f, 0.1f, 0.1f, 0.5f));
         ImGui::PushStyleColor(ImGuiCol_Separator, ImVec4(1.0f, 1.0f, 1.0f, 0.7f));
 
         ImGui::Begin("Debug",
                     nullptr,
-                    ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
+                    ImGuiWindowFlags_NoTitleBar | 
+                    ImGuiWindowFlags_NoMove | 
+                    ImGuiWindowFlags_NoResize | 
+                    ImGuiWindowFlags_NoCollapse);
         ImGui::Text("FPS: %.1f", fpsDisplay);
-        ImGui::Text("Pos: %.2f / %.2f / %.2f", pos.x, pos.y - 1.67f, pos.z);
+        ImGui::Text("Pos: %.2f / %.2f / %.2f", feetPos.x, feetPos.y, feetPos.z);
         ImGui::Text("Delta Time: %.2f ms", deltaTime*1000);
         ImGui::Text("Chunk: %d, %d", chunkX, chunkZ);
         ImGui::Separator();
@@ -300,7 +316,10 @@ void ImGuiOverlay::render(float deltaTime, const Camera& camera, World* world) {
         ImGui::SetNextWindowSize(ImVec2(winWidth, winHeight), ImGuiCond_Always);
         ImGui::Begin("##Inventory",
                 nullptr,
-                ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
+                ImGuiWindowFlags_NoTitleBar |
+                ImGuiWindowFlags_NoMove |
+                ImGuiWindowFlags_NoResize |
+                ImGuiWindowFlags_NoCollapse);
 
         std::unordered_map<std::string, std::vector<size_t>> tabMap;
         for (size_t i = 0; i < blockItems.size(); i++) {
@@ -359,6 +378,130 @@ void ImGuiOverlay::render(float deltaTime, const Camera& camera, World* world) {
         }
         ImGui::End();
     }
+
+    // ---------------- Console window ----------------
+    if (consoleOpen) {
+        if (consoleLog.empty()) {
+            consoleLog.push_back("Type 'help' for a list of commands.");
+        }
+        ImGuiIO& io = ImGui::GetIO();
+        float consoleWidth = io.DisplaySize.x * 0.5f;
+        float consoleHeight = io.DisplaySize.y * 0.45f;
+        ImVec2 consolePos(7.0f, io.DisplaySize.y - consoleHeight - 7.0f);
+
+        ImGui::SetNextWindowPos(consolePos, ImGuiCond_Always);
+        ImGui::SetNextWindowSize(ImVec2(consoleWidth, consoleHeight), ImGuiCond_Always);
+
+        ImGui::Begin("ConsoleWindow",
+                    nullptr,
+                    ImGuiWindowFlags_NoTitleBar |
+                    ImGuiWindowFlags_NoResize |
+                    ImGuiWindowFlags_NoMove |
+                    ImGuiWindowFlags_NoCollapse);
+
+        ImGui::BeginChild("consoleLog", ImVec2(0, consoleHeight - 60), false, ImGuiWindowFlags_HorizontalScrollbar);
+        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(ImGui::GetStyle().ItemSpacing.x, 0.0f));
+        for (const auto& line : consoleLog) {
+            ImGui::TextWrapped("%s", line.c_str());
+        }
+        ImGui::PopStyleVar();
+        if (scrollToBottom) {
+            ImGui::SetScrollHereY(1.0f);
+            scrollToBottom = false;
+        }
+        ImGui::EndChild();
+
+        ImGui::Separator();
+        ImGui::PushItemWidth(-1);
+
+        if (!prevConsoleOpen && consoleOpen) {
+            consoleFocusDelayFrames = 5; // delay focus by 5 frames to avoid typing the toggle key
+        }
+
+        if (consoleFocusDelayFrames > 0) {
+            consoleFocusDelayFrames--;
+            if (consoleFocusDelayFrames == 0) {
+                ImGui::SetKeyboardFocusHere();
+            }
+        }
+
+        bool enterPressed = ImGui::InputText("##ConsoleInput",
+                                            inputBuffer,
+                                            IM_ARRAYSIZE(inputBuffer),
+                                            ImGuiInputTextFlags_EnterReturnsTrue);
+
+        if (enterPressed) {
+            std::string input(inputBuffer);
+
+            if (!input.empty()) {
+                if (input.rfind("say ", 0) == 0) {
+                    std::string msg = input.substr(4);
+                    consoleLog.push_back(msg);
+                } else if (input == "clear") {
+                    consoleLog.clear();
+                } else if (input == "help") {
+                    consoleLog.push_back("Commands:");
+                    consoleLog.push_back("  say <message> - Print a message");
+                    consoleLog.push_back("  clear - Clear the console window");
+                    consoleLog.push_back("  help - Show this help page");
+                    consoleLog.push_back("  tp <x> <y> <z> - Teleport to coordinates");
+                    consoleLog.push_back("  farlands - Teleport to Far Lands");
+                } else if (input.rfind("tp", 0) == 0) {
+                    std::istringstream ss(input);
+                    std::string cmd, coordx, coordy, coordz;
+                    ss >> cmd >> coordx >> coordy >> coordz;
+                    if (coordx.empty() || coordy.empty() || coordz.empty()) {
+                        consoleLog.push_back("Invalid usage. Use: tp <x> <y> <z> (~ for current position)");
+                    } else {
+                        glm::vec3 current = camera.getPosition();
+                        float eyeHeight = camera.getEyeHeight();
+                        float currentFeetY = current.y - eyeHeight;
+                        auto parseCoord = [](const std::string& token, float currentVal, bool& ok) -> float {
+                            ok = true;
+                            if (token[0] == '~') {
+                                if (token.size() == 1) return currentVal;
+                                try {
+                                    return currentVal + std::stof(token.substr(1));
+                                } catch (...) {
+                                    ok = false;
+                                    return 0.0f;
+                                }
+                            }
+                            try {
+                                return std::stof(token);
+                            } catch (...) {
+                                ok = false;
+                                return 0.0f;
+                            }
+                        };
+                        bool okx = true, oky = true, okz = true;
+                        float x = parseCoord(coordx, current.x, okx);
+                        float y = parseCoord(coordy, currentFeetY, oky);
+                        float z = parseCoord(coordz, current.z, okz);
+                        if (!okx || !oky || !okz) {
+                            consoleLog.push_back("Invalid coordinates. Example: tp ~ ~10 ~-5");
+                        } else {
+                            camera.setPosition(glm::vec3(x, y + eyeHeight, z));
+                            char buf[128];
+                            snprintf(buf, sizeof(buf), "Teleported to %.2f %.2f %.2f", x, y, z);
+                            consoleLog.push_back(buf);
+                        }
+                    }
+                } else if (input == "farlands"){
+                    camera.setPosition(glm::vec3(4294960.0f, 100.0f, 0));
+                } else {
+                    consoleLog.push_back("Unknown command. Type 'help' for a list of commands.");
+                }
+                inputBuffer[0] = '\0';
+                scrollToBottom = true;
+            }
+            ImGui::SetKeyboardFocusHere(-1);
+        }
+
+        ImGui::PopItemWidth();
+        ImGui::End();
+    }
+    prevConsoleOpen = consoleOpen;
 
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

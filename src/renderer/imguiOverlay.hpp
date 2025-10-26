@@ -9,6 +9,7 @@ extern bool inventoryOpen;
 extern bool debugOpen;
 extern bool pauseMenuOpen;
 extern bool cursorCaptured;
+extern bool consoleOpen;
 
 class ImGuiOverlay {
 public:
@@ -16,7 +17,7 @@ public:
     ~ImGuiOverlay();
 
     bool init(GLFWwindow* window, GLuint textureAtlas);
-    void render(float deltaTime, const Camera& camera, class World* world);
+    void render(float deltaTime, Camera& camera, class World* world);
 
     static std::vector<const char*> blockItems;
     static std::vector<uint8_t> blockIds;
@@ -32,6 +33,8 @@ public:
     PauseMenuPage pauseScreenPage = PauseMenuPage::Main;
     
     bool prevPauseMenuOpen = false;
+    bool prevConsoleOpen = false;
+    int consoleFocusDelayFrames = 0;
 
 private:
     float fpsTimer;

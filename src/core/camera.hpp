@@ -15,7 +15,6 @@ public:
     glm::vec3 getUp() const { return up; }
     float getYaw() const { return yaw; }
     float getPitch() const { return pitch; }
-
     float getPlayerRadius() const { return playerRadius; }
     float getPlayerHeight() const { return playerHeight; }
     float getEyeHeight() const { return eyeHeight; }
@@ -26,6 +25,8 @@ public:
     void applyAcceleration(const glm::vec3& acceleration, float deltaTime);
     void jump();
     bool isGrounded() const { return grounded; }
+
+    void setPosition(const glm::vec3& pos);
 
 private:
     void updateCameraVectors();

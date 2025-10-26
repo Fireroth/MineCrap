@@ -297,3 +297,9 @@ void Camera::jump() {
         coyoteTimer = 0.0f;
     }
 }
+
+void Camera::setPosition(const glm::vec3& pos) {
+    position = pos;
+    velocity = glm::vec3(0.0f);
+    grounded = false;
+}

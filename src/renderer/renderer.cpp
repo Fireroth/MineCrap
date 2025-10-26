@@ -7,6 +7,7 @@
 #include "shader.hpp"
 #include "../core/camera.hpp"
 #include "../core/options.hpp"
+#include "../core/input.hpp"
 
 Renderer::Renderer() : shaderProgram(0), textureAtlas(0), crosshairVAO(0), crosshairVBO(0) {}
 
@@ -122,7 +123,6 @@ void Renderer::renderWorld(const Camera& camera, float aspectRatio, float deltaT
     bool sprintState = window && getSpeedMultiplier(window) > 2.4f;
     float sprintFov = baseFov + 10.0f;
 
-    bool getZoomState(GLFWwindow* window);
     bool zoomState = window && getZoomState(window);
     float zoomFov = baseFov * 0.1f;
 

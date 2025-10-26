@@ -59,6 +59,7 @@ cmake --build build -j$(nproc)
 - [stb_image](https://github.com/nothings/stb) – Image loading  
 - [ImGUI](https://github.com/ocornut/imgui) – GUI system
 - [FastNoiseLite](https://github.com/Auburn/FastNoiseLite) – Noise generator (for terrain)
+- [nlohmann/json](https://github.com/nlohmann/json) – JSON library
 
 ---
 
