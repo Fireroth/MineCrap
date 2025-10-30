@@ -47,6 +47,9 @@ Chunk::~Chunk() {
     glDeleteVertexArrays(1, &liquidVAO);
     glDeleteBuffers(1, &liquidVBO);
     glDeleteBuffers(1, &liquidEBO);
+
+    liquidVertexDataCPU.clear();
+    liquidIndexDataCPU.clear();
 }
 
 void Chunk::placeStructure(const Structure& structure, int baseX, int baseY, int baseZ) {

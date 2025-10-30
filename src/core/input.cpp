@@ -1,4 +1,5 @@
 #include <glad/glad.h>
+#include <array>
 #include "input.hpp"
 #include "../world/block_interaction.hpp"
 #include "../world/world.hpp"
@@ -9,6 +10,7 @@ bool inventoryOpen = false;
 bool debugOpen = false;
 bool pauseMenuOpen = false;
 bool consoleOpen = false;
+bool hotbarOpen = true;
 static Camera* g_camera = nullptr;
 static World* g_world = nullptr;
 static float lastX;
@@ -18,6 +20,8 @@ bool flyMode = false;
 bool wireframeEnabled = false;
 bool ingoreInput = false;
 bool zoomedIn = false;
+int selectedHotbarIndex = 0;
+std::array<uint8_t, 9> hotbarBlocks = {1, 2, 3, 4, 5, 6, 7, 8, 14};
 
 bool getZoomState(GLFWwindow*) {
     return zoomedIn;
@@ -29,6 +33,10 @@ uint8_t getSelectedBlockType() {
 
 void setSelectedBlockType(uint8_t type) {
     selectedBlockType = type;
+}
+
+void setHotbarBlock(int index, uint8_t type) {
+    hotbarBlocks[index] = type;
 }
 
 // Mouse movement
@@ -51,6 +59,19 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
         g_camera->processMouseMovement(xOffset, yOffset);
 }
 
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
+    if (pauseMenuOpen) return;
+    const int hotbarSize = 9;
+
+    if (yoffset < 0) {
+        selectedHotbarIndex = (selectedHotbarIndex + 1) % hotbarSize;
+    } else if (yoffset > 0) {
+        selectedHotbarIndex = (selectedHotbarIndex - 1 + hotbarSize) % hotbarSize;
+    }
+
+    selectedBlockType = hotbarBlocks[selectedHotbarIndex];
+}
+
 // Mouse button callback for block breaking and placing
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods) {
     if (!cursorCaptured) return;
@@ -70,6 +91,7 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
         if (g_camera && g_world) {
             BlockInfo info = getLookedAtBlockInfo(g_world, *g_camera);
             if (info.valid && info.type != 0) {
+                setHotbarBlock(selectedHotbarIndex, info.type);
                 setSelectedBlockType(info.type);
             }
         }
@@ -88,6 +110,7 @@ void setupInputCallbacks(GLFWwindow* window, Camera* camera, World* world) {
     glfwSetCursorPosCallback(window, mouse_callback);
     glfwSetMouseButtonCallback(window, mouse_button_callback);
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    glfwSetScrollCallback(window, scroll_callback);
 
     if (glfwRawMouseMotionSupported()) {
         glfwSetInputMode(window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
@@ -148,6 +171,14 @@ void processInput(GLFWwindow* window, Camera& camera, float deltaTime, float spe
         debugOpen = !debugOpen;
     }
     f3PressedLastFrame = f3PressedThisFrame;
+
+    // Toggle hotbar with F1 key
+    static bool f1PressedLastFrame = false;
+    bool f1PressedThisFrame = glfwGetKey(window, GLFW_KEY_F1) == GLFW_PRESS;
+    if (f1PressedThisFrame && !f1PressedLastFrame) {
+        hotbarOpen = !hotbarOpen;
+    }
+    f1PressedLastFrame = f1PressedThisFrame;
 
     if (!ingoreInput) { // True if console is opened
 
@@ -239,11 +270,11 @@ void processInput(GLFWwindow* window, Camera& camera, float deltaTime, float spe
         }
         ePressedLastFrame = ePressedThisFrame;
 
-
         // Block selection with number keys 1-9
         for (int i = 1; i <= 9; i++) {
             if (glfwGetKey(window, GLFW_KEY_1 + (i - 1)) == GLFW_PRESS) {
-                selectedBlockType = static_cast<uint8_t>(i);
+                selectedBlockType = hotbarBlocks[i - 1];
+                selectedHotbarIndex = i - 1;
             }
         }
 

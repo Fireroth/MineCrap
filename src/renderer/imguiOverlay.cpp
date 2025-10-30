@@ -1,6 +1,5 @@
 #include <backends/imgui_impl_glfw.h>
 #include <backends/imgui_impl_opengl3.h>
-#include <string>
 #include <sstream>
 #include "../world/world.hpp"
 #include "../core/camera.hpp"
@@ -47,6 +46,15 @@ bool ImGuiOverlay::init(GLFWwindow* window, GLuint textureAtlas) {
             blockItems.push_back(info->name.c_str());
             blockIds.push_back(id);
         }
+    }
+
+    // Keep tab insertion order consistent across platforms
+    for (size_t i = 0; i < blockItems.size(); i++) {
+        const auto* blockInfo = BlockDB::getBlockInfo(blockIds[i]);
+        auto& indices = tabMap[blockInfo->tabName];
+        if (indices.empty())
+            tabOrder.push_back(blockInfo->tabName);
+        indices.push_back(i);
     }
 
     texAtlas = (ImTextureID)(intptr_t)textureAtlas;
@@ -221,6 +229,7 @@ void ImGuiOverlay::render(float deltaTime, Camera& camera, World* world) {
                 ImGui::Text("Right Mouse: Place Block");
                 ImGui::Text("Middle Mouse: Pick Block");
                 ImGui::Text("1-9: Select Block");
+                ImGui::Text("F1: Toggle Hotbar");
                 ImGui::Text("F3: Debug Info");
                 ImGui::Text("T: Console");
                 ImGui::EndChild();
@@ -321,29 +330,15 @@ void ImGuiOverlay::render(float deltaTime, Camera& camera, World* world) {
                 ImGuiWindowFlags_NoResize |
                 ImGuiWindowFlags_NoCollapse);
 
-        std::unordered_map<std::string, std::vector<size_t>> tabMap;
-        for (size_t i = 0; i < blockItems.size(); i++) {
-            const auto* blockInfo = BlockDB::getBlockInfo(blockIds[i]);
-            tabMap[blockInfo->tabName].push_back(i);
-        }
-        
         if (ImGui::BeginTabBar("InventoryTabs")) {
-            for (auto& [tabName, indices] : tabMap) {
+            for (const auto& tabName : tabOrder) {
+                auto& indices = tabMap[tabName];
                 if (ImGui::BeginTabItem(tabName.c_str())) {
 
                     ImGui::BeginChild("BlockGrid", ImVec2(0, 0), false);
 
-                    uint8_t selectedBlockType = getSelectedBlockType();
-
                     for (size_t n = 0; n < indices.size(); n++) {
                         size_t i = indices[n];
-                        bool isSelected = (selectedBlockType == blockIds[i]);
-                        if (isSelected) {
-                            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.5f, 1.0f, 1.0f, 0.4f));
-                            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.6f, 1.0f, 1.0f, 0.8f));
-                            ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.5f, 1.0f, 1.0f, 0.4f));
-                        }
-
                         const auto* blockInfo = BlockDB::getBlockInfo(blockIds[i]);
                         int tileX = static_cast<int>(blockInfo->textureCoords[0].x);
                         int tileY = static_cast<int>(blockInfo->textureCoords[0].y);
@@ -357,24 +352,91 @@ void ImGuiOverlay::render(float deltaTime, Camera& camera, World* world) {
                             (tileY * 16) / 256.0f
                         );
 
-                        if (ImGui::ImageButton(blockItems[i], texAtlas, ImVec2(64, 64), uv0, uv1)) 
+                        if (ImGui::ImageButton(blockItems[i], texAtlas, ImVec2(64, 64), uv0, uv1)) {
+                            setHotbarBlock(selectedHotbarIndex, blockIds[i]);
                             setSelectedBlockType(blockIds[i]);
-                            
+                        }
+
                         if (ImGui::IsItemHovered())
                             ImGui::SetTooltip("%s", blockItems[i]);
 
-                        if (isSelected)
-                            ImGui::PopStyleColor(3);
-
                         static uint8_t itemsPerRow = 6;
                         if ((n % itemsPerRow) != (itemsPerRow - 1) && n + 1 < indices.size())
-                            ImGui::SameLine();  
+                            ImGui::SameLine();
                     }
                     ImGui::EndChild();
                     ImGui::EndTabItem();
                 }
             }
             ImGui::EndTabBar();
+        }
+
+        ImGui::End();
+    }
+
+    // ---------------- Hotbar UI ----------------
+    if (hotbarOpen && !pauseMenuOpen) {
+        ImGuiIO& io = ImGui::GetIO();
+        const float slotSize = 54.0f;
+        const float padding = 3.0f;
+        const float winWidth = 650.0f;
+        const float winHeight = 85.0f;
+
+        ImVec2 hotbarPos(
+            io.DisplaySize.x * 0.5f - winWidth * 0.5f,
+            io.DisplaySize.y - winHeight - 0.0f
+        );
+
+        ImGui::SetNextWindowPos(hotbarPos, ImGuiCond_Always);
+        ImGui::SetNextWindowSize(ImVec2(winWidth, winHeight), ImGuiCond_Always);
+
+        ImGui::Begin("##Hotbar",
+            nullptr,
+            ImGuiWindowFlags_NoTitleBar |
+            ImGuiWindowFlags_NoResize |
+            ImGuiWindowFlags_NoMove |
+            ImGuiWindowFlags_NoCollapse |
+            ImGuiWindowFlags_NoBackground |
+            ImGuiWindowFlags_NoScrollbar);
+
+        for (size_t i = 0; i < hotbarBlocks.size(); i++) {
+            uint8_t blockId = hotbarBlocks[i];
+            const auto* blockInfo = BlockDB::getBlockInfo(blockId);
+            if (!blockInfo) continue;
+
+            int tileX = static_cast<int>(blockInfo->textureCoords[0].x);
+            int tileY = static_cast<int>(blockInfo->textureCoords[0].y);
+
+            ImVec2 uv0 = ImVec2(
+                (tileX * 16) / 256.0f,
+                ((tileY + 1) * 16) / 256.0f
+            );
+            ImVec2 uv1 = ImVec2(
+                ((tileX + 1) * 16) / 256.0f,
+                (tileY * 16) / 256.0f
+            );
+
+            bool isSelected = (i == selectedHotbarIndex);
+            if (isSelected) {
+                ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.3f, 0.5f, 1.0f, 0.9f));
+                ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.3f, 0.5f, 1.0f, 0.9f));
+                ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.3f, 0.5f, 1.0f, 0.9f));
+            } else {
+                ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.2f, 0.2f, 0.2f, 0.9f));
+                ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.2f, 0.2f, 0.2f, 0.9f));
+                ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.2f, 0.2f, 0.2f, 0.9f));
+            }
+
+            ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(7.0f, 7.0f));
+
+            std::string buttonLabel = "##" + std::to_string(i);
+            ImGui::ImageButton(buttonLabel.c_str(), texAtlas, ImVec2(slotSize, slotSize), uv0, uv1);
+            ImGui::PopStyleVar();
+
+            ImGui::PopStyleColor(3);
+
+            if (i < hotbarBlocks.size() - 1)
+                ImGui::SameLine(0.0f, padding);
         }
         ImGui::End();
     }
