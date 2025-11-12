@@ -956,6 +956,60 @@ void BlockDB::init() {
         "Blocks"
     };
     
+    blockData[53] = {
+        {
+            glm::vec2(1.0f, 14.0f),
+            glm::vec2(1.0f, 14.0f),
+            glm::vec2(1.0f, 14.0f),
+            glm::vec2(1.0f, 14.0f),
+            glm::vec2(1.0f, 14.0f),
+            glm::vec2(1.0f, 14.0f)
+        },
+        false,
+        false,
+        "Model Test Block",
+        "testModel",
+        false,
+        "Internal"
+    };
+
+    blockData[54] = {
+        {
+            glm::vec2(9.0f, 14.0f),
+            glm::vec2(9.0f, 14.0f)
+        },
+        true,
+        false,
+        "Wheat",
+        "crop",
+        false,
+        "Plants"
+    };
+
+    blockData[55] = {
+        {
+            glm::vec2(9.0f, 11.0f),
+            glm::vec2(4.0f, 11.0f)
+        },
+        true,
+        false,
+        "Red Rose",
+        "cross",
+        false,
+        "Plants"
+    };
+
+    blockData[56] = {
+        {
+            glm::vec2(9.0f, 13.0f)
+        },
+        true,
+        false,
+        "Lily Pad",
+        "lily",
+        false,
+        "Plants"
+    };
 }
 
 const BlockDB::BlockInfo* BlockDB::getBlockInfo(const uint8_t& blockName) {

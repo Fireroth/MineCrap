@@ -7,13 +7,6 @@ class Camera;
 class Chunk;
 class World;
 
-struct AABB {
-    glm::vec3 min;
-    glm::vec3 max;
-};
-
-AABB getModelAABB(const std::string& modelName);
-
 bool rayAABBIntersect(const glm::vec3& rayOrigin, const glm::vec3& rayDir,
                       const glm::vec3& boxMin, const glm::vec3& boxMax,
                       float& tmin, float maxDistance);

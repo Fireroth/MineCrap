@@ -212,8 +212,9 @@ void Chunk::buildMesh() {
                 const BlockDB::BlockInfo* info = BlockDB::getBlockInfo(type);
                 if (!info) continue;
 
-                if (info->modelName == "cross") {
-                    for (int face = 0; face < 2; face++) {
+                const Model* m = ModelDB::getModel(info->modelName);
+                if (m && !m->planes.empty()) {
+                    for (int face = 0; face < (int)m->planes.size(); face++) {
                         addFace(crossVertices, crossIndices, x, y, z, face, info, crossIndexOffset);
                     }
                 } else if (info->liquid) {
@@ -403,81 +404,155 @@ bool Chunk::isBlockVisible(int x, int y, int z, int face) const {
 
 void Chunk::addFace(std::vector<float>& vertices, std::vector<unsigned int>& indices,
                     int x, int y, int z, int face, const BlockDB::BlockInfo* blockInfo, unsigned int& offset) {
-    const glm::vec3* usedFaceVerts;
-    const glm::vec2* usedUvs;
-    if (blockInfo->modelName == "cactus") {
-        usedFaceVerts = cactusFaceVertices[face];
-        usedUvs = cubeUvs;
-    } else if (blockInfo->modelName == "cross") {
-        usedFaceVerts = crossFaceVertices[face];
-        usedUvs = cubeUvs;
-    } else if (blockInfo->modelName == "pebble") {
-        usedFaceVerts = pebbleFaceVertices[face];
-        usedUvs = pebbleUvs;
-    } else if (blockInfo->modelName == "carpet") {
-        usedFaceVerts = carpetFaceVertices[face];
-        // Use "carpetUvs" for side faces, "cubeUvs" for top/bottom
-        if (face >= 0 && face <= 3) {
-            usedUvs = carpetUvs;
-        } else {
-            usedUvs = cubeUvs;
-        }
-    } else if (blockInfo->modelName == "slab") {
-        usedFaceVerts = slabFaceVertices[face];
-        // Use "slabUvs" for side faces, "cubeUvs" for top/bottom
-        if (face >= 0 && face <= 3) {
-            usedUvs = slabUvs;
-        } else {
-            usedUvs = cubeUvs;
-        }
-    } else {
-        usedFaceVerts = cubeFaceVertices[face];
-        usedUvs = cubeUvs;
-    }
+    const Model* model = ModelDB::getModel(blockInfo->modelName);
+    if (!model || (model->cuboids.empty() && model->planes.empty())) return;
 
-    bool liquidAbove = false;
-    int aboveY = y + 1;
+    static const char* faceNames[6] = {"north", "south", "west", "east", "up", "down"};
+    std::string faceName = faceNames[face];
 
-    if (aboveY >= 0 && aboveY < chunkHeight) {
-        uint8_t aboveType = blocks[x][aboveY][z].type;
-        if (aboveType != 0) {
-            const auto* aboveInfo = BlockDB::getBlockInfo(aboveType);
-            liquidAbove = (aboveInfo && aboveInfo->liquid);
-        }
-    }
+    constexpr float atlasSize = 16.0f;
 
-    if (blockInfo->modelName == "liquid") {
-        float faceMaxY = std::max({usedFaceVerts[0].y, usedFaceVerts[1].y, usedFaceVerts[2].y, usedFaceVerts[3].y});
+    if (!model->planes.empty()) {
+        int planeIndex = face;
+        if (planeIndex < 0 || planeIndex >= (int)model->planes.size()) planeIndex = 0;
+        const auto& plane = model->planes[planeIndex];
+        if (!plane.faces.empty()) {
+            const auto& faceData = plane.faces.begin()->second;
+            if (faceData.uv.size() == 4) {
+                glm::vec2 atlasOffset = blockInfo->textureCoords[0];
 
-        const float eps = 1e-6f;
-        bool isTopFace = (face == 4) && !liquidAbove;
+                float cz = (plane.from.z + plane.to.z) * 0.5f;
+                glm::vec3 quadVerts[4];
+                quadVerts[0] = glm::vec3(plane.from.x, plane.from.y, cz);
+                quadVerts[1] = glm::vec3(plane.to.x,   plane.from.y, cz);
+                quadVerts[2] = glm::vec3(plane.to.x,   plane.to.y,   cz);
+                quadVerts[3] = glm::vec3(plane.from.x, plane.to.y,   cz);
 
-        for (int i = 0; i < 4; ++i) {
-            glm::vec3 pos = usedFaceVerts[i] + glm::vec3(x, y, z);
-            glm::vec2 uv = (blockInfo->textureCoords[face] + usedUvs[i]) / 16.0f;
+                bool applyRotation = (plane.rotationAxis != '\0' && std::abs(plane.rotationAngle) > 1e-6f);
+                glm::mat4 rotMat(1.0f);
+                if (applyRotation) {
+                    glm::vec3 axis(0.0f);
+                    if (plane.rotationAxis == 'x') axis = glm::vec3(1.0f, 0.0f, 0.0f);
+                    else if (plane.rotationAxis == 'y') axis = glm::vec3(0.0f, 1.0f, 0.0f);
+                    else if (plane.rotationAxis == 'z') axis = glm::vec3(0.0f, 0.0f, 1.0f);
+                    rotMat = glm::translate(glm::mat4(1.0f), plane.rotationOrigin) *
+                             glm::rotate(glm::mat4(1.0f), glm::radians(plane.rotationAngle), axis) *
+                             glm::translate(glm::mat4(1.0f), -plane.rotationOrigin);
+                }
 
-            float isTop = 0.0f;
-            if (!liquidAbove) {
-                if (isTopFace || (face <= 3 && fabs(usedFaceVerts[i].y - faceMaxY) < eps)) 
-                    isTop = 1.0f;
+                for (int i = 0; i < 4; ++i) {
+                    glm::vec3 pos = quadVerts[i];
+                    if (applyRotation) {
+                        glm::vec4 p = rotMat * glm::vec4(pos, 1.0f);
+                        pos = glm::vec3(p.x, p.y, p.z);
+                    }
+                    if (plane.positionDirection != '\0' && std::abs(plane.positionOffset) > 1e-6f) {
+                        if (plane.positionDirection == 'x') pos += glm::vec3(plane.positionOffset, 0.0f, 0.0f);
+                        else if (plane.positionDirection == 'y') pos += glm::vec3(0.0f, plane.positionOffset, 0.0f);
+                        else if (plane.positionDirection == 'z') pos += glm::vec3(0.0f, 0.0f, plane.positionOffset);
+                    }
+                    pos += glm::vec3(x, y, z);
+                    glm::vec2 uv = (atlasOffset + glm::vec2(faceData.uv[i].first, faceData.uv[i].second)) / atlasSize;\
+                    vertices.insert(vertices.end(), {pos.x, pos.y, pos.z, uv.x, uv.y, 0.0f});
+                }
+
+                indices.insert(indices.end(), { offset, offset + 1, offset + 2, offset + 2, offset + 3, offset });
+                offset += 4;
             }
-            vertices.insert(vertices.end(), {pos.x, pos.y, pos.z, uv.x, uv.y, static_cast<float>(face), isTop});
         }
-    } else {
-        for (int i = 0; i < 4; ++i) {
-            glm::vec3 pos = usedFaceVerts[i] + glm::vec3(x, y, z);
-            glm::vec2 uv = (blockInfo->textureCoords[face] + usedUvs[i]) / 16.0f;
-
-            vertices.insert(vertices.end(), {pos.x, pos.y, pos.z, uv.x, uv.y, static_cast<float>(face)});
-        }
+        return;
     }
 
-    indices.insert(indices.end(), {
-        offset, offset + 1, offset + 2,
-        offset + 2, offset + 3, offset
-    });
+    for (const auto& cuboid : model->cuboids) {
+        auto it = cuboid.faces.find(faceName);
+        if (it == cuboid.faces.end()) continue;
+        const auto& faceData = it->second;
+        if (faceData.uv.size() != 4) continue;
 
-    offset += 4;
+        glm::vec3 faceVerts[4];
+        switch (face) {
+            case 0: // north (z+)
+                faceVerts[0] = glm::vec3(cuboid.from.x, cuboid.from.y, cuboid.to.z);
+                faceVerts[1] = glm::vec3(cuboid.to.x, cuboid.from.y, cuboid.to.z);
+                faceVerts[2] = glm::vec3(cuboid.to.x, cuboid.to.y, cuboid.to.z);
+                faceVerts[3] = glm::vec3(cuboid.from.x, cuboid.to.y, cuboid.to.z);
+                break;
+            case 1: // south (z-)
+                faceVerts[0] = glm::vec3(cuboid.to.x, cuboid.from.y, cuboid.from.z);
+                faceVerts[1] = glm::vec3(cuboid.from.x, cuboid.from.y, cuboid.from.z);
+                faceVerts[2] = glm::vec3(cuboid.from.x, cuboid.to.y, cuboid.from.z);
+                faceVerts[3] = glm::vec3(cuboid.to.x, cuboid.to.y, cuboid.from.z);
+                break;
+            case 2: // west (x-)
+                faceVerts[0] = glm::vec3(cuboid.from.x, cuboid.from.y, cuboid.from.z);
+                faceVerts[1] = glm::vec3(cuboid.from.x, cuboid.from.y, cuboid.to.z);
+                faceVerts[2] = glm::vec3(cuboid.from.x, cuboid.to.y, cuboid.to.z);
+                faceVerts[3] = glm::vec3(cuboid.from.x, cuboid.to.y, cuboid.from.z);
+                break;
+            case 3: // east (x+)
+                faceVerts[0] = glm::vec3(cuboid.to.x, cuboid.from.y, cuboid.to.z);
+                faceVerts[1] = glm::vec3(cuboid.to.x, cuboid.from.y, cuboid.from.z);
+                faceVerts[2] = glm::vec3(cuboid.to.x, cuboid.to.y, cuboid.from.z);
+                faceVerts[3] = glm::vec3(cuboid.to.x, cuboid.to.y, cuboid.to.z);
+                break;
+            case 4: // up (y+)
+                faceVerts[0] = glm::vec3(cuboid.from.x, cuboid.to.y, cuboid.to.z);
+                faceVerts[1] = glm::vec3(cuboid.to.x, cuboid.to.y, cuboid.to.z);
+                faceVerts[2] = glm::vec3(cuboid.to.x, cuboid.to.y, cuboid.from.z);
+                faceVerts[3] = glm::vec3(cuboid.from.x, cuboid.to.y, cuboid.from.z);
+                break;
+            case 5: // down (y-)
+                faceVerts[0] = glm::vec3(cuboid.from.x, cuboid.from.y, cuboid.from.z);
+                faceVerts[1] = glm::vec3(cuboid.to.x, cuboid.from.y, cuboid.from.z);
+                faceVerts[2] = glm::vec3(cuboid.to.x, cuboid.from.y, cuboid.to.z);
+                faceVerts[3] = glm::vec3(cuboid.from.x, cuboid.from.y, cuboid.to.z);
+                break;
+            default:
+                continue;
+        }
+
+        glm::vec2 atlasOffset = blockInfo->textureCoords[face];
+
+        bool isLiquid = blockInfo->liquid;
+        bool liquidAbove = false;
+        int aboveY = y + 1;
+
+        if (aboveY >= 0 && aboveY < chunkHeight) {
+            uint8_t aboveType = blocks[x][aboveY][z].type;
+            if (aboveType != 0) {
+                const auto* aboveInfo = BlockDB::getBlockInfo(aboveType);
+                liquidAbove = (aboveInfo && aboveInfo->liquid);
+            }
+        }
+
+        float faceMaxY = 0.0f;
+        const float eps = 1e-6f;
+        if (isLiquid) {
+            faceMaxY = std::max({faceVerts[0].y, faceVerts[1].y, faceVerts[2].y, faceVerts[3].y});
+        }
+        for (int i = 0; i < 4; ++i) {
+            glm::vec3 pos = faceVerts[i] + glm::vec3(x, y, z);
+            glm::vec2 uv = (atlasOffset + glm::vec2(faceData.uv[i].first, faceData.uv[i].second)) / atlasSize;
+
+            if (isLiquid) {
+                float isTop = 0.0f;
+                bool isTopFace = (face == 4) && !liquidAbove;
+                if (!liquidAbove) {
+                    if (isTopFace || (face <= 3 && std::abs(faceVerts[i].y - faceMaxY) < eps))
+                        isTop = 1.0f;
+                }
+                vertices.insert(vertices.end(), {pos.x, pos.y, pos.z, uv.x, uv.y, static_cast<float>(face), isTop});
+            } else {
+                vertices.insert(vertices.end(), {pos.x, pos.y, pos.z, uv.x, uv.y, static_cast<float>(face)});
+            }
+        }
+
+        indices.insert(indices.end(), {
+            offset, offset + 1, offset + 2,
+            offset + 2, offset + 3, offset
+        });
+        offset += 4;
+    }
 }
 
 void Chunk::render(const Camera& camera, GLint uModelLoc) {

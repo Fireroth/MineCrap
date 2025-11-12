@@ -4,6 +4,7 @@
 #include "../world/world.hpp"
 #include "../world/chunk.hpp"
 #include "../world/blockDB.hpp"
+#include "../world/modelDB.hpp"
 
 Camera::Camera(glm::vec3 position, glm::vec3 up, float yaw, float pitch)
     : position(position), worldUp(up), yaw(yaw), pitch(pitch), movementSpeed(2.5f), mouseSensitivity(0.1f) {
@@ -61,22 +62,15 @@ void Camera::updateCameraVectors() {
     up = glm::normalize(glm::cross(right, front));
 }
 
-// Helper: get AABB for block id
-static void getBlockAABB(uint8_t blockId, glm::vec3& outMin, glm::vec3& outMax) {
+static void getBlockAABBs(uint8_t blockId, std::vector<std::pair<glm::vec3, glm::vec3>>& outBoxes) {
     const BlockDB::BlockInfo* info = BlockDB::getBlockInfo(blockId);
-    if (!info) { outMin = glm::vec3(0.0f); outMax = glm::vec3(1.0f); return; }
-    if (info->modelName == "cactus") {
-        outMin = glm::vec3(0.1f, 0.0f, 0.1f);
-        outMax = glm::vec3(0.9f, 1.0f, 0.9f);
-    } else if (info->modelName == "slab") {
-        outMin = glm::vec3(0.0f, 0.0f, 0.0f);
-        outMax = glm::vec3(1.0f, 0.5f, 1.0f);
-    } else if (info->modelName == "carpet") {
-        outMin = glm::vec3(0.0f, 0.0f, 0.0f);
-        outMax = glm::vec3(1.0f, 0.05f, 1.0f);
-    } else {
-        outMin = glm::vec3(0.0f);
-        outMax = glm::vec3(1.0f);
+    if (!info) {
+        outBoxes.push_back({glm::vec3(0.0f), glm::vec3(1.0f)});
+        return;
+    }
+
+    if (!ModelDB::getCollisionBoxes(info->modelName, outBoxes)) {
+        outBoxes.push_back({glm::vec3(0.0f), glm::vec3(1.0f)});
     }
 }
 
@@ -131,7 +125,8 @@ void Camera::stepVelocity(float deltaTime, World* world) {
         if (type == 0) return false;
         const BlockDB::BlockInfo* info = BlockDB::getBlockInfo(type);
         if (!info) return true;
-        return !(info->modelName == "cross" || info->modelName == "liquid" || info->modelName == "pebble");
+        std::vector<std::pair<glm::vec3, glm::vec3>> boxes;
+        return ModelDB::getCollisionBoxes(info->modelName, boxes);
     };
 
     auto collidesWithTop = [&](const glm::dvec3& aabbMin, const glm::dvec3& aabbMax, World* world, double& outBlockTop) -> bool {
@@ -155,14 +150,17 @@ void Camera::stepVelocity(float deltaTime, World* world) {
                     uint8_t type = chunk->blocks[localX][localY][localZ].type;
                     if (!isBlockSolid(type)) continue;
 
-                    glm::vec3 bmin_f, bmax_f;
-                    getBlockAABB(type, bmin_f, bmax_f);
-                    glm::dvec3 bmin = glm::dvec3(bmin_f) + glm::dvec3(blockX, blockY, blockZ);
-                    glm::dvec3 bmax = glm::dvec3(bmax_f) + glm::dvec3(blockX, blockY, blockZ);
+                    std::vector<std::pair<glm::vec3, glm::vec3>> boxes;
+                    getBlockAABBs(type, boxes);
 
-                    if (aabbOverlapStrict(aabbMin, aabbMax, bmin, bmax)) {
-                        outBlockTop = bmax.y;
-                        return true;
+                    for (const auto& [minF, maxF] : boxes) {
+                        glm::dvec3 bmin = glm::dvec3(minF) + glm::dvec3(blockX, blockY, blockZ);
+                        glm::dvec3 bmax = glm::dvec3(maxF) + glm::dvec3(blockX, blockY, blockZ);
+
+                        if (aabbOverlapStrict(aabbMin, aabbMax, bmin, bmax)) {
+                            outBlockTop = bmax.y;
+                            return true;
+                        }
                     }
                 }
             }

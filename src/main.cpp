@@ -8,6 +8,7 @@
 #include "core/camera.hpp"
 #include "core/input.hpp"
 #include "core/options.hpp"
+#include "world/modelDB.hpp"
 
 GLFWwindow* g_currentGLFWwindow = nullptr;
 GLFWwindow* getCurrentGLFWwindow() { return g_currentGLFWwindow; }
@@ -27,6 +28,7 @@ int main() {
     Renderer renderer;
     ImGuiOverlay ImGuiOverlay;
     BlockDB::init();
+    ModelDB::loadAllModels("models");
     
     Camera camera(
         glm::vec3(0.0f, 70.0f, 0.0f),  // Position

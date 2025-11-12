@@ -3,11 +3,7 @@
 #include "../core/camera.hpp"
 #include "world.hpp"
 #include "blockDB.hpp"
-
-struct AABB {
-    glm::vec3 min;
-    glm::vec3 max;
-};
+#include "modelDB.hpp"
 
 struct RaycastResult {
     bool hit = false;
@@ -22,31 +18,16 @@ struct RaycastResult {
 };
 
 
-// Helper function to get AABB for a block type
-AABB getModelAABB(uint8_t blockId) {
+// Helper function to get Hitbox for a block model
+bool getModelHitBoxes(uint8_t blockId, std::vector<std::pair<glm::vec3, glm::vec3>>& outBoxes) {
     const BlockDB::BlockInfo* info = BlockDB::getBlockInfo(blockId);
-    if (info->modelName == "liquid") {
-        return {glm::vec3(0.0f, 0.0f, 0.0f),
-                glm::vec3(1.0f, 0.85f, 1.0f)};
-    } else if (info->modelName == "cactus") {
-        return {glm::vec3(0.1f, 0.0f, 0.1f),
-                glm::vec3(0.9f, 1.0f, 0.9f)};
-    } else if (info->modelName == "cross") {
-        return {glm::vec3(0.1f, 0.0f, 0.1f),
-                glm::vec3(0.9f, 0.65f, 0.9f)};
-    } else if (info->modelName == "slab") {
-        return {glm::vec3(0.0f, 0.0f, 0.0f),
-                glm::vec3(1.0f, 0.5f, 1.0f)};
-    } else if (info->modelName == "pebble") {
-        return {glm::vec3(0.385f, 0.0f, 0.385f),
-                glm::vec3(0.615f, 0.125f, 0.615f)};
-    } else if (info->modelName == "carpet") {
-        return {glm::vec3(0.0f, 0.0f, 0.0f),
-                glm::vec3(1.0f, 0.05f, 1.0f)};
-    } else { // full block
-        return {glm::vec3(0.0f),
-                glm::vec3(1.0f)};
+    if (!info) return false;
+
+    if (!ModelDB::getHitBoxes(info->modelName, outBoxes) || outBoxes.empty()) {
+        outBoxes.clear();
+        outBoxes.emplace_back(glm::vec3(0.0f), glm::vec3(1.0f));
     }
+    return true;
 }
 
 // Ray-AABB intersection helper
@@ -113,16 +94,31 @@ RaycastResult raycast(World* world, const glm::vec3& origin, const glm::vec3& di
                 localZ >= 0 && localZ < Chunk::chunkDepth) {
                 uint8_t type = chunk->blocks[localX][localY][localZ].type;
                 if (type != 0) {
-                    const BlockDB::BlockInfo* info = BlockDB::getBlockInfo(type);
-                    AABB aabb = getModelAABB(type);
-                    glm::vec3 boxMin = glm::vec3(blockPos) + aabb.min;
-                    glm::vec3 boxMax = glm::vec3(blockPos) + aabb.max;
-                    float hitT;
-                    if (rayAABBIntersect(origin, dir, boxMin, boxMax, hitT, maxDist)) {
+                    std::vector<std::pair<glm::vec3, glm::vec3>> boxes;
+                    getModelHitBoxes(type, boxes);
+
+                    float bestT = std::numeric_limits<float>::infinity();
+                    glm::ivec3 nearestNormal(0);
+                    bool found = false;
+
+                    for (const auto& p : boxes) {
+                        glm::vec3 boxMin = glm::vec3(blockPos) + p.first;
+                        glm::vec3 boxMax = glm::vec3(blockPos) + p.second;
+                        float hitT;
+                        if (rayAABBIntersect(origin, dir, boxMin, boxMax, hitT, maxDist)) {
+                            if (hitT >= 0.0f && hitT < bestT) {
+                                bestT = hitT;
+                                nearestNormal = getAABBHitNormal(origin + dir * hitT, boxMin, boxMax);
+                                found = true;
+                            }
+                        }
+                    }
+
+                    if (found) {
                         result.hit = true;
                         result.hitChunk = chunk;
                         result.hitBlockPos = glm::ivec3(localX, localY, localZ);
-                        result.faceNormal = getAABBHitNormal(origin + dir * hitT, boxMin, boxMax);
+                        result.faceNormal = nearestNormal;
 
                         glm::ivec3 placeWorldPos = blockPos + result.faceNormal;
                         int placeChunkX = worldToChunkCoord(placeWorldPos.x, Chunk::chunkWidth);
@@ -192,17 +188,8 @@ void placeBreakBlockOnClick(World* world, const Camera& camera, char action, uin
         if (block.type != 0) return;
 
         // Prevent placing inside player
-        AABB blockAABB = getModelAABB(blockType);
-        glm::vec3 blockWorldMin = glm::vec3(
-            hit.placeChunk->chunkX * Chunk::chunkWidth + hit.placeBlockPos.x, 
-            hit.placeBlockPos.y, 
-            hit.placeChunk->chunkZ * Chunk::chunkDepth + hit.placeBlockPos.z
-        ) + blockAABB.min;
-        glm::vec3 blockWorldMax = glm::vec3(
-            hit.placeChunk->chunkX * Chunk::chunkWidth + hit.placeBlockPos.x, 
-            hit.placeBlockPos.y, 
-            hit.placeChunk->chunkZ * Chunk::chunkDepth + hit.placeBlockPos.z
-        ) + blockAABB.max;
+        std::vector<std::pair<glm::vec3, glm::vec3>> boxes;
+        getModelHitBoxes(blockType, boxes);
 
         glm::vec3 playerPos = camera.getPosition();
         float playerRadius = camera.getPlayerRadius();
@@ -210,11 +197,23 @@ void placeBreakBlockOnClick(World* world, const Camera& camera, char action, uin
         float eyeHeight = camera.getEyeHeight();
         glm::vec3 playerAABBMin = glm::vec3(playerPos.x - playerRadius, playerPos.y - eyeHeight, playerPos.z - playerRadius);
         glm::vec3 playerAABBMax = glm::vec3(playerPos.x + playerRadius, playerPos.y - eyeHeight + playerHeight, playerPos.z + playerRadius);
+        for (const auto& p : boxes) {
+            glm::vec3 blockWorldMin = glm::vec3(
+                hit.placeChunk->chunkX * Chunk::chunkWidth + hit.placeBlockPos.x,
+                hit.placeBlockPos.y,
+                hit.placeChunk->chunkZ * Chunk::chunkDepth + hit.placeBlockPos.z
+            ) + p.first;
+            glm::vec3 blockWorldMax = glm::vec3(
+                hit.placeChunk->chunkX * Chunk::chunkWidth + hit.placeBlockPos.x,
+                hit.placeBlockPos.y,
+                hit.placeChunk->chunkZ * Chunk::chunkDepth + hit.placeBlockPos.z
+            ) + p.second;
 
-        bool overlap = (blockWorldMin.x < playerAABBMax.x && blockWorldMax.x > playerAABBMin.x) &&
-                       (blockWorldMin.y < playerAABBMax.y && blockWorldMax.y > playerAABBMin.y) &&
-                       (blockWorldMin.z < playerAABBMax.z && blockWorldMax.z > playerAABBMin.z);
-        if (overlap) return;
+            bool overlap = (blockWorldMin.x < playerAABBMax.x && blockWorldMax.x > playerAABBMin.x) &&
+                           (blockWorldMin.y < playerAABBMax.y && blockWorldMax.y > playerAABBMin.y) &&
+                           (blockWorldMin.z < playerAABBMax.z && blockWorldMax.z > playerAABBMin.z);
+            if (overlap) return;
+        }
 
         block.type = blockType;
         hit.placeChunk->buildMesh();

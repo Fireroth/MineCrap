@@ -1,0 +1,76 @@
+{
+  "planes": [
+    {
+      "from": [0, 0, 0],
+      "to": [1, 1, 1],
+      "position": {
+        "direction": "z",
+        "offset": 0.25
+      },
+      "faces": {
+        "north": { "uv": [[0.0, 0.0], [1.0, 0.0], [1.0, 1.0], [0.0, 1.0]] }
+      },
+      "collisions": {
+        "enabled": false,
+        "box": [
+          {
+            "from": [0, 0, 0],
+            "to": [1, 1, 1]
+          }
+        ]
+      }
+    },
+    {
+      "from": [0, 0, 0],
+      "to": [1, 1, 1],
+      "position": {
+        "direction": "z",
+        "offset": -0.25
+      },
+      "faces": {
+        "north": { "uv": [[0.0, 0.0], [1.0, 0.0], [1.0, 1.0], [0.0, 1.0]] }
+      },
+      "collisions": {
+        "enabled": false
+      }
+    },
+    {
+      "from": [0, 0, 0],
+      "to": [1, 1, 1],
+      "rotation": {
+        "origin": [0.5, 0.5, 0.5],
+        "axis": "y",
+        "angle": 90
+      },
+      "position": {
+        "direction": "x",
+        "offset": -0.25
+      },
+      "faces": {
+        "north": { "uv": [[0.0, 0.0], [1.0, 0.0], [1.0, 1.0], [0.0, 1.0]] }
+      },
+      "collisions": {
+        "enabled": false
+      }
+    },
+    {
+      "from": [0, 0, 0],
+      "to": [1, 1, 1],
+      "rotation": {
+        "origin": [0.5, 0.5, 0.5],
+        "axis": "y",
+        "angle": 90
+      },
+      "position": {
+        "direction": "x",
+        "offset": 0.25
+      },
+      "faces": {
+        "north": { "uv": [[0.0, 0.0], [1.0, 0.0], [1.0, 1.0], [0.0, 1.0]] }
+      },
+      "collisions": {
+        "enabled": false
+      }
+    }
+  ]
+}
