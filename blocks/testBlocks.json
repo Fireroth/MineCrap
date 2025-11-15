@@ -1,0 +1,15 @@
+{
+    "Model Test Block": {
+        "id": 250,
+        "textures": [[1,14],[1,14],[1,14],[1,14],[1,14],[1,14]],
+        "textures2": [[2,14],[2,14],[2,14],[2,14],[2,14],[2,14]],
+        "textures3": [[3,15],[3,15],[3,15],[3,15],[3,15],[3,15]],
+        "textures4": [[4,14],[4,14],[4,14],[4,14],[4,14],[4,14]],
+        "transparent": false,
+        "liquid": false,
+        "name": "Model Test Block",
+        "model": "testModel",
+        "renderFacesInBetween": false,
+        "tabName": "Internal"
+    }
+}

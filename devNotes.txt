@@ -14,9 +14,7 @@ extern "C" {
 ----------------------------------------------------------------------------
 
 --TODO--
-fix liquid visible face detection
-fix basically everything about liquids :}
-Inventory system
+fix liquid face gap when liquid is built in the shape of stairs
 Sounds
 Chunk saving
 Lighting

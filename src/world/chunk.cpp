@@ -329,36 +329,17 @@ bool Chunk::isBlockVisible(int x, int y, int z, int face) const {
     if (neighborY < 0 || neighborY >= chunkHeight)
         return true;
 
-    // If neighbor is within current chunk
-    if (neighborX >= 0 && neighborX < chunkWidth && neighborZ >= 0 && neighborZ < chunkDepth) {
+    Chunk* neighbor = const_cast<Chunk*>(this);
+    int neighborLocalX = neighborX;
+    int neighborLocalZ = neighborZ;
+    int neighborChunkX = chunkX;
+    int neighborChunkZ = chunkZ;
 
-        uint8_t neighborType = blocks[neighborX][neighborY][neighborZ].type;
-        if (neighborType == 0)
-            return true;
-        const BlockDB::BlockInfo* neighborInfo = BlockDB::getBlockInfo(neighborType);
-        const BlockDB::BlockInfo* thisInfo = BlockDB::getBlockInfo(blocks[x][y][z].type);
+    bool outsideChunk =
+        neighborX < 0 || neighborX >= chunkWidth ||
+        neighborZ < 0 || neighborZ >= chunkDepth;
 
-        static int fasterTrees = getOptionInt("faster_trees", 0);
-        if (!fasterTrees && thisInfo->renderFacesInBetween)
-            return true;
-
-        if (neighborInfo->modelName != "cube" && neighborInfo->modelName != "liquid" || thisInfo->modelName != "cube" && thisInfo->modelName != "liquid")
-            return true;
-
-        if (neighborInfo->liquid && !thisInfo->liquid || thisInfo->liquid && !neighborInfo->liquid && face == 4)
-            return true;
-
-        if (neighborInfo->transparent && !thisInfo->transparent)
-            return true;
-
-        return false;
-
-    } else { // Neighbor is in another chunk
-        int neighborChunkX = chunkX;
-        int neighborChunkZ = chunkZ;
-        int neighborLocalX = neighborX;
-        int neighborLocalZ = neighborZ;
-
+    if (outsideChunk) {
         if (neighborLocalX < 0) {
             neighborChunkX -= 1;
             neighborLocalX += chunkWidth;
@@ -375,31 +356,33 @@ bool Chunk::isBlockVisible(int x, int y, int z, int face) const {
             neighborLocalZ -= chunkDepth;
         }
 
-        Chunk* neighbor = world->getChunk(neighborChunkX, neighborChunkZ);
+        neighbor = world->getChunk(neighborChunkX, neighborChunkZ);
         if (!neighbor)
-            return true;  // If no neighbor, assume empty
-
-        uint8_t neighborType = neighbor->blocks[neighborLocalX][neighborY][neighborLocalZ].type;
-        if (neighborType == 0)
             return true;
-        const BlockDB::BlockInfo* neighborInfo = BlockDB::getBlockInfo(neighborType);
-        const BlockDB::BlockInfo* thisInfo = BlockDB::getBlockInfo(blocks[x][y][z].type);
-
-        static int fasterTrees = getOptionInt("faster_trees", 0);
-        if (!fasterTrees && thisInfo->renderFacesInBetween)
-            return true;
-
-        if (neighborInfo->modelName != "cube" && neighborInfo->modelName != "liquid" || thisInfo->modelName != "cube" && thisInfo->modelName != "liquid")
-            return true;
-
-        if (neighborInfo->liquid && !thisInfo->liquid || thisInfo->liquid && !neighborInfo->liquid && face == 4)
-            return true;
-
-        if (neighborInfo->transparent && !thisInfo->transparent)
-            return true;
-            
-        return false;
     }
+
+    uint8_t neighborType = neighbor->blocks[neighborLocalX][neighborY][neighborLocalZ].type;
+
+    if (neighborType == 0)
+        return true;
+
+    const BlockDB::BlockInfo* neighborInfo = BlockDB::getBlockInfo(neighborType);
+    const BlockDB::BlockInfo* thisInfo = BlockDB::getBlockInfo(blocks[x][y][z].type);
+
+    static int fasterTrees = getOptionInt("faster_trees", 0);
+    if (!fasterTrees && thisInfo->renderFacesInBetween)
+        return true;
+
+    if ((neighborInfo->modelName != "cube" && neighborInfo->modelName != "liquid") || (thisInfo->modelName != "cube" && thisInfo->modelName != "liquid"))
+        return true;
+
+    if ((neighborInfo->liquid && !thisInfo->liquid) || (thisInfo->liquid && !neighborInfo->liquid && face == 4))
+        return true;
+
+    if (neighborInfo->transparent && !thisInfo->transparent)
+        return true;
+
+    return false;
 }
 
 void Chunk::addFace(std::vector<float>& vertices, std::vector<unsigned int>& indices,
@@ -463,7 +446,8 @@ void Chunk::addFace(std::vector<float>& vertices, std::vector<unsigned int>& ind
         return;
     }
 
-    for (const auto& cuboid : model->cuboids) {
+    for (size_t cuboidIndex = 0; cuboidIndex < model->cuboids.size(); cuboidIndex++) {
+        const auto& cuboid = model->cuboids[cuboidIndex];
         auto it = cuboid.faces.find(faceName);
         if (it == cuboid.faces.end()) continue;
         const auto& faceData = it->second;
@@ -512,6 +496,13 @@ void Chunk::addFace(std::vector<float>& vertices, std::vector<unsigned int>& ind
         }
 
         glm::vec2 atlasOffset = blockInfo->textureCoords[face];
+        if (!blockInfo->multiTextureCoords.empty()) {
+            if (cuboidIndex < blockInfo->multiTextureCoords.size()) {
+                atlasOffset = blockInfo->multiTextureCoords[cuboidIndex][face];
+            } else {
+                atlasOffset = blockInfo->textureCoords[face];
+            }
+        }
 
         bool isLiquid = blockInfo->liquid;
         bool liquidAbove = false;

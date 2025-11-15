@@ -252,10 +252,12 @@ void generateChunkTerrain(Chunk& chunk) {
             generateChunkBiomeFeatures(chunk, 0.92f, 0, 0, "leavesCarpet", 1, 3, 0);
             break;
         case Chunk::Biome::Desert:
-            generateChunkBiomeFeatures(chunk, 0.993f, 0, 0, "cactus2", 4, 0, 0);
-            generateChunkBiomeFeatures(chunk, 0.993f, 0, 0, "cactus", 4, 1, 0);
+            generateChunkBiomeFeatures(chunk, 0.994f, 0, 0, "cactus2", 4, 0, 0);
+            generateChunkBiomeFeatures(chunk, 0.994f, 0, 0, "cactus", 4, 1, 0);
             generateChunkBiomeFeatures(chunk, 0.98f, 0, 0, "deadBush", 4, 2, 0);
             generateChunkBiomeFeatures(chunk, 0.99999f, 8, 8, "pyramid", 4, 3, -1);
+            generateChunkBiomeFeatures(chunk, 0.996f, 0, 0, "flowerCactus", 4, 4, 0);
+            generateChunkBiomeFeatures(chunk, 0.985f, 0, 0, "deadGrass", 4, 5, 0);
             break;
         case Chunk::Biome::FirForest:
             generateChunkBiomeFeatures(chunk, 0.985f, 4, 4, "firTree", 23, 0, 0);
@@ -263,6 +265,7 @@ void generateChunkTerrain(Chunk& chunk) {
             generateChunkBiomeFeatures(chunk, 0.80f, 0, 0, "darkGrass", 23, 2, 0);
             generateChunkBiomeFeatures(chunk, 0.88f, 0, 0, "darkGrassShort", 23, 3, 0);
             generateChunkBiomeFeatures(chunk, 0.93f, 0, 0, "pebble", 23, 4, 0);
+            generateChunkBiomeFeatures(chunk, 0.98f, 0, 0, "lily", 9, 5, 0);
             break;
         case Chunk::Biome::FlowerField:
             generateChunkBiomeFeatures(chunk, 0.97f, 0, 0, "lavender", 1, 0, 0);
@@ -275,6 +278,7 @@ void generateChunkTerrain(Chunk& chunk) {
             generateChunkBiomeFeatures(chunk, 0.97f, 0, 0, "grass", 1, 7, 0);
             generateChunkBiomeFeatures(chunk, 0.97f, 0, 0, "grassShort", 1, 8, 0);
             generateChunkBiomeFeatures(chunk, 0.97f, 1, 1, "tinyTree", 1, 9, 0);
+            generateChunkBiomeFeatures(chunk, 0.97f, 0, 0, "redRose", 1, 10, 0);
             break;
         case Chunk::Biome::MapleForest:
             generateChunkBiomeFeatures(chunk, 0.986f, 2, 2, "redMaple", 1, 0, 0);

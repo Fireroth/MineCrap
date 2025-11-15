@@ -60,6 +60,8 @@ add_custom_command(TARGET MineCrap POST_BUILD
             ${CMAKE_SOURCE_DIR}/structures $<TARGET_FILE_DIR:MineCrap>/structures
     COMMAND ${CMAKE_COMMAND} -E copy_directory
             ${CMAKE_SOURCE_DIR}/models $<TARGET_FILE_DIR:MineCrap>/models
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+            ${CMAKE_SOURCE_DIR}/blocks $<TARGET_FILE_DIR:MineCrap>/blocks
     COMMAND ${CMAKE_COMMAND} -E copy
             "${CMAKE_SOURCE_DIR}/options.txt" "$<TARGET_FILE_DIR:MineCrap>/options.txt" 
     COMMAND ${CMAKE_COMMAND} -E copy
