@@ -85,7 +85,7 @@ void Chunk::placeStructure(const Structure& structure, int baseX, int baseY, int
                         case 3: place = !(noiseValue >= (1.0f / 20)); break;  // 1 in 20
                     }
                     if (!place) {
-                        blockType = 0;
+                        continue;
                     }
                 }
 

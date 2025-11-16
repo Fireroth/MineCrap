@@ -254,6 +254,8 @@ void generateChunkTerrain(Chunk& chunk) {
             generateChunkBiomeBlocks(chunk, 0.93f, 0, 0, 17, 1, 1, 0); // Grass
             generateChunkBiomeBlocks(chunk, 0.93f, 0, 0, 18, 1, 2, 0); // Grass Short
             generateChunkBiomeBlocks(chunk, 0.92f, 0, 0, 41, 1, 3, 0); // Leaves Carpet
+            generateChunkBiomeBlocks(chunk, 0.997f, 0, 0, 60, 1, 4, 0); // Brown Mushroom
+            generateChunkBiomeBlocks(chunk, 0.997f, 0, 0, 61, 1, 5, 0); // Red Mushroom
             break;
         case Chunk::Biome::Desert:
             generateChunkBiomeFeatures(chunk, 0.997f, 0, 0, "cactus2", 4, 0, 0);
@@ -270,6 +272,9 @@ void generateChunkTerrain(Chunk& chunk) {
             generateChunkBiomeBlocks(chunk, 0.88f, 0, 0, 26, 23, 3, 0); // Dark Grass Short
             generateChunkBiomeBlocks(chunk, 0.93f, 0, 0, 25, 23, 4, 0); // Pebble
             generateChunkBiomeBlocks(chunk, 0.98f, 0, 0, 56, 9, 5, 0); // Lily Pad
+            generateChunkBiomeBlocks(chunk, 0.98f, 0, 0, 60, 23, 6, 0); // Brown Mushroom
+            generateChunkBiomeBlocks(chunk, 0.98f, 0, 0, 61, 23, 7, 0); // Red Mushroom
+            generateChunkBiomeFeatures(chunk, 0.998f, 2, 2, "rock", 23, 8, -1);
             break;
         case Chunk::Biome::FlowerField:
             generateChunkBiomeBlocks(chunk, 0.97f, 0, 0, 34, 1, 0, 0); // Lavender

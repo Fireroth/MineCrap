@@ -702,5 +702,27 @@
         "model": "cross",
         "renderFacesInBetween": false,
         "tabName": "Plants"
+    },
+
+    "brown_mushroom": {
+        "id": 60,
+        "textures": [[8,10]],
+        "transparent": false,
+        "liquid": false,
+        "name": "Brown Mushroom",
+        "model": "cross",
+        "renderFacesInBetween": false,
+        "tabName": "Plants"
+    },
+
+    "red_mushroom": {
+        "id": 61,
+        "textures": [[9,10]],
+        "transparent": false,
+        "liquid": false,
+        "name": "Red Mushroom",
+        "model": "cross",
+        "renderFacesInBetween": false,
+        "tabName": "Plants"
     }
 }

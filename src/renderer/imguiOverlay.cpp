@@ -229,7 +229,7 @@ void ImGuiOverlay::render(float deltaTime, Camera& camera, World* world) {
                 ImGui::Text("Right Mouse: Place Block");
                 ImGui::Text("Middle Mouse: Pick Block");
                 ImGui::Text("1-9: Select Block");
-                ImGui::Text("F1: Toggle Hotbar");
+                ImGui::Text("F1: Toggle Hotbar and Crosshair");
                 ImGui::Text("F3: Debug Info");
                 ImGui::Text("T: Console");
                 ImGui::EndChild();

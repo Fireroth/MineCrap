@@ -8,6 +8,7 @@
 #include "../core/camera.hpp"
 #include "../core/options.hpp"
 #include "../core/input.hpp"
+#include "imguiOverlay.hpp"
 
 Renderer::Renderer() : shaderProgram(0), textureAtlas(0), crosshairVAO(0), crosshairVBO(0) {}
 
@@ -228,6 +229,7 @@ void Renderer::renderWorld(const Camera& camera, float aspectRatio, float deltaT
 }
 
 void Renderer::renderCrosshair(float aspectRatio) {
+    if (!hotbarOpen) return;
     glDisable(GL_DEPTH_TEST);
     glUseProgram(crosshairShaderProgram);
     
