@@ -1,5 +1,5 @@
 {
-    "Grass Block": {
+    "grass_block": {
         "id": 1,
         "texture positions (comment)": ["front","back","left","right","top","bottom"],
         "textures": [[0,15],[0,15],[0,15],[0,15],[2,15],[1,15]],
@@ -11,7 +11,7 @@
         "tabName": "Blocks"
     },
 
-    "Dirt": {
+    "dirt": {
         "id": 2,
         "textures": [[1,15],[1,15],[1,15],[1,15],[1,15],[1,15]],
         "transparent": false,
@@ -22,7 +22,7 @@
         "tabName": "Blocks"
     },
 
-    "Stone": {
+    "stone": {
         "id": 3,
         "textures": [[3,15],[3,15],[3,15],[3,15],[3,15],[3,15]],
         "transparent": false,
@@ -33,7 +33,7 @@
         "tabName": "Blocks"
     },
 
-    "Sand": {
+    "sand": {
         "id": 4,
         "textures": [[4,15],[4,15],[4,15],[4,15],[4,15],[4,15]],
         "transparent": false,
@@ -44,7 +44,7 @@
         "tabName": "Blocks"
     },
 
-    "Oak Log": {
+    "oak _log": {
         "id": 5,
         "textures": [[2,14],[2,14],[2,14],[2,14],[3,14],[3,14]],
         "transparent": false,
@@ -55,7 +55,7 @@
         "tabName": "Blocks"
     },
 
-    "Bedrock": {
+    "bedrock": {
         "id": 6,
         "textures": [[1,14],[1,14],[1,14],[1,14],[1,14],[1,14]],
         "transparent": false,
@@ -66,7 +66,7 @@
         "tabName": "Blocks"
     },
 
-    "Gravel": {
+    "gravel": {
         "id": 7,
         "textures": [[5,15],[5,15],[5,15],[5,15],[5,15],[5,15]],
         "transparent": false,
@@ -77,7 +77,7 @@
         "tabName": "Blocks"
     },
 
-    "Bricks": {
+    "bricks": {
         "id": 8,
         "textures": [[4,14],[4,14],[4,14],[4,14],[4,14],[4,14]],
         "transparent": false,
@@ -88,7 +88,7 @@
         "tabName": "Blocks"
     },
 
-    "Water": {
+    "water": {
         "id": 9,
         "textures": [[0,13],[0,13],[0,13],[0,13],[0,13],[0,13]],
         "transparent": true,
@@ -99,7 +99,7 @@
         "tabName": "Liquids"
     },
 
-    "Lava": {
+    "lava": {
         "id": 10,
         "textures": [[1,13],[1,13],[1,13],[1,13],[1,13],[1,13]],
         "transparent": true,
@@ -110,7 +110,7 @@
         "tabName": "Liquids"
     },
 
-    "Leaves:slow": {
+    "leaves:slow": {
         "id": 11,
         "textures": [[5,14],[5,14],[5,14],[5,14],[5,14],[5,14]],
         "transparent": true,
@@ -121,7 +121,7 @@
         "tabName": "Blocks"
     },
 
-    "Leaves:fast": {
+    "leaves:fast": {
         "id": 11,
         "textures": [[6,15],[6,15],[6,15],[6,15],[6,15],[6,15]],
         "transparent": false,
@@ -132,7 +132,7 @@
         "tabName": "Blocks"
     },
 
-    "Cactus": {
+    "cactus": {
         "id": 12,
         "textures": [[7,15],[7,15],[7,15],[7,15],[7,14],[8,15]],
         "transparent": false,
@@ -143,18 +143,18 @@
         "tabName": "Blocks"
     },
 
-    "Stone slab": {
+    "stone_slab": {
         "id": 13,
         "textures": [[3,15],[3,15],[3,15],[3,15],[3,15],[3,15]],
         "transparent": false,
         "liquid": false,
-        "name": "Stone slab",
+        "name": "Stone Slab",
         "model": "slab",
         "renderFacesInBetween": false,
         "tabName": "Slabs"
     },
 
-    "Oak Plank": {
+    "oak_plank": {
         "id": 14,
         "textures": [[6,14],[6,14],[6,14],[6,14],[6,14],[6,14]],
         "transparent": false,
@@ -165,7 +165,7 @@
         "tabName": "Blocks"
     },
 
-    "Oak Plank Slab": {
+    "oak_plank_slab": {
         "id": 15,
         "textures": [[6,14],[6,14],[6,14],[6,14],[6,14],[6,14]],
         "transparent": false,
@@ -176,7 +176,7 @@
         "tabName": "Slabs"
     },
 
-    "Glass": {
+    "glass": {
         "id": 16,
         "textures": [[8,14],[8,14],[8,14],[8,14],[8,14],[8,14]],
         "transparent": true,
@@ -187,7 +187,7 @@
         "tabName": "Blocks"
     },
 
-    "Medium Grass": {
+    "medium _grass": {
         "id": 17,
         "textures": [[2,13]],
         "transparent": true,
@@ -198,7 +198,7 @@
         "tabName": "Plants"
     },
 
-    "Short Grass": {
+    "short_grass": {
         "id": 18,
         "textures": [[3,13]],
         "transparent": true,
@@ -209,7 +209,7 @@
         "tabName": "Plants"
     },
 
-    "Dead Bush": {
+    "dead_bush": {
         "id": 19,
         "textures": [[4,13]],
         "transparent": true,
@@ -220,7 +220,7 @@
         "tabName": "Plants"
     },
 
-    "Poppy": {
+    "poppy": {
         "id": 20,
         "textures": [[5,13]],
         "transparent": true,
@@ -231,7 +231,7 @@
         "tabName": "Plants"
     },
 
-    "Dandelion": {
+    "dandelion": {
         "id": 21,
         "textures": [[6,13]],
         "transparent": true,
@@ -242,7 +242,7 @@
         "tabName": "Plants"
     },
 
-    "Fir Leaves:slow": {
+    "fir_leaves:slow": {
         "id": 22,
         "textures": [[7,13],[7,13],[7,13],[7,13],[7,13],[7,13]],
         "transparent": true,
@@ -253,7 +253,7 @@
         "tabName": "Blocks"
     },
         
-    "Fir Leaves:fast": {
+    "fir_leaves:fast": {
         "id": 22,
         "textures": [[8,13],[8,13],[8,13],[8,13],[8,13],[8,13]],
         "transparent": false,
@@ -264,18 +264,18 @@
         "tabName": "Blocks"
     },
 
-    "Dark Grass block": {
+    "dark_grass_block": {
         "id": 23,
         "textures": [[1,12],[1,12],[1,12],[1,12],[2,12],[1,15]],
         "transparent": false,
         "liquid": false,
-        "name": "Dark Grass block",
+        "name": "Dark Grass Block",
         "model": "cube",
         "renderFacesInBetween": false,
         "tabName": "Blocks"
     },
 
-    "Dark Medium Grass": {
+    "dark_medium_grass": {
         "id": 24,
         "textures": [[3,12]],
         "transparent": true,
@@ -286,7 +286,7 @@
         "tabName": "Plants"
     },
 
-    "Pebble": {
+    "pebble": {
         "id": 25,
         "textures": [[3,15],[3,15],[3,15],[3,15],[3,15],[3,15]],
         "transparent": false,
@@ -297,7 +297,7 @@
         "tabName": "Blocks"
     },
 
-    "Dark Short Grass": {
+    "dark_short_grass": {
         "id": 26,
         "textures": [[4,12]],
         "transparent": true,
@@ -308,7 +308,7 @@
         "tabName": "Plants"
     },
 
-    "Fir Log": {
+    "fir_log": {
         "id": 27,
         "textures": [[5,12],[5,12],[5,12],[5,12],[6,12],[6,12]],
         "transparent": false,
@@ -319,7 +319,7 @@
         "tabName": "Blocks"
     },
 
-    "Blue Sage": {
+    "blue_sage": {
         "id": 28,
         "textures": [[7,12]],
         "transparent": true,
@@ -330,7 +330,7 @@
         "tabName": "Plants"
     },
 
-    "Pink Anemone": {
+    "pink_anemone": {
         "id": 29,
         "textures": [[8,12]],
         "transparent": true,
@@ -341,7 +341,7 @@
         "tabName": "Plants"
     },
 
-    "Bistort": {
+    "bistort": {
         "id": 30,
         "textures": [[7,11]],
         "transparent": true,
@@ -352,7 +352,7 @@
         "tabName": "Plants"
     },
 
-    "Fir Plank": {
+    "fir_plank": {
         "id": 31,
         "textures": [[6,11],[6,11],[6,11],[6,11],[6,11],[6,11]],
         "transparent": false,
@@ -363,7 +363,7 @@
         "tabName": "Blocks"
     },
 
-    "Fir Plank Slab": {
+    "fir_plank_slab": {
         "id": 32,
         "textures": [[6,11],[6,11],[6,11],[6,11],[6,11],[6,11]],
         "transparent": false,
@@ -374,7 +374,7 @@
         "tabName": "Slabs"
     },
 
-    "Crocus": {
+    "crocus": {
         "id": 33,
         "textures": [[8,11]],
         "transparent": true,
@@ -385,7 +385,7 @@
         "tabName": "Plants"
     },
 
-    "Lavender": {
+    "lavender": {
         "id": 34,
         "textures": [[9,12]],
         "transparent": true,
@@ -396,7 +396,7 @@
         "tabName": "Plants"
     },
 
-    "Red Maple Leaves:slow": {
+    "red_maple_leaves:slow": {
         "id": 35,
         "textures": [[3,11],[3,11],[3,11],[3,11],[3,11],[3,11]],
         "transparent": true,
@@ -407,7 +407,7 @@
         "tabName": "Blocks"
     },
 
-    "Red Maple Leaves:fast": {
+    "red_maple_leaves:fast": {
         "id": 35,
         "textures": [[3,10],[3,10],[3,10],[3,10],[3,10],[3,10]],
         "transparent": false,
@@ -418,7 +418,7 @@
         "tabName": "Blocks"
     },
 
-    "Orange Maple Leaves:slow": {
+    "orange _maple_leaves:slow": {
         "id": 36,
         "textures": [[4,11],[4,11],[4,11],[4,11],[4,11],[4,11]],
         "transparent": true,
@@ -429,7 +429,7 @@
         "tabName": "Blocks"
     },
 
-    "Orange Maple Leaves:fast": {
+    "orange _maple_leaves:fast": {
         "id": 36,
         "textures": [[4,10],[4,10],[4,10],[4,10],[4,10],[4,10]],
         "transparent": false,
@@ -440,7 +440,7 @@
         "tabName": "Blocks"
     },
 
-    "Yellow Maple Leaves:slow": {
+    "yellow_maple_leaves:slow": {
         "id": 37,
         "textures": [[5,11],[5,11],[5,11],[5,11],[5,11],[5,11]],
         "transparent": true,
@@ -451,7 +451,7 @@
         "tabName": "Blocks"
     },
 
-    "Yellow Maple Leaves:fast": {
+    "yellow_maple_leaves:fast": {
         "id": 37,
         "textures": [[5,10],[5,10],[5,10],[5,10],[5,10],[5,10]],
         "transparent": true,
@@ -462,7 +462,7 @@
         "tabName": "Blocks"
     },
 
-    "Maple Log": {
+    "maple_log": {
         "id": 38,
         "textures": [[0,11],[0,11],[0,11],[0,11],[1,11],[1,11]],
         "transparent": false,
@@ -473,7 +473,7 @@
         "tabName": "Blocks"
     },
 
-    "Maple Plank": {
+    "maple_plank": {
         "id": 39,
         "textures": [[2,11],[2,11],[2,11],[2,11],[2,11],[2,11]],
         "transparent": false,
@@ -484,7 +484,7 @@
         "tabName": "Blocks"
     },
 
-    "Maple Plank Slab": {
+    "maple_plank_slab": {
         "id": 40,
         "textures": [[2,11],[2,11],[2,11],[2,11],[2,11],[2,11]],
         "transparent": false,
@@ -495,7 +495,7 @@
         "tabName": "Slabs"
     },
 
-    "Leaves Carpet": {
+    "leaves_carpet": {
         "id": 41,
         "textures": [[5,14],[5,14],[5,14],[5,14],[5,14],[5,14]],
         "transparent": false,
@@ -506,7 +506,7 @@
         "tabName": "Blocks"
     },
 
-    "Stone Bricks": {
+    "stone_bricks": {
         "id": 42,
         "textures": [[0,14],[0,14],[0,14],[0,14],[0,14],[0,14]],
         "transparent": false,
@@ -517,7 +517,7 @@
         "tabName": "Blocks"
     },
 
-    "Stone Brick Slab": {
+    "stone_brick_slab": {
         "id": 43,
         "textures": [[0,14],[0,14],[0,14],[0,14],[0,14],[0,14]],
         "transparent": false,
@@ -528,7 +528,7 @@
         "tabName": "Slabs"
     },
 
-    "Structure Air": {
+    "structure_air": {
         "id": 44,
         "textures": [[0,12],[0,12],[0,12],[0,12],[0,12],[0,12]],
         "transparent": false,
@@ -539,7 +539,7 @@
         "tabName": "Internal"
     },
 
-    "Sand Slab": {
+    "sand_slab": {
         "id": 45,
         "textures": [[4,15],[4,15],[4,15],[4,15],[4,15],[4,15]],
         "transparent": false,
@@ -550,7 +550,7 @@
         "tabName": "Slabs"
     },
 
-    "Grass Block Slab": {
+    "grass_block_slab": {
         "id": 46,
         "textures": [[2,15],[2,15],[2,15],[2,15],[2,15],[1,15]],
         "transparent": false,
@@ -561,7 +561,7 @@
         "tabName": "Slabs"
     },
 
-    "Dark Grass Block Slab": {
+    "dark_grass_block_slab": {
         "id": 47,
         "textures": [[2,12],[2,12],[2,12],[2,12],[2,12],[1,15]],
         "transparent": false,
@@ -572,7 +572,7 @@
         "tabName": "Slabs"
     },
 
-    "Grass Block (all sides)": {
+    "grass_block_all_sides": {
         "id": 48,
         "textures": [[2,15],[2,15],[2,15],[2,15],[2,15],[1,15]],
         "transparent": false,
@@ -583,7 +583,7 @@
         "tabName": "Blocks"
     },
 
-    "Dark Grass Block (all sides)": {
+    "dark_grass_block_all_sides": {
         "id": 49,
         "textures": [[2,12],[2,12],[2,12],[2,12],[2,12],[1,15]],
         "transparent": false,
@@ -594,7 +594,7 @@
         "tabName": "Blocks"
     },
 
-    "Sand Bricks": {
+    "sand_bricks": {
         "id": 50,
         "textures": [[9,15],[9,15],[9,15],[9,15],[9,15],[9,15]],
         "transparent": false,
@@ -605,7 +605,7 @@
         "tabName": "Blocks"
     },
 
-    "Green Maple Leaves:slow": {
+    "green_maple_leaves:slow": {
         "id": 51,
         "textures": [[1,10],[1,10],[1,10],[1,10],[1,10],[1,10]],
         "transparent": true,
@@ -616,7 +616,7 @@
         "tabName": "Blocks"
     },
 
-    "Green Maple Leaves:fast": {
+    "green_maple_leaves:fast": {
         "id": 51,
         "textures": [[2,10],[2,10],[2,10],[2,10],[2,10],[2,10]],
         "transparent": false,
@@ -627,7 +627,7 @@
         "tabName": "Blocks"
     },
 
-    "Green Maple Leaves Carpet": {
+    "green_maple_leaves_carpet": {
         "id": 52,
         "textures": [[1,10],[1,10],[1,10],[1,10],[1,10],[1,10]],
         "transparent": false,
@@ -638,7 +638,7 @@
         "tabName": "Blocks"
     },
 
-    "Wheat": {
+    "wheat": {
         "id": 54,
         "textures": [[9,14]],
         "transparent": true,
@@ -649,7 +649,7 @@
         "tabName": "Plants"
     },
 
-    "Red Rose": {
+    "red_rose": {
         "id": 55,
         "textures": [[9,11]],
         "transparent": true,
@@ -660,7 +660,7 @@
         "tabName": "Plants"
     },
 
-    "Lily Pad": {
+    "lily_pad": {
         "id": 56,
         "textures": [[9,13]],
         "transparent": true,
@@ -671,7 +671,7 @@
         "tabName": "Plants"
     },
 
-    "Flowering cactus": {
+    "flowering_cactus": {
         "id": 57,
         "textures": [[6,10],[6,10],[6,10],[6,10],[7,14],[8,15]],
         "transparent": true,
@@ -682,7 +682,7 @@
         "tabName": "Blocks"
     },
 
-    "Cactus Flower": {
+    "cactus_flower": {
         "id": 58,
         "textures": [[7,10]],
         "transparent": true,
@@ -693,7 +693,7 @@
         "tabName": "Plants"
     },
 
-    "Dead Grass": {
+    "dead_grass": {
         "id": 59,
         "textures": [[0,10]],
         "transparent": true,
