@@ -278,7 +278,7 @@ void ImGuiOverlay::render(float deltaTime, Camera& camera, World* world) {
                     ImGuiWindowFlags_NoResize | 
                     ImGuiWindowFlags_NoCollapse);
         ImGui::Text("FPS: %.1f", fpsDisplay);
-        ImGui::Text("Pos: %.2f / %.2f / %.2f", feetPos.x, feetPos.y, feetPos.z);
+        ImGui::Text("Pos: %.2f / %.2f / %.2f", feetPos.x-0.5f, feetPos.y, feetPos.z-0.5f);
         ImGui::Text("Delta Time: %.2f ms", deltaTime*1000);
         ImGui::Text("Chunk: %d, %d", chunkX, chunkZ);
         ImGui::Separator();
@@ -543,7 +543,7 @@ void ImGuiOverlay::render(float deltaTime, Camera& camera, World* world) {
                         if (!okx || !oky || !okz) {
                             consoleLog.push_back("Invalid coordinates. Example: tp ~ ~10 ~-5");
                         } else {
-                            camera.setPosition(glm::vec3(x, y + eyeHeight, z));
+                            camera.setPosition(glm::vec3(x+0.5f, y + eyeHeight, z+0.5f));
                             char buf[128];
                             snprintf(buf, sizeof(buf), "Teleported to %.2f %.2f %.2f", x, y, z);
                             consoleLog.push_back(buf);

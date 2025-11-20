@@ -154,45 +154,6 @@ void Chunk::buildMesh() {
         }
     }
 
-    if (VAO != 0) {
-        glDeleteVertexArrays(1, &VAO);
-        VAO = 0;
-    }
-    if (VBO != 0) {
-        glDeleteBuffers(1, &VBO);
-        VBO = 0;
-    }
-    if (EBO != 0) {
-        glDeleteBuffers(1, &EBO);
-        EBO = 0;
-    }
-
-    if (crossVAO != 0) {
-        glDeleteVertexArrays(1, &crossVAO);
-        crossVAO = 0;
-    }
-    if (crossVBO != 0) {
-        glDeleteBuffers(1, &crossVBO);
-        crossVBO = 0;
-    }
-    if (crossEBO != 0) {
-        glDeleteBuffers(1, &crossEBO);
-        crossEBO = 0;
-    }
-
-    if (liquidVAO != 0) {
-        glDeleteVertexArrays(1, &liquidVAO);
-        liquidVAO = 0;
-    }
-    if (liquidVBO != 0) {
-        glDeleteBuffers(1, &liquidVBO);
-        liquidVBO = 0;
-    }
-    if (liquidEBO != 0) {
-        glDeleteBuffers(1, &liquidEBO);
-        liquidEBO = 0;
-    }
-
     std::vector<float> vertices;
     std::vector<float> crossVertices;
     std::vector<float> liquidVertices;
@@ -238,73 +199,114 @@ void Chunk::buildMesh() {
     crossIndexCount = static_cast<GLsizei>(crossIndices.size());
     liquidIndexCount = static_cast<GLsizei>(liquidIndices.size());
 
-    // Create mesh
-    glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO);
-    glGenBuffers(1, &EBO);
+    if (VAO == 0) {
+        glGenVertexArrays(1, &VAO);
+        glGenBuffers(1, &VBO);
+        glGenBuffers(1, &EBO);
 
-    glBindVertexArray(VAO);
+        glBindVertexArray(VAO);
 
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STATIC_DRAW);
+        glBindBuffer(GL_ARRAY_BUFFER, VBO);
+        glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STATIC_DRAW);
 
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), indices.data(), GL_STATIC_DRAW);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), indices.data(), GL_STATIC_DRAW);
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(5 * sizeof(float)));
-    glEnableVertexAttribArray(2);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+        glEnableVertexAttribArray(1);
+        glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(5 * sizeof(float)));
+        glEnableVertexAttribArray(2);
 
-    glBindVertexArray(0);
+        glBindVertexArray(0);
+    } else {
+        glBindVertexArray(VAO);
 
-    //--------------------------------------------------------------
-    
-    glGenVertexArrays(1, &crossVAO);
-    glGenBuffers(1, &crossVBO);
-    glGenBuffers(1, &crossEBO);
+        glBindBuffer(GL_ARRAY_BUFFER, VBO);
+        glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), nullptr, GL_STATIC_DRAW);
+        glBufferSubData(GL_ARRAY_BUFFER, 0, vertices.size() * sizeof(float), vertices.data());
 
-    glBindVertexArray(crossVAO);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), nullptr, GL_STATIC_DRAW);
+        glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, indices.size() * sizeof(unsigned int), indices.data());
 
-    glBindBuffer(GL_ARRAY_BUFFER, crossVBO);
-    glBufferData(GL_ARRAY_BUFFER, crossVertices.size() * sizeof(float), crossVertices.data(), GL_STATIC_DRAW);
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, crossEBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, crossIndices.size() * sizeof(unsigned int), crossIndices.data(), GL_STATIC_DRAW);
-
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
-    glEnableVertexAttribArray(1);
-
-    glBindVertexArray(0);
+        glBindVertexArray(0);
+    }
 
     //--------------------------------------------------------------
     
-    glGenVertexArrays(1, &liquidVAO);
-    glGenBuffers(1, &liquidVBO);
-    glGenBuffers(1, &liquidEBO);
+    if (crossVAO == 0) {
+        glGenVertexArrays(1, &crossVAO);
+        glGenBuffers(1, &crossVBO);
+        glGenBuffers(1, &crossEBO);
 
-    glBindVertexArray(liquidVAO);
+        glBindVertexArray(crossVAO);
 
-    glBindBuffer(GL_ARRAY_BUFFER, liquidVBO);
-    glBufferData(GL_ARRAY_BUFFER, liquidVertices.size() * sizeof(float), liquidVertices.data(), GL_DYNAMIC_DRAW);
+        glBindBuffer(GL_ARRAY_BUFFER, crossVBO);
+        glBufferData(GL_ARRAY_BUFFER, crossVertices.size() * sizeof(float), crossVertices.data(), GL_STATIC_DRAW);
 
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, liquidEBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, liquidIndices.size() * sizeof(unsigned int), liquidIndices.data(), GL_DYNAMIC_DRAW);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, crossEBO);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, crossIndices.size() * sizeof(unsigned int), crossIndices.data(), GL_STATIC_DRAW);
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)(3 * sizeof(float)));
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)(5 * sizeof(float)));
-    glEnableVertexAttribArray(2);
-    glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)(6 * sizeof(float)));
-    glEnableVertexAttribArray(3);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+        glEnableVertexAttribArray(1);
 
-    glBindVertexArray(0);
+        glBindVertexArray(0);
+    } else {
+        glBindVertexArray(crossVAO);
+
+        glBindBuffer(GL_ARRAY_BUFFER, crossVBO);
+        glBufferData(GL_ARRAY_BUFFER, crossVertices.size() * sizeof(float), nullptr, GL_STATIC_DRAW);
+        glBufferSubData(GL_ARRAY_BUFFER, 0, crossVertices.size() * sizeof(float), crossVertices.data());
+
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, crossEBO);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, crossIndices.size() * sizeof(unsigned int), nullptr, GL_STATIC_DRAW);
+        glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, crossIndices.size() * sizeof(unsigned int), crossIndices.data());
+
+        glBindVertexArray(0);
+    }
+
+    //--------------------------------------------------------------
+    
+    if (liquidVAO == 0) {
+        glGenVertexArrays(1, &liquidVAO);
+        glGenBuffers(1, &liquidVBO);
+        glGenBuffers(1, &liquidEBO);
+
+        glBindVertexArray(liquidVAO);
+
+        glBindBuffer(GL_ARRAY_BUFFER, liquidVBO);
+        glBufferData(GL_ARRAY_BUFFER, liquidVertices.size() * sizeof(float), liquidVertices.data(), GL_DYNAMIC_DRAW);
+
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, liquidEBO);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, liquidIndices.size() * sizeof(unsigned int), liquidIndices.data(), GL_DYNAMIC_DRAW);
+
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)0);
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)(3 * sizeof(float)));
+        glEnableVertexAttribArray(1);
+        glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)(5 * sizeof(float)));
+        glEnableVertexAttribArray(2);
+        glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)(6 * sizeof(float)));
+        glEnableVertexAttribArray(3);
+
+        glBindVertexArray(0);
+    } else {
+        glBindVertexArray(liquidVAO);
+
+        glBindBuffer(GL_ARRAY_BUFFER, liquidVBO);
+        glBufferData(GL_ARRAY_BUFFER, liquidVertices.size() * sizeof(float), nullptr, GL_DYNAMIC_DRAW);
+        glBufferSubData(GL_ARRAY_BUFFER, 0, liquidVertices.size() * sizeof(float), liquidVertices.data());
+
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, liquidEBO);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, liquidIndices.size() * sizeof(unsigned int), nullptr, GL_DYNAMIC_DRAW);
+        glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, liquidIndices.size() * sizeof(unsigned int), liquidIndices.data());
+
+        glBindVertexArray(0);
+    }
 
     // Store CPU side copies for sorting
     liquidVertexDataCPU = std::move(liquidVertices);
@@ -622,7 +624,8 @@ void Chunk::renderLiquid(const Camera& camera, GLint uLiquidModelLoc) {
 
     glBindVertexArray(liquidVAO);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, liquidEBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sortedIndices.size() * sizeof(unsigned int), sortedIndices.data(), GL_DYNAMIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sortedIndices.size() * sizeof(unsigned int), nullptr, GL_DYNAMIC_DRAW);
+    glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, sortedIndices.size() * sizeof(unsigned int), sortedIndices.data());
     glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(sortedIndices.size()), GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
 }

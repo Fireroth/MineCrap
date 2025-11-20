@@ -15,13 +15,14 @@ Chunk::Biome getBiome(float b) {
     };
 
     float normalized = (b + 1.0f) / 2.0f;
-    int index = normalized * biomes.size();
+    int index = static_cast<int>(normalized * static_cast<float>(biomes.size()));
 
-    if (index >= (int)biomes.size())
-        index = biomes.size() - 1;
+    if (index >= static_cast<int>(biomes.size()))
+        index = static_cast<int>(biomes.size() - 1);
 
     return biomes[index];
 }
+
 
 // Helper function to get biome parameters
 void getBiomeParams(Chunk::Biome biome, float& heightScale, float& detailWeight, float& power, float& baseHeight) {

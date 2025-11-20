@@ -31,7 +31,7 @@ int main() {
     ModelDB::loadAllModels("models");
     
     Camera camera(
-        glm::vec3(0.0f, 70.0f, 0.0f),  // Position
+        glm::vec3(0.5f, 70.0f, 0.5f),  // Position
         glm::vec3(0.0f, 1.0f, 0.0f),   // Up vector
         0.0f,                          // Yaw
         0.0f                           // Pitch
