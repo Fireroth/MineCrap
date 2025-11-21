@@ -441,7 +441,7 @@ void Chunk::addFace(std::vector<float>& vertices, std::vector<unsigned int>& ind
                     vertices.insert(vertices.end(), {pos.x, pos.y, pos.z, uv.x, uv.y, 0.0f});
                 }
 
-                indices.insert(indices.end(), { offset, offset + 1, offset + 2, offset + 2, offset + 3, offset });
+                indices.insert(indices.end(), {offset, offset + 1, offset + 2, offset + 2, offset + 3, offset});
                 offset += 4;
             }
         }
