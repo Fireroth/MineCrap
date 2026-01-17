@@ -200,7 +200,27 @@ void ImGuiOverlay::render(float deltaTime, Camera& camera, World* world) {
                 }
                 ImGui::PopItemWidth();
 
-                float backButtonY = fovSliderY + 50;
+                int maxFps = getOptionInt("max_fps", 60);
+                const char* fpsLabel = "Max FPS";
+                float fpsLabelWidth = ImGui::CalcTextSize(fpsLabel).x;
+                float fpsTotalWidth = fpsLabelWidth + spacing + sliderWidth;
+                float fpsStartX = (windowSize.x - fpsTotalWidth) * 0.5f;
+                float fpsSliderY = fovSliderY + 50;
+                ImGui::SetCursorPos(ImVec2(fpsStartX, fpsSliderY));
+                ImGui::TextUnformatted(fpsLabel);
+                ImGui::SameLine();
+                ImGui::PushItemWidth(sliderWidth);
+                if (ImGui::SliderInt("##MaxFPS", &maxFps, 10, 250)) {
+                    if (maxFps == 250) {
+                        maxFps = 0;
+                    }
+                    saveOption("max_fps", maxFps, "options.txt");
+                }
+                ImGui::PopItemWidth();
+                ImGui::SameLine();
+                ImGui::TextUnformatted(maxFps == 0 ? "(Unlimited)" : "");
+
+                float backButtonY = fpsSliderY + 50;
                 ImGui::SetCursorPos(ImVec2(centerX, backButtonY));
                 if (ImGui::Button("Back", buttonSize))
                     pauseScreenPage = PauseMenuPage::Settings;

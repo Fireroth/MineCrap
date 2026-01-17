@@ -1,6 +1,8 @@
 #ifdef _WIN32
     #include <windows.h>
 #endif
+#include <thread>
+#include <chrono>
 #include <glad/glad.h>
 #include "renderer/imguiOverlay.hpp"
 #include "core/window.hpp"
@@ -69,6 +71,20 @@ int main() {
 
         window.swapBuffers();
         window.pollEvents();
+        
+        // Frame rate limiting
+        int currentMaxFPS = getOptionInt("max_fps", 60);
+        if (currentMaxFPS > 0) {
+            float targetFrameTime = 1.0f / currentMaxFPS;
+            float elapsedTime = static_cast<float>(glfwGetTime()) - currentFrame;
+            while (elapsedTime < targetFrameTime) {
+                float remainingTime = targetFrameTime - elapsedTime;
+                if (remainingTime > 0.001f) {
+                    std::this_thread::sleep_for(std::chrono::duration<float>(remainingTime * 0.95f));
+                }
+                elapsedTime = static_cast<float>(glfwGetTime()) - currentFrame;
+            }
+        }
     }
     return 0;
 }
