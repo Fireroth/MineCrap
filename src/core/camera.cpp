@@ -19,17 +19,17 @@ void Camera::processKeyboard(const char *direction, float deltaTime, float speed
     float acceleration = movementSpeed * speedMultiplier * 11.0f;
     glm::vec3 accel(0.0f);
 
-    if (strcmp(direction, "FORWARD") == 0)
+    if (direction[0] == 'F' && direction[1] == 'O')   // FORWARD
         accel += glm::normalize(glm::vec3(front.x, 0.0f, front.z)) * acceleration;
-    if (strcmp(direction, "BACKWARD") == 0)
+     else if (direction[0] == 'B')   // BACKWARD
         accel -= glm::normalize(glm::vec3(front.x, 0.0f, front.z)) * acceleration;
-    if (strcmp(direction, "LEFT") == 0)
+     else if (direction[0] == 'L')   // LEFT
         accel -= right * acceleration;
-    if (strcmp(direction, "RIGHT") == 0)
+     else if (direction[0] == 'R')   // RIGHT
         accel += right * acceleration;
-    if (strcmp(direction, "UP") == 0)
+     else if (direction[0] == 'U')   // UP
         accel += worldUp * acceleration;
-    if (strcmp(direction, "DOWN") == 0)
+     else if (direction[0] == 'D')  // DOWN
         accel -= worldUp * acceleration;
 
     applyAcceleration(accel, deltaTime);

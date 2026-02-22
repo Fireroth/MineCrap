@@ -9,8 +9,9 @@
 #include "../core/options.hpp"
 #include "../core/input.hpp"
 #include "imguiOverlay.hpp"
+#include "../world/block_interaction.hpp"
 
-Renderer::Renderer() : shaderProgram(0), textureAtlas(0), crosshairVAO(0), crosshairVBO(0) {}
+Renderer::Renderer() : shaderProgram(0), textureAtlas(0), crosshairVAO(0), crosshairVBO(0), borderVAO(0), borderVBO(0), borderShaderProgram(0) {}
 
 Renderer::~Renderer() {
     glDeleteTextures(1, &textureAtlas);
@@ -19,6 +20,10 @@ Renderer::~Renderer() {
     glDeleteVertexArrays(1, &crosshairVAO);
     glDeleteBuffers(1, &crosshairVBO);
     glDeleteProgram(crosshairShaderProgram);
+
+    glDeleteVertexArrays(1, &borderVAO);
+    glDeleteBuffers(1, &borderVBO);
+    glDeleteProgram(borderShaderProgram);
 }
 
 void Renderer::init() {
@@ -47,6 +52,10 @@ void Renderer::init() {
     std::string crosshairFragmentSource = loadShaderSource("shaders/crosshair_fragment.glsl");
     crosshairShaderProgram = createShaderProgram(crosshairVertexSource.c_str(), crosshairFragmentSource.c_str());
 
+    std::string borderVertexSource = loadShaderSource("shaders/border_vertex.glsl");
+    std::string borderFragmentSource = loadShaderSource("shaders/border_fragment.glsl");
+    borderShaderProgram = createShaderProgram(borderVertexSource.c_str(), borderFragmentSource.c_str());
+
     uCrosshairAspectLoc = glGetUniformLocation(crosshairShaderProgram, "aspectRatio");
 
     uCrossModelLoc = glGetUniformLocation(crossShaderProgram, "model");
@@ -68,6 +77,10 @@ void Renderer::init() {
     uLiquidFogColorLoc = glGetUniformLocation(liquidShaderProgram, "fogColor");
     uLiquidCamPosLoc = glGetUniformLocation(liquidShaderProgram, "cameraPos");
 
+    uBorderModelLoc = glGetUniformLocation(borderShaderProgram, "model");
+    uBorderViewLoc = glGetUniformLocation(borderShaderProgram, "view");
+    uBorderProjLoc = glGetUniformLocation(borderShaderProgram, "projection");
+
     uModelLoc = glGetUniformLocation(shaderProgram, "model");
     uViewLoc = glGetUniformLocation(shaderProgram, "view");
     uProjLoc = glGetUniformLocation(shaderProgram, "projection");
@@ -79,6 +92,7 @@ void Renderer::init() {
 
     loadTextureAtlas("textures/atlas.png");
     initCrosshair();
+    initBorderMesh();
 
     currentFov = getOptionFloat("fov", 60.0f);
 
@@ -108,6 +122,46 @@ void Renderer::initCrosshair() {
     glEnableVertexAttribArray(0);
 
     glBindVertexArray(0);
+}
+
+void Renderer::initBorderMesh() {
+    float borderVertices[] = {
+        // Bottom
+        0.0f, 0.0f, 0.0f,
+        1.0f, 0.0f, 0.0f,
+        1.0f, 0.0f, 1.0f,
+        0.0f, 0.0f, 1.0f,
+        // Top
+        0.0f, 1.0f, 0.0f,
+        1.0f, 1.0f, 0.0f,
+        1.0f, 1.0f, 1.0f,
+        0.0f, 1.0f, 1.0f
+    };
+
+    unsigned int borderIndices[] = {
+        0, 1, 1, 2, 2, 3, 3, 0,
+        4, 5, 5, 6, 6, 7, 7, 4,
+        0, 4, 1, 5, 2, 6, 3, 7
+    };
+
+    glGenVertexArrays(1, &borderVAO);
+    glGenBuffers(1, &borderVBO);
+    GLuint borderEBO;
+    glGenBuffers(1, &borderEBO);
+
+    glBindVertexArray(borderVAO);
+
+    glBindBuffer(GL_ARRAY_BUFFER, borderVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(borderVertices), borderVertices, GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, borderEBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(borderIndices), borderIndices, GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+
+    glBindVertexArray(0);
+
 }
 
 void Renderer::renderWorld(const Camera& camera, float aspectRatio, float deltaTime, float currentFrame) {
@@ -143,6 +197,8 @@ void Renderer::renderWorld(const Camera& camera, float aspectRatio, float deltaT
     
     Frustum frustum = World::extractFrustumPlanes(projection * view);
 
+    glm::vec3 camPos = camera.getPosition();
+
     // -------------------------------- Render main --------------------------------
 
     glUseProgram(shaderProgram);
@@ -157,7 +213,6 @@ void Renderer::renderWorld(const Camera& camera, float aspectRatio, float deltaT
     glUniform1i(uAtlasLoc, 0);
 
     if (uCamPosLoc != -1) {
-        glm::vec3 camPos = camera.getPosition();
         glUniform3fv(uCamPosLoc, 1, glm::value_ptr(camPos));
     }
 
@@ -184,7 +239,6 @@ void Renderer::renderWorld(const Camera& camera, float aspectRatio, float deltaT
     glUniform1i(uCrossAtlasLoc, 0);
 
     if (uCrossCamPosLoc != -1) {
-        glm::vec3 camPos = camera.getPosition();
         glUniform3fv(uCrossCamPosLoc, 1, glm::value_ptr(camPos));
     }
 
@@ -211,7 +265,6 @@ void Renderer::renderWorld(const Camera& camera, float aspectRatio, float deltaT
     glUniform1f(uLiquidTimeLoc, currentFrame);
 
     if (uLiquidCamPosLoc != -1) {
-        glm::vec3 camPos = camera.getPosition();
         glUniform3fv(uLiquidCamPosLoc, 1, glm::value_ptr(camPos));
     }
 
@@ -224,6 +277,10 @@ void Renderer::renderWorld(const Camera& camera, float aspectRatio, float deltaT
     }
 
     world.renderLiquid(camera, uLiquidModelLoc, frustum);
+
+    // -------------------- Render selected block border --------------------
+    glEnable(GL_DEPTH_TEST);
+    renderSelectedBlockBorder(camera, aspectRatio);
 
     glDisable(GL_BLEND);
 }
@@ -239,6 +296,55 @@ void Renderer::renderCrosshair(float aspectRatio) {
     glBindVertexArray(crosshairVAO);
     glDrawArrays(GL_LINES, 0, 4);
     glBindVertexArray(0);
+}
+
+
+void Renderer::renderSelectedBlockBorder(const Camera& camera, float aspectRatio) {
+    RaycastResult hit = raycast(&world, camera.getPosition(), camera.getFront(), 6.0f);
+    if (!hit.hit || !hit.hitChunk) return;
+
+    glm::ivec3 worldPos = glm::ivec3(
+        hit.hitChunk->chunkX * Chunk::chunkWidth + hit.hitBlockPos.x,
+        hit.hitBlockPos.y,
+        hit.hitChunk->chunkZ * Chunk::chunkDepth + hit.hitBlockPos.z
+    );
+
+    glm::mat4 view = camera.getViewMatrix();
+    glm::mat4 projection = glm::perspective(
+        glm::radians(currentFov),
+        aspectRatio,
+        0.1f,
+        5000.0f
+    );
+
+    glUseProgram(borderShaderProgram);
+
+    glDisable(GL_CULL_FACE);
+    glLineWidth(4.0f);
+
+    // Avoid z-fighting
+    glEnable(GL_POLYGON_OFFSET_LINE);
+    glPolygonOffset(-2.0f, -4.0f);
+
+    glDepthMask(GL_FALSE);
+
+    glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(worldPos));
+    model = glm::scale(model, glm::vec3(1.001f));
+
+    glUniformMatrix4fv(uBorderModelLoc, 1, GL_FALSE, glm::value_ptr(model));
+    glUniformMatrix4fv(uBorderViewLoc, 1, GL_FALSE, glm::value_ptr(view));
+    glUniformMatrix4fv(uBorderProjLoc, 1, GL_FALSE, glm::value_ptr(projection));
+
+    glBindVertexArray(borderVAO);
+    glDrawElements(GL_LINES, 24, GL_UNSIGNED_INT, 0);
+    glBindVertexArray(0);
+
+    glDepthMask(GL_TRUE);
+    glDisable(GL_POLYGON_OFFSET_LINE);
+
+    glLineWidth(1.0f);
+    glEnable(GL_CULL_FACE);
+    glUseProgram(0);
 }
 
 GLuint Renderer::createShader(const char *source, GLenum shaderType) {

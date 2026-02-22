@@ -37,7 +37,7 @@ public:
         Main,
         Settings,
         Video,
-        Controls
+        ControlsCustomize
     };
 
     PauseMenuPage pauseScreenPage = PauseMenuPage::Main;

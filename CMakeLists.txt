@@ -65,5 +65,7 @@ add_custom_command(TARGET MineCrap POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy
             "${CMAKE_SOURCE_DIR}/options.txt" "$<TARGET_FILE_DIR:MineCrap>/options.txt" 
     COMMAND ${CMAKE_COMMAND} -E copy
+            "${CMAKE_SOURCE_DIR}/controls.txt" "$<TARGET_FILE_DIR:MineCrap>/controls.txt"
+    COMMAND ${CMAKE_COMMAND} -E copy
             "${CMAKE_SOURCE_DIR}/Font.ttf" "$<TARGET_FILE_DIR:MineCrap>/Font.ttf"
 )

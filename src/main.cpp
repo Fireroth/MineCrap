@@ -10,6 +10,7 @@
 #include "core/camera.hpp"
 #include "core/input.hpp"
 #include "core/options.hpp"
+#include "core/controls.hpp"
 #include "world/modelDB.hpp"
 
 GLFWwindow* g_currentGLFWwindow = nullptr;
@@ -31,6 +32,7 @@ int main() {
     ImGuiOverlay ImGuiOverlay;
     BlockDB::init();
     ModelDB::loadAllModels("models");
+    loadControlsFromFile("controls.txt");
     
     Camera camera(
         glm::vec3(0.5f, 70.0f, 0.5f),  // Position
@@ -75,14 +77,14 @@ int main() {
         // Frame rate limiting
         int currentMaxFPS = getOptionInt("max_fps", 60);
         if (currentMaxFPS > 0) {
-            float targetFrameTime = 1.0f / currentMaxFPS;
-            float elapsedTime = static_cast<float>(glfwGetTime()) - currentFrame;
-            while (elapsedTime < targetFrameTime) {
-                float remainingTime = targetFrameTime - elapsedTime;
-                if (remainingTime > 0.001f) {
-                    std::this_thread::sleep_for(std::chrono::duration<float>(remainingTime * 0.95f));
+            float targetFrameTime = 1.0f / static_cast<float>(currentMaxFPS);
+            double elapsedTime = glfwGetTime() - currentFrame;
+            if (elapsedTime < targetFrameTime) {
+                double remainingTime = targetFrameTime - elapsedTime;
+                if (remainingTime > 0.0001) {
+                    std::this_thread::sleep_for(std::chrono::duration<double>(remainingTime - 0.0001));
                 }
-                elapsedTime = static_cast<float>(glfwGetTime()) - currentFrame;
+                while (glfwGetTime() - currentFrame < targetFrameTime) {}
             }
         }
     }

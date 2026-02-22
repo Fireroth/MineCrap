@@ -1,0 +1,14 @@
+moveForward=W
+moveBackward=S
+moveLeft=A
+moveRight=D
+jumpUp=SPACE
+crouchDown=LSHIFT
+toggleFlyMode=F
+toggleWireframe=G
+sprint=LCTRL
+openInventory=E
+openConsole=T
+toggleHotbar=F1
+toggleDebug=F3
+zoom=C

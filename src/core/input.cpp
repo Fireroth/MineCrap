@@ -1,6 +1,7 @@
 #include <glad/glad.h>
 #include <array>
 #include "input.hpp"
+#include "controls.hpp"
 #include "../world/block_interaction.hpp"
 #include "../world/world.hpp"
 
@@ -120,9 +121,9 @@ void setupInputCallbacks(GLFWwindow* window, Camera* camera, World* world) {
 // Speed multiplier
 float getSpeedMultiplier(GLFWwindow* window) {
     if (flyMode)
-        return (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS) ? 30.0f : 4.0f;
+        return (glfwGetKey(window, g_controls.sprint) == GLFW_PRESS) ? 30.0f : 4.0f;
     else
-        return (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS) ? 2.5f : 1.9f;
+        return (glfwGetKey(window, g_controls.sprint) == GLFW_PRESS) ? 2.5f : 1.9f;
 }
 
 // Keyboard movement
@@ -164,41 +165,41 @@ void processInput(GLFWwindow* window, Camera& camera, float deltaTime, float spe
     }
     escPressedLastFrame = escPressedThisFrame;
 
-    // Toggle debug window with F3 key
-    static bool f3PressedLastFrame = false;
-    bool f3PressedThisFrame = glfwGetKey(window, GLFW_KEY_F3) == GLFW_PRESS;
-    if (f3PressedThisFrame && !f3PressedLastFrame) {
+    // Toggle debug window
+    static bool debugTogglePressedLastFrame = false;
+    bool debugTogglePressedThisFrame = glfwGetKey(window, g_controls.toggleDebug) == GLFW_PRESS;
+    if (debugTogglePressedThisFrame && !debugTogglePressedLastFrame) {
         debugOpen = !debugOpen;
     }
-    f3PressedLastFrame = f3PressedThisFrame;
+    debugTogglePressedLastFrame = debugTogglePressedThisFrame;
 
-    // Toggle hotbar with F1 key
-    static bool f1PressedLastFrame = false;
-    bool f1PressedThisFrame = glfwGetKey(window, GLFW_KEY_F1) == GLFW_PRESS;
-    if (f1PressedThisFrame && !f1PressedLastFrame) {
+    // Toggle hotbar
+    static bool hotbarTogglePressedLastFrame = false;
+    bool hotbarTogglePressedThisFrame = glfwGetKey(window, g_controls.toggleHotbar) == GLFW_PRESS;
+    if (hotbarTogglePressedThisFrame && !hotbarTogglePressedLastFrame) {
         hotbarOpen = !hotbarOpen;
     }
-    f1PressedLastFrame = f1PressedThisFrame;
+    hotbarTogglePressedLastFrame = hotbarTogglePressedThisFrame;
 
     if (!ingoreInput) { // True if console is opened
 
-        if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+        if (glfwGetKey(window, g_controls.moveForward) == GLFW_PRESS)
             camera.processKeyboard("FORWARD", deltaTime, speedMultiplier);
-        if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+        if (glfwGetKey(window, g_controls.moveBackward) == GLFW_PRESS)
             camera.processKeyboard("BACKWARD", deltaTime, speedMultiplier);
-        if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+        if (glfwGetKey(window, g_controls.moveLeft) == GLFW_PRESS)
             camera.processKeyboard("LEFT", deltaTime, speedMultiplier);
-        if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+        if (glfwGetKey(window, g_controls.moveRight) == GLFW_PRESS)
             camera.processKeyboard("RIGHT", deltaTime, speedMultiplier);
 
         if (flyMode) {
-            if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
+            if (glfwGetKey(window, g_controls.crouchDown) == GLFW_PRESS)
                 camera.processKeyboard("DOWN", deltaTime, speedMultiplier);
-            if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
+            if (glfwGetKey(window, g_controls.jumpUp) == GLFW_PRESS)
                 camera.processKeyboard("UP", deltaTime, speedMultiplier);
         } else {
             static bool spaceLast = false;
-            bool spaceNow = glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS;
+            bool spaceNow = glfwGetKey(window, g_controls.jumpUp) == GLFW_PRESS;
             if (spaceNow && !spaceLast && g_camera) {
                 g_camera->jump();
             }
@@ -206,29 +207,29 @@ void processInput(GLFWwindow* window, Camera& camera, float deltaTime, float spe
         }
 
         // Zoom state
-        zoomedIn = (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS) ? true : false;
+        zoomedIn = (glfwGetKey(window, g_controls.zoom) == GLFW_PRESS) ? true : false;
 
-        // Toggle wireframe mode with G key
-        static bool gPressedLastFrame = false;
-        bool gPressedThisFrame = glfwGetKey(window, GLFW_KEY_G) == GLFW_PRESS;
-        if (gPressedThisFrame && !gPressedLastFrame) {
+        // Toggle wireframe mode
+        static bool wireframePressedLastFrame = false;
+        bool wireframePressedThisFrame = glfwGetKey(window, g_controls.toggleWireframe) == GLFW_PRESS;
+        if (wireframePressedThisFrame && !wireframePressedLastFrame) {
             wireframeEnabled = !wireframeEnabled;
             glPolygonMode(GL_FRONT_AND_BACK, wireframeEnabled ? GL_LINE : GL_FILL);
         }
-        gPressedLastFrame = gPressedThisFrame;
+        wireframePressedLastFrame = wireframePressedThisFrame;
 
-        // Toggle flyMode mode with F key
-        static bool fPressedLastFrame = false;
-        bool fPressedThisFrame = glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS;
-        if (fPressedThisFrame && !fPressedLastFrame) {
+        // Toggle fly mode
+        static bool flyModePressedLastFrame = false;
+        bool flyModePressedThisFrame = glfwGetKey(window, g_controls.toggleFlyMode) == GLFW_PRESS;
+        if (flyModePressedThisFrame && !flyModePressedLastFrame) {
             flyMode = !flyMode;
         }
-        fPressedLastFrame = fPressedThisFrame;
+        flyModePressedLastFrame = flyModePressedThisFrame;
 
-        // Toggle chat with T key
-        static bool tPressedLastFrame = false;
-        bool tPressedThisFrame = glfwGetKey(window, GLFW_KEY_T) == GLFW_PRESS;
-        if (tPressedThisFrame && !tPressedLastFrame) {
+        // Toggle console
+        static bool consolePressedLastFrame = false;
+        bool consolePressedThisFrame = glfwGetKey(window, g_controls.openConsole) == GLFW_PRESS;
+        if (consolePressedThisFrame && !consolePressedLastFrame) {
             if (pauseMenuOpen)
                 return;
             if (!consoleOpen) {
@@ -247,12 +248,12 @@ void processInput(GLFWwindow* window, Camera& camera, float deltaTime, float spe
                 firstMouse = true;
             }
         }
-        tPressedLastFrame = tPressedThisFrame;
+        consolePressedLastFrame = consolePressedThisFrame;
 
-        // Toggle inventory with E key
-        static bool ePressedLastFrame = false;
-        bool ePressedThisFrame = glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS;
-        if (ePressedThisFrame && !ePressedLastFrame) {
+        // Toggle inventory
+        static bool inventoryPressedLastFrame = false;
+        bool inventoryPressedThisFrame = glfwGetKey(window, g_controls.openInventory) == GLFW_PRESS;
+        if (inventoryPressedThisFrame && !inventoryPressedLastFrame) {
             if (!inventoryOpen) {
                 inventoryOpen = true;
                 consoleOpen = false;
@@ -268,7 +269,7 @@ void processInput(GLFWwindow* window, Camera& camera, float deltaTime, float spe
                 firstMouse = true;
             }
         }
-        ePressedLastFrame = ePressedThisFrame;
+        inventoryPressedLastFrame = inventoryPressedThisFrame;
 
         // Block selection with number keys 1-9
         for (int i = 1; i <= 9; i++) {

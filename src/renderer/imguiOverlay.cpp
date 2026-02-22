@@ -8,6 +8,7 @@
 #include "../world/block_interaction.hpp"
 #include "../core/input.hpp"
 #include "../core/options.hpp"
+#include "../core/controls.hpp"
 
 const float ImGuiOverlay::fpsRefreshInterval = 0.5f; // 500ms
 
@@ -110,7 +111,7 @@ void ImGuiOverlay::render(float deltaTime, Camera& camera, World* world) {
         ImVec2 buttonSize(200, 50);
         float spacing = 20.0f;
 
-        float startY = (windowSize.y - (buttonSize.y * 4 + spacing * 2)) * 0.5f;
+        float startY = (windowSize.y - (buttonSize.y * 3 + spacing * 2)) * 0.5f;
         float centerX = (windowSize.x - buttonSize.x) * 0.5f;
 
         switch (pauseScreenPage) {
@@ -127,19 +128,15 @@ void ImGuiOverlay::render(float deltaTime, Camera& camera, World* world) {
                     pauseScreenPage = PauseMenuPage::Settings;
                 }
 
-                ImGui::SetCursorPos(ImVec2(centerX, startY + 2*(buttonSize.y + spacing)));
-                if (ImGui::Button("Controls", buttonSize)) {
-                    pauseScreenPage = PauseMenuPage::Controls;
-                }
 
-                ImGui::SetCursorPos(ImVec2(centerX, startY + 3*(buttonSize.y + spacing)));
+                ImGui::SetCursorPos(ImVec2(centerX, startY + 2*(buttonSize.y + spacing)));
                 if (ImGui::Button("Quit", buttonSize)) {
                     glfwSetWindowShouldClose(glfwGetCurrentContext(), true);
                 }
             } break;
 
             case PauseMenuPage::Settings: {
-                float totalHeight = ImGui::GetTextLineHeightWithSpacing() + spacing + 2 * buttonSize.y + spacing;
+                float totalHeight = ImGui::GetTextLineHeightWithSpacing() + spacing + 3 * buttonSize.y + spacing * 2;
                 float startY = (windowSize.y - totalHeight) * 0.5f;
                 float centerX = (windowSize.x - buttonSize.x) * 0.5f;
 
@@ -151,6 +148,10 @@ void ImGuiOverlay::render(float deltaTime, Camera& camera, World* world) {
                     pauseScreenPage = PauseMenuPage::Video;
 
                 ImGui::SetCursorPos(ImVec2(centerX, startY + ImGui::GetTextLineHeightWithSpacing() + spacing + buttonSize.y + spacing));
+                if (ImGui::Button("Controls", buttonSize))
+                    pauseScreenPage = PauseMenuPage::ControlsCustomize;
+
+                ImGui::SetCursorPos(ImVec2(centerX, startY + ImGui::GetTextLineHeightWithSpacing() + spacing + 2 * (buttonSize.y + spacing)));
                 if (ImGui::Button("Back", buttonSize))
                     pauseScreenPage = PauseMenuPage::Main;
             } break;
@@ -226,37 +227,95 @@ void ImGuiOverlay::render(float deltaTime, Camera& camera, World* world) {
                     pauseScreenPage = PauseMenuPage::Settings;
             } break;
 
-            case PauseMenuPage::Controls: {
+            case PauseMenuPage::ControlsCustomize: {
                 ImGuiIO& io = ImGui::GetIO();
-                float infoWidth = 400.0f;
-                float infoHeight = io.DisplaySize.y * 0.6f;
-                float startY = (windowSize.y - infoHeight) * 0.5f;
-                float centerX = (windowSize.x - infoWidth) * 0.5f;
+                float controlsWidth = 600.0f;
+                float controlsHeight = io.DisplaySize.y * 0.75f;
+                float startY = (windowSize.y - controlsHeight) * 0.5f;
+                float centerX = (windowSize.x - controlsWidth) * 0.5f;
 
                 ImGui::SetCursorPos(ImVec2(centerX, startY));
-                ImGui::BeginChild("ControlsInfo", ImVec2(infoWidth, infoHeight), true);
-                ImGui::Text("Controls");
+                ImGui::BeginChild("ControlsCustomize", ImVec2(controlsWidth, controlsHeight), true);
+                ImGui::Text("Customize Controls");
                 ImGui::Separator();
-                ImGui::Text("W/A/S/D: Move");
-                ImGui::Text("Space: Up/Jump");
-                ImGui::Text("Shift: Down (in Fly mode)");
-                ImGui::Text("F: Toggle Fly Mode");
-                ImGui::Text("G: Toggle Wireframe Mode");
-                ImGui::Text("Ctrl: Sprint");
-                ImGui::Text("E: Open Inventory");
-                ImGui::Text("Esc: Pause Menu");
-                ImGui::Text("Left Mouse: Break Block");
-                ImGui::Text("Right Mouse: Place Block");
-                ImGui::Text("Middle Mouse: Pick Block");
-                ImGui::Text("1-9: Select Block in Hotbar");
-                ImGui::Text("F1: Toggle Hotbar and Crosshair");
-                ImGui::Text("F3: Debug Info");
-                ImGui::Text("T: Console");
+
+                static int selectedControlIndex = -1;
+                static bool waitingForKey = false;
+                static int pendingKeyControl = -1;
+
+                ImGui::Text("Click on a control to rebind it, then press the new key");
+                ImGui::Spacing();
+
+                // Helper lambda to display control row
+                auto displayControlRow = [&](const char* label, int& controlKey, int controlIndex) {
+                    bool isSelected = (selectedControlIndex == controlIndex && waitingForKey);
+                    
+                    if (isSelected) {
+                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1.0f, 0.5f, 0.0f, 0.9f));
+                    }
+
+                    std::string displayText = std::string(label) + ": " + getKeyName(controlKey);
+                    if (ImGui::Button(displayText.c_str(), ImVec2(controlsWidth - 20, 30))) {
+                        selectedControlIndex = controlIndex;
+                        waitingForKey = true;
+                        pendingKeyControl = controlIndex;
+                    }
+
+                    if (isSelected) {
+                        ImGui::PopStyleColor();
+                        ImGui::Indent(10.0f);
+                        ImGui::TextColored(ImVec4(1.0f, 0.5f, 0.0f, 1.0f), "Press a key...");
+                        ImGui::Unindent(10.0f);
+                    }
+
+                    if (isSelected) {
+                        GLFWwindow* window = glfwGetCurrentContext();
+                        for (int key = 0; key < GLFW_KEY_LAST; key++) {
+                            if (glfwGetKey(window, key) == GLFW_PRESS) {
+                                if (key == GLFW_KEY_ESCAPE) {
+                                    waitingForKey = false;
+                                    selectedControlIndex = -1;
+                                } else {
+                                    controlKey = key;
+                                    waitingForKey = false;
+                                    selectedControlIndex = -1;
+                                }
+                                break;
+                            }
+                        }
+                    }
+                };
+
+                displayControlRow("Move Forward", g_controls.moveForward, 0);
+                displayControlRow("Move Backward", g_controls.moveBackward, 1);
+                displayControlRow("Move Left", g_controls.moveLeft, 2);
+                displayControlRow("Move Right", g_controls.moveRight, 3);
+                displayControlRow("Jump/Up", g_controls.jumpUp, 4);
+                displayControlRow("Down", g_controls.crouchDown, 5);
+                displayControlRow("Sprint", g_controls.sprint, 6);
+                displayControlRow("Toggle Fly Mode", g_controls.toggleFlyMode, 7);
+                displayControlRow("Toggle Wireframe", g_controls.toggleWireframe, 8);
+                displayControlRow("Open Inventory", g_controls.openInventory, 9);
+                displayControlRow("Open Console", g_controls.openConsole, 10);
+                displayControlRow("Toggle Hotbar", g_controls.toggleHotbar, 11);
+                displayControlRow("Toggle Debug", g_controls.toggleDebug, 12);
+                displayControlRow("Zoom", g_controls.zoom, 13);
+
                 ImGui::EndChild();
 
-                ImGui::SetCursorPos(ImVec2(centerX, startY + infoHeight + spacing));
-                if (ImGui::Button("Back", buttonSize))
-                    pauseScreenPage = PauseMenuPage::Main;
+                ImGui::SetCursorPos(ImVec2(centerX, startY + controlsHeight + spacing));
+                if (ImGui::Button("Load Defaults", ImVec2(140, 40))) {
+                    initializeDefaultControls();
+                }
+                ImGui::SameLine();
+                if (ImGui::Button("Save & Back", ImVec2(140, 40))) {
+                    saveControlsToFile("controls.txt");
+                    pauseScreenPage = PauseMenuPage::Settings;
+                }
+                ImGui::SameLine();
+                if (ImGui::Button("Cancel", ImVec2(140, 40))) {
+                    pauseScreenPage = PauseMenuPage::Settings;
+                }
             } break;
         }
 
