@@ -332,7 +332,7 @@ void ImGuiOverlay::render(float deltaTime, Camera& camera, World* world) {
         ImGui::SetNextWindowSize(ImVec2(450, 0)); // Width, Height
         ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
         
-        glm::vec3 pos = camera.getPosition();
+        glm::dvec3 pos = camera.getPositionDouble();
         glm::vec3 front = camera.getFront();
         glm::vec3 up = camera.getUp();
         BlockInfo blockInfo = getLookedAtBlockInfo(world, camera);
@@ -343,7 +343,7 @@ void ImGuiOverlay::render(float deltaTime, Camera& camera, World* world) {
         uint8_t selectedBlockType = getSelectedBlockType();
 
         float eyeHeight = camera.getEyeHeight();
-        glm::vec3 feetPos = glm::vec3(pos.x, pos.y - eyeHeight, pos.z);
+        glm::dvec3 feetPos = glm::dvec3(pos.x, pos.y - eyeHeight, pos.z);
         int chunkX = static_cast<int>(std::floor(feetPos.x / 16.0f));
         int chunkZ = static_cast<int>(std::floor(feetPos.z / 16.0f));
 
@@ -357,7 +357,7 @@ void ImGuiOverlay::render(float deltaTime, Camera& camera, World* world) {
                     ImGuiWindowFlags_NoResize | 
                     ImGuiWindowFlags_NoCollapse);
         ImGui::Text("FPS: %.1f", fpsDisplay);
-        ImGui::Text("Pos: %.2f / %.2f / %.2f", feetPos.x-0.5f, feetPos.y, feetPos.z-0.5f);
+        ImGui::Text("Pos: %.2f / %.2f / %.2f", feetPos.x-0.5, feetPos.y, feetPos.z-0.5);
         ImGui::Text("Delta Time: %.2f ms", deltaTime*1000);
         ImGui::Text("Chunk: %d, %d", chunkX, chunkZ);
         ImGui::Separator();
@@ -586,7 +586,7 @@ void ImGuiOverlay::render(float deltaTime, Camera& camera, World* world) {
                     consoleLog.push_back("  clear - Clear the console window");
                     consoleLog.push_back("  help - Show this help page");
                     consoleLog.push_back("  tp <x> <y> <z> - Teleport to coordinates");
-                    consoleLog.push_back("  farlands - Teleport to Far Lands");
+                    consoleLog.push_back("  edgelands - Teleport to the edge of the world");
                 } else if (input.rfind("tp", 0) == 0) {
                     std::istringstream ss(input);
                     std::string cmd, coordx, coordy, coordz;
@@ -594,10 +594,10 @@ void ImGuiOverlay::render(float deltaTime, Camera& camera, World* world) {
                     if (coordx.empty() || coordy.empty() || coordz.empty()) {
                         consoleLog.push_back("Invalid usage. Use: tp <x> <y> <z> (~ for current position)");
                     } else {
-                        glm::vec3 current = camera.getPosition();
+                        glm::dvec3 current = camera.getPositionDouble();
                         float eyeHeight = camera.getEyeHeight();
-                        float currentFeetY = current.y - eyeHeight;
-                        auto parseCoord = [](const std::string& token, float currentVal, bool& ok) -> float {
+                        double currentFeetY = current.y - eyeHeight;
+                        auto parseCoord = [](const std::string& token, double currentVal, bool& ok) -> double {
                             ok = true;
                             if (token[0] == '~') {
                                 if (token.size() == 1) return currentVal;
@@ -616,20 +616,23 @@ void ImGuiOverlay::render(float deltaTime, Camera& camera, World* world) {
                             }
                         };
                         bool okx = true, oky = true, okz = true;
-                        float x = parseCoord(coordx, current.x, okx);
-                        float y = parseCoord(coordy, currentFeetY, oky);
-                        float z = parseCoord(coordz, current.z, okz);
+                        double x = parseCoord(coordx, current.x, okx);
+                        double y = parseCoord(coordy, currentFeetY, oky);
+                        double z = parseCoord(coordz, current.z, okz);
                         if (!okx || !oky || !okz) {
                             consoleLog.push_back("Invalid coordinates. Example: tp ~ ~10 ~-5");
                         } else {
-                            camera.setPosition(glm::vec3(x+0.5f, y + eyeHeight, z+0.5f));
+                            camera.setPosition(glm::dvec3(x+0.5, y + eyeHeight, z+0.5));
                             char buf[128];
                             snprintf(buf, sizeof(buf), "Teleported to %.2f %.2f %.2f", x, y, z);
                             consoleLog.push_back(buf);
                         }
                     }
-                } else if (input == "farlands"){
+                } /*else if (input == "farlands"){
                     camera.setPosition(glm::vec3(4294960.0f, 100.0f, 0));
+                }*/ else if (input == "edgelands"){
+                    camera.setPosition(glm::dvec3(2147483635.0, 100.0, 0));
+                    consoleLog.push_back("Do not step on blocks right at the edge (game will crash)");
                 } else {
                     consoleLog.push_back("Unknown command. Type 'help' for a list of commands.");
                 }

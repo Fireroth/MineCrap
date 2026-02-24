@@ -29,13 +29,5 @@ ChunkNoises noiseInit(int seedOffset) {
     noises.detail2Noise.SetFrequency(0.05f);
     noises.detail2Noise.SetSeed(seed + 2);
 
-    noises.featureNoise.SetNoiseType(FastNoiseLite::NoiseType_Value);
-    noises.featureNoise.SetFrequency(500.0f);
-    noises.featureNoise.SetSeed(seed + 3 + seedOffset);
-
-    noises.randomNoise.SetNoiseType(FastNoiseLite::NoiseType_Value);
-    noises.randomNoise.SetFrequency(500.0f);
-    noises.randomNoise.SetSeed(seed + 4);
-
     return noises;
 }

@@ -7,12 +7,14 @@
 #include "../world/modelDB.hpp"
 
 Camera::Camera(glm::vec3 position, glm::vec3 up, float yaw, float pitch)
-    : position(position), worldUp(up), yaw(yaw), pitch(pitch), movementSpeed(2.5f), mouseSensitivity(0.1f) {
+    : position(glm::dvec3(position)), worldUp(up), yaw(yaw), pitch(pitch), movementSpeed(2.5f), mouseSensitivity(0.1f) {
     updateCameraVectors();
 }
 
 glm::mat4 Camera::getViewMatrix() const {
-    return glm::lookAt(position, position + front, up);
+    // Use camera relative rendering, position camera is always at origin
+    // This prevents floating-point precision issues when far from world origin
+    return glm::lookAt(glm::vec3(0.0f), front, up);
 }
 
 void Camera::processKeyboard(const char *direction, float deltaTime, float speedMultiplier) {
@@ -94,7 +96,7 @@ void Camera::updateVelocity(float deltaTime, World* world) {
     // Substep for stability at low FPS
     const float maxSubstep = 1.0f / 200.0f;
     int numSteps = static_cast<int>(ceil(deltaTime / maxSubstep));
-    float subDelta = deltaTime / numSteps;
+    double subDelta = deltaTime / numSteps;
 
     for (int i = 0; i < numSteps; ++i) {
         stepVelocity(subDelta, world);
@@ -117,8 +119,8 @@ void Camera::stepVelocity(float deltaTime, World* world) {
     }
 
     velocity.y += gravity * deltaTime;
-    glm::vec3 proposedPos = position;
-    glm::vec3 horizMove = glm::vec3(velocity.x, 0.0f, velocity.z) * deltaTime;
+    glm::dvec3 proposedPos = position;
+    glm::dvec3 horizMove = glm::dvec3(velocity.x, 0.0, velocity.z) * static_cast<double>(deltaTime);
     double feetY_current = position.y - eyeHeight;
 
     auto isBlockSolid = [&](uint8_t type) -> bool {
@@ -168,7 +170,7 @@ void Camera::stepVelocity(float deltaTime, World* world) {
         return false;
     };
 
-    auto tryMoveOrStep = [&](const glm::vec3& tryPos, glm::vec3& outPos) -> bool {
+    auto tryMoveOrStep = [&](const glm::dvec3& tryPos, glm::dvec3& outPos) -> bool {
         double feetY = tryPos.y - eyeHeight;
         glm::dvec3 aabbMin(tryPos.x - playerRadius, feetY, tryPos.z - playerRadius);
         glm::dvec3 aabbMax(tryPos.x + playerRadius, feetY + playerHeight, tryPos.z + playerRadius);
@@ -182,8 +184,8 @@ void Camera::stepVelocity(float deltaTime, World* world) {
         // step up check
         double stepDiff = blockTop - feetY_current;
         if (grounded && stepDiff > -0.01 - COLLISION_EPS && stepDiff <= stepHeight + COLLISION_EPS) {
-            glm::vec3 steppedPos = tryPos;
-            steppedPos.y = static_cast<float>(blockTop + eyeHeight);
+            glm::dvec3 steppedPos = tryPos;
+            steppedPos.y = blockTop + eyeHeight;
             double steppedFeetY = steppedPos.y - eyeHeight;
 
             glm::dvec3 sMin(steppedPos.x - playerRadius, steppedFeetY, steppedPos.z - playerRadius);
@@ -192,7 +194,7 @@ void Camera::stepVelocity(float deltaTime, World* world) {
             double dummyTop;
             if (!collidesWithTop(sMin, sMax, world, dummyTop)) {
                 outPos = steppedPos;
-                velocity.y = 0.0f;
+                velocity.y = 0.0;
                 grounded = true;
                 return true;
             }
@@ -202,25 +204,25 @@ void Camera::stepVelocity(float deltaTime, World* world) {
     };
 
     if (world) {
-        glm::vec3 stepPos;
+        glm::dvec3 stepPos;
 
         // full X+Z
         if (tryMoveOrStep(position + horizMove, stepPos)) {
             proposedPos = stepPos;
         }
         // X only
-        else if (tryMoveOrStep(position + glm::vec3(horizMove.x, 0, 0), stepPos)) {
+        else if (tryMoveOrStep(position + glm::dvec3(horizMove.x, 0.0, 0.0), stepPos)) {
             proposedPos.x = stepPos.x;
             proposedPos.y = stepPos.y;
-            velocity.z = 0.0f;
+            velocity.z = 0.0;
         }
         // Z only
-        else if (tryMoveOrStep(position + glm::vec3(0, 0, horizMove.z), stepPos)) {
+        else if (tryMoveOrStep(position + glm::dvec3(0.0, 0.0, horizMove.z), stepPos)) {
             proposedPos.z = stepPos.z;
             proposedPos.y = stepPos.y;
-            velocity.x = 0.0f;
+            velocity.x = 0.0;
         } else {
-            velocity.x = velocity.z = 0.0f;
+            velocity.x = velocity.z = 0.0;
         }
 
         // vertical movement
@@ -234,12 +236,12 @@ void Camera::stepVelocity(float deltaTime, World* world) {
         if (collidesWithTop(aabbMin, aabbMax, world, blockTop)) {
             if (feetY <= blockTop + 0.01 + COLLISION_EPS &&
                 feetY >= blockTop - stepHeight - COLLISION_EPS) {
-                proposedPos.y = static_cast<float>(blockTop + eyeHeight + COLLISION_EPS);
-                velocity.y = 0.0f;
+                proposedPos.y = blockTop + eyeHeight + COLLISION_EPS;
+                velocity.y = 0.0;
                 grounded = true;
             } else {
                 proposedPos.y = position.y;
-                velocity.y = 0.0f;
+                velocity.y = 0.0;
             }
         }
     } else {
@@ -259,28 +261,28 @@ void Camera::stepVelocity(float deltaTime, World* world) {
     position = proposedPos;
 
     // drag
-    glm::vec3 horizVel = glm::vec3(velocity.x, 0.0f, velocity.z);
+    glm::dvec3 horizVel = glm::dvec3(velocity.x, 0.0, velocity.z);
     float drag = 9.0f;
-    horizVel -= horizVel * glm::min(drag * deltaTime, 1.0f);
-    if (glm::length(horizVel) < 0.01f) horizVel = glm::vec3(0.0f);
+    horizVel -= horizVel * glm::min(static_cast<double>(drag * deltaTime), 1.0);
+    if (glm::length(horizVel) < 0.01) horizVel = glm::dvec3(0.0);
     velocity.x = horizVel.x;
     velocity.z = horizVel.z;
 }
 
 void Camera::updateVelocityFlight(float deltaTime) {
-    position += velocity * deltaTime;
+    position += velocity * static_cast<double>(deltaTime);
 
     float drag = 9.0f;
-    velocity -= velocity * glm::min(drag * deltaTime, 1.0f);
+    velocity -= velocity * glm::min(static_cast<double>(drag * deltaTime), 1.0);
 
-    if (glm::length(velocity) < 0.01f)
-        velocity = glm::vec3(0.0f);
+    if (glm::length(velocity) < 0.01)
+        velocity = glm::dvec3(0.0);
 }
 
 void Camera::applyAcceleration(const glm::vec3& acceleration, float deltaTime) {
     //glm::vec3 horizAccel = glm::vec3(acceleration.x, 0.0f, acceleration.z);
     //velocity += horizAccel * deltaTime;
-    velocity += acceleration * deltaTime;
+    velocity += glm::dvec3(acceleration) * static_cast<double>(deltaTime);
 }
 
 void Camera::jump() {
@@ -296,8 +298,8 @@ void Camera::jump() {
     }
 }
 
-void Camera::setPosition(const glm::vec3& pos) {
-    position = pos;
-    velocity = glm::vec3(0.0f);
+void Camera::setPosition(const glm::dvec3& pos) {
+    position = glm::dvec3(pos);
+    velocity = glm::dvec3(0.0);
     grounded = false;
 }

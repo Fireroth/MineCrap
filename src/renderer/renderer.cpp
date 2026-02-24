@@ -168,7 +168,7 @@ void Renderer::renderWorld(const Camera& camera, float aspectRatio, float deltaT
     glEnable(GL_DEPTH_TEST);
     int renderDist = getOptionInt("render_distance", 7) + 1; // +1 to account for invisible "mesh helper" chunk
     fogStartDistance = ((getOptionFloat("render_distance", 7) + 1) * 16) - 20;
-    world.updateChunksAroundPlayer(camera.getPosition(), renderDist);
+    world.updateChunksAroundPlayer(camera.getPositionDouble(), renderDist);
 
     GLFWwindow* getCurrentGLFWwindow();
     GLFWwindow* window = getCurrentGLFWwindow();
@@ -213,7 +213,7 @@ void Renderer::renderWorld(const Camera& camera, float aspectRatio, float deltaT
     glUniform1i(uAtlasLoc, 0);
 
     if (uCamPosLoc != -1) {
-        glUniform3fv(uCamPosLoc, 1, glm::value_ptr(camPos));
+        glUniform3fv(uCamPosLoc, 1, glm::value_ptr(glm::vec3(0.0f)));
     }
 
     if (fogEnabled) {
@@ -239,7 +239,7 @@ void Renderer::renderWorld(const Camera& camera, float aspectRatio, float deltaT
     glUniform1i(uCrossAtlasLoc, 0);
 
     if (uCrossCamPosLoc != -1) {
-        glUniform3fv(uCrossCamPosLoc, 1, glm::value_ptr(camPos));
+        glUniform3fv(uCrossCamPosLoc, 1, glm::value_ptr(glm::vec3(0.0f)));
     }
 
     if (fogEnabled) {
@@ -265,7 +265,7 @@ void Renderer::renderWorld(const Camera& camera, float aspectRatio, float deltaT
     glUniform1f(uLiquidTimeLoc, currentFrame);
 
     if (uLiquidCamPosLoc != -1) {
-        glUniform3fv(uLiquidCamPosLoc, 1, glm::value_ptr(camPos));
+        glUniform3fv(uLiquidCamPosLoc, 1, glm::value_ptr(glm::vec3(0.0f)));
     }
 
     if (fogEnabled) {
@@ -300,7 +300,7 @@ void Renderer::renderCrosshair(float aspectRatio) {
 
 
 void Renderer::renderSelectedBlockBorder(const Camera& camera, float aspectRatio) {
-    RaycastResult hit = raycast(&world, camera.getPosition(), camera.getFront(), 6.0f);
+    RaycastResult hit = raycast(&world, camera.getPositionDouble(), camera.getFront(), 6.0f);
     if (!hit.hit || !hit.hitChunk) return;
 
     glm::ivec3 worldPos = glm::ivec3(
@@ -328,7 +328,7 @@ void Renderer::renderSelectedBlockBorder(const Camera& camera, float aspectRatio
 
     glDepthMask(GL_FALSE);
 
-    glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(worldPos));
+    glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(glm::dvec3(worldPos) - camera.getPositionDouble()));
     model = glm::scale(model, glm::vec3(1.001f));
 
     glUniformMatrix4fv(uBorderModelLoc, 1, GL_FALSE, glm::value_ptr(model));

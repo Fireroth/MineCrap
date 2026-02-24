@@ -7,9 +7,7 @@ class Camera;
 class Chunk;
 class World;
 
-bool rayAABBIntersect(const glm::vec3& rayOrigin, const glm::vec3& rayDir,
-                      const glm::vec3& boxMin, const glm::vec3& boxMax,
-                      float& tmin, float maxDistance);
+bool rayAABBIntersect(const glm::dvec3& rayOrigin, const glm::dvec3& rayDir, const glm::dvec3& boxMin, const glm::dvec3& boxMax, double& tmin, double maxDistance);
 
 struct RaycastResult {
     bool hit = false;
@@ -23,9 +21,9 @@ struct RaycastResult {
     glm::ivec3 faceNormal = glm::ivec3(0);
 };
 
-glm::ivec3 getAABBHitNormal(const glm::vec3& hitPoint, const glm::vec3& boxMin, const glm::vec3& boxMax);
+glm::ivec3 getAABBHitNormal(const glm::dvec3& hitPoint, const glm::dvec3& boxMin, const glm::dvec3& boxMax);
 int worldToChunkCoord(int x, int chunkSize);
-RaycastResult raycast(World* world, const glm::vec3& origin, const glm::vec3& dir, float maxDistance);
+RaycastResult raycast(World* world, const glm::dvec3& origin, const glm::vec3& dir, float maxDistance);
 void placeBreakBlockOnClick(World* world, const Camera& camera, char action, uint8_t blockType);
 
 struct BlockInfo {

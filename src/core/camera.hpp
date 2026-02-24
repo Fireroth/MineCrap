@@ -10,7 +10,8 @@ public:
     void processKeyboard(const char* direction, float deltaTime, float speedMultiplier = 1.0f);
     void processMouseMovement(float xOffset, float yOffset);
 
-    glm::vec3 getPosition() const { return position; }
+    glm::dvec3 getPositionDouble() const { return position; }
+    glm::vec3 getPosition() const { return glm::vec3(position); }
     glm::vec3 getFront() const { return front; }
     glm::vec3 getUp() const { return up; }
     float getYaw() const { return yaw; }
@@ -26,12 +27,12 @@ public:
     void jump();
     bool isGrounded() const { return grounded; }
 
-    void setPosition(const glm::vec3& pos);
+    void setPosition(const glm::dvec3& pos);
 
 private:
     void updateCameraVectors();
 
-    glm::vec3 position;
+    glm::dvec3 position;
     glm::vec3 front;
     glm::vec3 up;
     glm::vec3 right;
@@ -43,7 +44,7 @@ private:
     float movementSpeed;
     float mouseSensitivity;
 
-    glm::vec3 velocity = glm::vec3(0.0f);
+    glm::dvec3 velocity = glm::dvec3(0.0);
     bool grounded = false;
 
     float gravity = -30.0f;

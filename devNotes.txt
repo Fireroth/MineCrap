@@ -1,9 +1,5 @@
 ----------------------------------------------------------------------------
 
-"Far lands" at 4294960.0f
-
-----------------------------------------------------------------------------
-
 #ifdef _WIN32
 extern "C" {
     __declspec(dllexport) unsigned long NvOptimusEnablement = 0x00000001;
@@ -14,9 +10,14 @@ extern "C" {
 ----------------------------------------------------------------------------
 
 --TODO--
-fix liquid face gap when liquid is built in the shape of stairs
+Fix liquid face gap when liquid is built in the shape of stairs
 Sounds
-Chunk saving
-Lighting
+Chunk saving > Survival mode
+Lighting > Caves > Ores
+Easy biome management like models
+Support for models spanning multiple blocks
+Fix rebinding a key also triggers the event
+Replace ImGUI with custom UI rendering for inventory and hotbar
+Add temporary text display above hotbar (used for Fly enabled, At build limit etc...)
 
 ----------------------------------------------------------------------------

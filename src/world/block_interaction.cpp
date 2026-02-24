@@ -31,13 +31,13 @@ bool getModelHitBoxes(uint8_t blockId, std::vector<std::pair<glm::vec3, glm::vec
 }
 
 // Ray-AABB intersection helper
-bool rayAABBIntersect( const glm::vec3& rayOrigin, const glm::vec3& rayDir, const glm::vec3& boxMin, const glm::vec3& boxMax, float& hitDist, float maxRayDist) {
-    float nearestEntry = 0.0f;
-    float farthestExit = maxRayDist;
+bool rayAABBIntersect(const glm::dvec3& rayOrigin, const glm::dvec3& rayDir, const glm::dvec3& boxMin, const glm::dvec3& boxMax, double& hitDist, double maxRayDist) {
+    double nearestEntry = 0.0;
+    double farthestExit = maxRayDist;
     for (int axis = 0; axis < 3; axis++) {
-        float inverseDir = 1.0f / rayDir[axis];
-        float entryDist = (boxMin[axis] - rayOrigin[axis]) * inverseDir;
-        float exitDist  = (boxMax[axis] - rayOrigin[axis]) * inverseDir;
+        double inverseDir = 1.0 / rayDir[axis];
+        double entryDist = (boxMin[axis] - rayOrigin[axis]) * inverseDir;
+        double exitDist  = (boxMax[axis] - rayOrigin[axis]) * inverseDir;
         if (entryDist > exitDist) std::swap(entryDist, exitDist);
         nearestEntry = std::max(nearestEntry, entryDist);
         farthestExit = std::min(farthestExit, exitDist);
@@ -45,12 +45,12 @@ bool rayAABBIntersect( const glm::vec3& rayOrigin, const glm::vec3& rayDir, cons
     }
 
     hitDist = nearestEntry;
-    return nearestEntry <= maxRayDist && farthestExit >= 0.0f;
+    return nearestEntry <= maxRayDist && farthestExit >= 0.0;
 }
 
 // Helper function that returns the face normal of the AABB that was hit
-glm::ivec3 getAABBHitNormal(const glm::vec3& hitPoint, const glm::vec3& boxMin, const glm::vec3& boxMax) {
-    const float helper = 0.0001f;
+glm::ivec3 getAABBHitNormal(const glm::dvec3& hitPoint, const glm::dvec3& boxMin, const glm::dvec3& boxMax) {
+    const double helper = 0.0001;
     if (fabs(hitPoint.x - boxMin.x) < helper) return glm::ivec3(-1, 0, 0);
     if (fabs(hitPoint.x - boxMax.x) < helper) return glm::ivec3(1, 0, 0);
     if (fabs(hitPoint.y - boxMin.y) < helper) return glm::ivec3(0, -1, 0);
@@ -65,22 +65,22 @@ int worldToChunkCoord(int x, int chunkSize) {
     return (x >= 0) ? (x / chunkSize) : ((x - chunkSize + 1) / chunkSize);
 }
 
-RaycastResult raycast(World* world, const glm::vec3& origin, const glm::vec3& dir, float maxDist) {
+RaycastResult raycast(World* world, const glm::dvec3& origin, const glm::vec3& dir, float maxDist) {
     RaycastResult result;
 
-    glm::vec3 rayPos = origin;
+    glm::dvec3 rayPos = origin;
     glm::ivec3 blockPos = glm::floor(rayPos);
 
-    glm::vec3 deltaDist = glm::abs(glm::vec3(1.0f) / dir);
+    glm::dvec3 deltaDist = glm::abs(glm::dvec3(1.0) / glm::dvec3(dir));
     glm::ivec3 step = glm::sign(dir);
 
-    glm::vec3 sideDist;
+    glm::dvec3 sideDist;
     for (int i = 0; i < 3; i++) {
-        float offset = (step[i] > 0 ? (blockPos[i] + 1.0f - rayPos[i]) : (rayPos[i] - blockPos[i]));
+        double offset = (step[i] > 0 ? (blockPos[i] + 1.0 - rayPos[i]) : (rayPos[i] - blockPos[i]));
         sideDist[i] = offset * deltaDist[i];
     }
 
-    float traveledDist = 0.0f;
+    double traveledDist = 0.0;
     for (int i = 0; i < 128 && traveledDist <= maxDist; i++) {
         int chunkX = worldToChunkCoord(blockPos.x, Chunk::chunkWidth);
         int chunkZ = worldToChunkCoord(blockPos.z, Chunk::chunkDepth);
@@ -97,18 +97,18 @@ RaycastResult raycast(World* world, const glm::vec3& origin, const glm::vec3& di
                     std::vector<std::pair<glm::vec3, glm::vec3>> boxes;
                     getModelHitBoxes(type, boxes);
 
-                    float bestT = std::numeric_limits<float>::infinity();
+                    double bestT = std::numeric_limits<double>::infinity();
                     glm::ivec3 nearestNormal(0);
                     bool found = false;
 
                     for (const auto& p : boxes) {
-                        glm::vec3 boxMin = glm::vec3(blockPos) + p.first;
-                        glm::vec3 boxMax = glm::vec3(blockPos) + p.second;
-                        float hitT;
-                        if (rayAABBIntersect(origin, dir, boxMin, boxMax, hitT, maxDist)) {
-                            if (hitT >= 0.0f && hitT < bestT) {
+                        glm::dvec3 boxMin = glm::dvec3(blockPos) + glm::dvec3(p.first);
+                        glm::dvec3 boxMax = glm::dvec3(blockPos) + glm::dvec3(p.second);
+                        double hitT;
+                        if (rayAABBIntersect(origin, glm::dvec3(dir), boxMin, boxMax, hitT, static_cast<double>(maxDist))) {
+                            if (hitT >= 0.0 && hitT < bestT) {
                                 bestT = hitT;
-                                nearestNormal = getAABBHitNormal(origin + dir * hitT, boxMin, boxMax);
+                                nearestNormal = getAABBHitNormal(origin + glm::dvec3(dir) * hitT, boxMin, boxMax);
                                 found = true;
                             }
                         }
@@ -162,7 +162,7 @@ RaycastResult raycast(World* world, const glm::vec3& origin, const glm::vec3& di
 }
 
 void placeBreakBlockOnClick(World* world, const Camera& camera, char action, uint8_t blockType) {
-    glm::vec3 origin = camera.getPosition();
+    glm::dvec3 origin = camera.getPositionDouble();
     glm::vec3 dir = camera.getFront();
 
     RaycastResult hit = raycast(world, origin, dir, 6.0f);
@@ -251,7 +251,7 @@ struct BlockInfo {
 };
 
 BlockInfo getLookedAtBlockInfo(World* world, const Camera& camera) {
-    glm::vec3 origin = camera.getPosition();
+    glm::dvec3 origin = camera.getPositionDouble();
     glm::vec3 dir = camera.getFront();
 
     RaycastResult hit = raycast(world, origin, dir, 6.0f);

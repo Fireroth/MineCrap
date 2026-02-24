@@ -34,7 +34,7 @@ void World::generateChunks(int radius) {
     }
 }
 
-void World::updateChunksAroundPlayer(const glm::vec3& playerPos, int radius, bool force) {
+void World::updateChunksAroundPlayer(const glm::dvec3& playerPos, int radius, bool force) {
     int playerChunkX = static_cast<int>(std::floor(playerPos.x / Chunk::chunkWidth));
     int playerChunkZ = static_cast<int>(std::floor(playerPos.z / Chunk::chunkDepth));
 
@@ -106,12 +106,12 @@ Frustum World::extractFrustumPlanes(const glm::mat4& projView) {
     return frustum;
 }
 
-bool World::isChunkInFrustum(int chunkX, int chunkZ, const Frustum& frustum) {
-    float minX = static_cast<float>(chunkX * Chunk::chunkWidth);
-    float maxX = minX + static_cast<float>(Chunk::chunkWidth);
-    float minY = 0.0f;
-    float maxY = static_cast<float>(Chunk::chunkHeight);
-    float minZ = static_cast<float>(chunkZ * Chunk::chunkDepth);
+bool World::isChunkInFrustum(int chunkX, int chunkZ, const Frustum& frustum, const glm::dvec3& cameraPos) {
+    double minX = static_cast<double>(chunkX * Chunk::chunkWidth) - cameraPos.x;
+    double maxX = minX + static_cast<double>(Chunk::chunkWidth);
+    double minY = 0.0 - cameraPos.y;
+    double maxY = static_cast<double>(Chunk::chunkHeight) - cameraPos.y;
+    double minZ = static_cast<double>(chunkZ * Chunk::chunkDepth) - cameraPos.z;
     float maxZ = minZ + static_cast<float>(Chunk::chunkDepth);
 
     for (int i = 0; i < 6; i++) {
@@ -131,15 +131,17 @@ bool World::isChunkInFrustum(int chunkX, int chunkZ, const Frustum& frustum) {
 }
 
 void World::render(const Camera& camera, GLint uModelLoc, const Frustum& frustum) {
+    glm::dvec3 camPos = camera.getPositionDouble();
     for (auto& [coord, chunk] : chunks) {
-        if (isChunkInFrustum(coord.first, coord.second, frustum))
+        if (isChunkInFrustum(coord.first, coord.second, frustum, camPos))
             chunk->render(camera, uModelLoc);
     }
 }
 
 void World::renderCross(const Camera& camera, GLint uCrossModelLoc, const Frustum& frustum) {
+    glm::dvec3 camPos = camera.getPositionDouble();
     for (auto& [coord, chunk] : chunks) {
-        if (isChunkInFrustum(coord.first, coord.second, frustum))
+        if (isChunkInFrustum(coord.first, coord.second, frustum, camPos))
             chunk->renderCross(camera, uCrossModelLoc);
     }
 }
@@ -147,9 +149,9 @@ void World::renderLiquid(const Camera& camera, GLint uLiquidModelLoc, const Frus
     std::vector<std::pair<float, Chunk*>> visible;
     visible.reserve(chunks.size());
 
-    glm::vec3 camPos = camera.getPosition();
+    glm::dvec3 camPos = camera.getPositionDouble();
     for (auto& [coord, chunk] : chunks) {
-        if (!isChunkInFrustum(coord.first, coord.second, frustum))
+        if (!isChunkInFrustum(coord.first, coord.second, frustum, camPos))
             continue;
 
         float cx = (coord.first * Chunk::chunkWidth) + (Chunk::chunkWidth * 0.5f);

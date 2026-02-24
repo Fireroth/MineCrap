@@ -1,4 +1,5 @@
 #include <map>
+#include <cstdint>
 #include "structureDB.hpp"
 #include "noise.hpp"
 #include "chunkTerrain.hpp"
@@ -78,9 +79,11 @@ void generateChunkTerrain(Chunk& chunk) {
     int chunkZ = chunk.chunkZ;
     
     // Get the "main" biome for this chunk for feature generation
+    double chunkWorldX = static_cast<double>(chunkX) * static_cast<double>(chunkWidth);
+    double chunkWorldZ = static_cast<double>(chunkZ) * static_cast<double>(chunkDepth);
     float b = noises.biomeNoise.GetNoise(
-        (float)(chunkX * chunkWidth) + noises.biomeDistortNoise.GetNoise((float)(chunkX * chunkWidth), (float)(chunkZ * chunkDepth)) * biomeDistortStrength,
-        (float)(chunkZ * chunkDepth) + noises.biomeDistortNoise.GetNoise((float)(chunkX * chunkWidth) + 1000.0f, (float)(chunkZ * chunkDepth) + 1000.0f) * biomeDistortStrength
+        chunkWorldX + noises.biomeDistortNoise.GetNoise(chunkWorldX, chunkWorldZ) * biomeDistortStrength,
+        chunkWorldZ + noises.biomeDistortNoise.GetNoise(chunkWorldX + 1000.0, chunkWorldZ + 1000.0) * biomeDistortStrength
     );
     Chunk::Biome biome = getBiome(b);
 
@@ -90,19 +93,19 @@ void generateChunkTerrain(Chunk& chunk) {
 
     for (int localOffsetX = -transitionRadius; localOffsetX < chunkWidth + transitionRadius; localOffsetX++) {
         for (int localOffsetZ = -transitionRadius; localOffsetZ < chunkDepth + transitionRadius; localOffsetZ++) {
-            int worldX = chunkX * chunkWidth + localOffsetX;
-            int worldZ = chunkZ * chunkDepth + localOffsetZ;
+            double worldX = chunkWorldX + static_cast<double>(localOffsetX);
+            double worldZ = chunkWorldZ + static_cast<double>(localOffsetZ);
 
             // Distort biome noise coordinates
-            float distortX = noises.biomeDistortNoise.GetNoise((float)worldX, (float)worldZ) * biomeDistortStrength;
-            float distortY = noises.biomeDistortNoise.GetNoise((float)worldX + 1000.0f, (float)worldZ + 1000.0f) * biomeDistortStrength;
-            float biomeNoise = noises.biomeNoise.GetNoise((float)worldX + distortX, (float)worldZ + distortY);
+            float distortX = noises.biomeDistortNoise.GetNoise((double)worldX, (double)worldZ) * biomeDistortStrength;
+            float distortY = noises.biomeDistortNoise.GetNoise((double)worldX + 1000.0, (double)worldZ + 1000.0) * biomeDistortStrength;
+            float biomeNoise = noises.biomeNoise.GetNoise((double)worldX + distortX, (double)worldZ + distortY);
             Chunk::Biome biome = getBiome(biomeNoise);
             biomeCache[localOffsetX + transitionRadius][localOffsetZ + transitionRadius] = biome;
 
-            float base = noises.baseNoise.GetNoise((float)worldX, (float)worldZ) * 0.5f + 0.5f;
-            float detail = noises.detailNoise.GetNoise((float)worldX, (float)worldZ) * 0.5f + 0.5f;
-            float detail2 = noises.detail2Noise.GetNoise((float)worldX, (float)worldZ) * 0.5f + 0.5f;
+            float base = noises.baseNoise.GetNoise((double)worldX, (double)worldZ) * 0.5f + 0.5f;
+            float detail = noises.detailNoise.GetNoise((double)worldX, (double)worldZ) * 0.5f + 0.5f;
+            float detail2 = noises.detail2Noise.GetNoise((double)worldX, (double)worldZ) * 0.5f + 0.5f;
 
             float heightScale = 1.0f;
             float detailWeight = 1.0f;
@@ -123,13 +126,13 @@ void generateChunkTerrain(Chunk& chunk) {
 
     for (int x = 0; x < chunkWidth; x++) {
         for (int z = 0; z < chunkDepth; z++) {
-            int worldX = chunkX * chunkWidth + x;
-            int worldZ = chunkZ * chunkDepth + z;
+            double worldX = chunkWorldX + static_cast<double>(x);
+            double worldZ = chunkWorldZ + static_cast<double>(z);
 
             // Distort biome noise coordinates for this column
-            float distortX = noises.biomeDistortNoise.GetNoise((float)worldX, (float)worldZ) * biomeDistortStrength;
-            float distortY = noises.biomeDistortNoise.GetNoise((float)worldX + 1000.0f, (float)worldZ + 1000.0f) * biomeDistortStrength;
-            float centerBiomeNoise = noises.biomeNoise.GetNoise((float)worldX + distortX, (float)worldZ + distortY);
+            float distortX = noises.biomeDistortNoise.GetNoise((double)worldX, (double)worldZ) * biomeDistortStrength;
+            float distortY = noises.biomeDistortNoise.GetNoise((double)worldX + 1000.0, (double)worldZ + 1000.0) * biomeDistortStrength;
+            float centerBiomeNoise = noises.biomeNoise.GetNoise((double)worldX + distortX, (double)worldZ + distortY);
             Chunk::Biome centerBiome = getBiome(centerBiomeNoise);
 
             float centerHeight = heightCache[x + transitionRadius][z + transitionRadius];
@@ -348,53 +351,60 @@ Structure rotateStructure(const Structure& in, int rot) {
     return out;
 }
 
-void generateChunkBiomeFeatures(Chunk& chunk, float treshold, int xOffset, int zOffset, std::string structureName, int allowedBlockID, int seedOffset, int yOffset) {
-    ChunkNoises noises = noiseInit(seedOffset);
+static inline float seededHash(int wx, int wz, int seed) {
+    uint32_t h = static_cast<uint32_t>(seed);
+    h ^= static_cast<uint32_t>(wx) * 2246822519u;
+    h ^= static_cast<uint32_t>(wz) * 3266489917u;
+    h *= 668265263u;
+    h ^= h >> 15;
+    h *= 2246822519u;
+    h ^= h >> 13;
+    h *= 3266489917u;
+    h ^= h >> 16;
+    // Map to [-1, 1]
+    return (static_cast<float>(h) / static_cast<float>(UINT32_MAX)) * 2.0f - 1.0f;
+}
+
+void generateChunkBiomeFeatures(Chunk& chunk, float threshold, int xOffset, int zOffset, std::string structureName, int allowedBlockID, int seedOffset, int yOffset) {
     const Structure* original = StructureDB::get(structureName);
     if (!original) return;
 
-    float centerX = float(chunk.chunkX * Chunk::chunkWidth + 8);
-    float centerZ = float(chunk.chunkZ * Chunk::chunkDepth + 8);
-
-    float r = noises.randomNoise.GetNoise(centerX, centerZ);
+    int chunkSeed = seedOffset ^ (chunk.chunkX * 1619) ^ (chunk.chunkZ * 31337);
+    float r = seededHash(chunk.chunkX, chunk.chunkZ, chunkSeed);
     int rot = static_cast<int>((r + 1.0f) * 0.5f * 4.0f) % 4;
     Structure rotated = rotateStructure(*original, rot);
 
     for (int x = 0; x < Chunk::chunkWidth; x++) {
         for (int z = 0; z < Chunk::chunkDepth; z++) {
-            float worldX = float(chunk.chunkX * Chunk::chunkWidth + x);
-            float worldZ = float(chunk.chunkZ * Chunk::chunkDepth + z);
-            float n = noises.featureNoise.GetNoise(worldX, worldZ);
-            if (n > treshold) {
+            int worldX = chunk.chunkX * Chunk::chunkWidth + x;
+            int worldZ = chunk.chunkZ * Chunk::chunkDepth + z;
+            float n = seededHash(worldX, worldZ, seedOffset);
+            if (n > threshold) {
                 int y = Chunk::chunkHeight - 2;
                 while (y > 0 && chunk.blocks[x][y][z].type == 0) y--;
 
-                if (chunk.blocks[x][y][z].type == allowedBlockID) {
+                if (chunk.blocks[x][y][z].type == allowedBlockID)
                     chunk.placeStructure(rotated, x - xOffset, (y + 1) + yOffset, z - zOffset);
-                }
             }
         }
     }
 }
 
-void generateChunkBiomeBlocks(Chunk& chunk, float treshold, int blockID, int allowedBlockID, int seedOffset, int yOffset) {
-    ChunkNoises noises = noiseInit(seedOffset);
-
+void generateChunkBiomeBlocks(Chunk& chunk, float threshold, int blockID, int allowedBlockID, int seedOffset, int yOffset) {
     for (int x = 0; x < Chunk::chunkWidth; x++) {
         for (int z = 0; z < Chunk::chunkDepth; z++) {
-            float worldX = static_cast<float>(chunk.chunkX * Chunk::chunkWidth + x);
-            float worldZ = static_cast<float>(chunk.chunkZ * Chunk::chunkDepth + z);
-            float n = noises.featureNoise.GetNoise(worldX, worldZ);
-            if (n > treshold) {
-                int y = Chunk::chunkHeight - 2;
-                while (y > 0 && chunk.blocks[x][y][z].type == 0) y--; {
-                    if (chunk.blocks[x][y][z].type == allowedBlockID) {
-                        int ty = (y + 1) + yOffset;
+            int worldX = chunk.chunkX * Chunk::chunkWidth + x;
+            int worldZ = chunk.chunkZ * Chunk::chunkDepth + z;
 
-                        if (x >= 0 && x < Chunk::chunkWidth && z >= 0 && z < Chunk::chunkDepth && ty >= 0 && ty < Chunk::chunkHeight) {
-                            chunk.blocks[x][ty][z].type = static_cast<uint8_t>(blockID);
-                        }
-                    }
+            float n = seededHash(worldX, worldZ, seedOffset);
+            if (n > threshold) {
+                int y = Chunk::chunkHeight - 2;
+                while (y > 0 && chunk.blocks[x][y][z].type == 0) y--;
+
+                if (chunk.blocks[x][y][z].type == allowedBlockID) {
+                    int ty = (y + 1) + yOffset;
+                    if (ty >= 0 && ty < Chunk::chunkHeight) 
+                        chunk.blocks[x][ty][z].type = static_cast<uint8_t>(blockID);
                 }
             }
         }

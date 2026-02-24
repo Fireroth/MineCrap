@@ -75,7 +75,7 @@ void Chunk::placeStructure(const Structure& structure, int baseX, int baseY, int
                     blockType = 0;
 
                 if (chance > 0) {
-                    float randNoise = noises.randomNoise.GetNoise((float)worldX, (float)worldY, (float)worldZ);
+                    float randNoise = noises.randomNoise.GetNoise((double)worldX, (double)worldY, (double)worldZ);
                     float noiseValue = (randNoise + 1.0f) * 0.5f;
 
                     bool place = false;
@@ -549,7 +549,9 @@ void Chunk::addFace(std::vector<float>& vertices, std::vector<unsigned int>& ind
 }
 
 void Chunk::render(const Camera& camera, GLint uModelLoc) {
-    glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(chunkX * chunkWidth, 0, chunkZ * chunkDepth));
+    glm::dvec3 chunkWorldPos = glm::dvec3(chunkX * chunkWidth, 0, chunkZ * chunkDepth);
+    glm::dvec3 relativePos = chunkWorldPos - camera.getPositionDouble();
+    glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(relativePos));
     glUniformMatrix4fv(uModelLoc, 1, GL_FALSE, &model[0][0]);
 
     glBindVertexArray(VAO);
@@ -558,7 +560,9 @@ void Chunk::render(const Camera& camera, GLint uModelLoc) {
 }
 
 void Chunk::renderCross(const Camera& camera, GLint uCrossModelLoc) {
-    glm::mat4 crossModel = glm::translate(glm::mat4(1.0f), glm::vec3(chunkX * chunkWidth, 0, chunkZ * chunkDepth));
+    glm::dvec3 chunkWorldPos = glm::dvec3(chunkX * chunkWidth, 0, chunkZ * chunkDepth);
+    glm::dvec3 relativePos = chunkWorldPos - camera.getPositionDouble();
+    glm::mat4 crossModel = glm::translate(glm::mat4(1.0f), glm::vec3(relativePos));
     glUniformMatrix4fv(uCrossModelLoc, 1, GL_FALSE, &crossModel[0][0]);
 
     glBindVertexArray(crossVAO);
@@ -567,15 +571,17 @@ void Chunk::renderCross(const Camera& camera, GLint uCrossModelLoc) {
 }
 
 void Chunk::renderLiquid(const Camera& camera, GLint uLiquidModelLoc) {
-    glm::mat4 liquidModel = glm::translate(glm::mat4(1.0f), glm::vec3(chunkX * chunkWidth, 0, chunkZ * chunkDepth));
+    glm::dvec3 chunkWorldPos = glm::dvec3(chunkX * chunkWidth, 0, chunkZ * chunkDepth);
+    glm::dvec3 relativePos = chunkWorldPos - camera.getPositionDouble();
+    glm::mat4 liquidModel = glm::translate(glm::mat4(1.0f), glm::vec3(relativePos));
     glUniformMatrix4fv(uLiquidModelLoc, 1, GL_FALSE, &liquidModel[0][0]);
 
     // If there are no liquid indices, nothing to do
     if (liquidIndexCount == 0 || liquidVertexDataCPU.empty() || liquidIndexDataCPU.empty()) 
         return;
 
-    glm::vec3 camPosWorld = camera.getPosition();
-    glm::vec3 camPosLocal = camPosWorld - glm::vec3(chunkX * chunkWidth, 0.0f, chunkZ * chunkDepth);
+    glm::dvec3 camPosWorld = camera.getPositionDouble();
+    glm::vec3 camPosLocal = glm::vec3(camPosWorld - glm::dvec3(chunkX * chunkWidth, 0.0f, chunkZ * chunkDepth));
 
     const size_t stride = 7; // pos(3) uv(2) faceID(1) isTop(1)
     const size_t vertsCount = liquidVertexDataCPU.size() / stride;
