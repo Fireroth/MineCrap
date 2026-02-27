@@ -191,23 +191,23 @@ void placeBreakBlockOnClick(World* world, const Camera& camera, char action, uin
         std::vector<std::pair<glm::vec3, glm::vec3>> boxes;
         getModelHitBoxes(blockType, boxes);
 
-        glm::vec3 playerPos = camera.getPosition();
+        glm::dvec3 playerPos = camera.getPositionDouble();
         float playerRadius = camera.getPlayerRadius();
         float playerHeight = camera.getPlayerHeight();
         float eyeHeight = camera.getEyeHeight();
-        glm::vec3 playerAABBMin = glm::vec3(playerPos.x - playerRadius, playerPos.y - eyeHeight, playerPos.z - playerRadius);
-        glm::vec3 playerAABBMax = glm::vec3(playerPos.x + playerRadius, playerPos.y - eyeHeight + playerHeight, playerPos.z + playerRadius);
+        glm::dvec3 playerAABBMin = glm::dvec3(playerPos.x - playerRadius, playerPos.y - eyeHeight, playerPos.z - playerRadius);
+        glm::dvec3 playerAABBMax = glm::dvec3(playerPos.x + playerRadius, playerPos.y - eyeHeight + playerHeight, playerPos.z + playerRadius);
         for (const auto& p : boxes) {
-            glm::vec3 blockWorldMin = glm::vec3(
+            glm::dvec3 blockWorldMin = glm::dvec3(
                 hit.placeChunk->chunkX * Chunk::chunkWidth + hit.placeBlockPos.x,
                 hit.placeBlockPos.y,
                 hit.placeChunk->chunkZ * Chunk::chunkDepth + hit.placeBlockPos.z
-            ) + p.first;
-            glm::vec3 blockWorldMax = glm::vec3(
+            ) + glm::dvec3(p.first);
+            glm::dvec3 blockWorldMax = glm::dvec3(
                 hit.placeChunk->chunkX * Chunk::chunkWidth + hit.placeBlockPos.x,
                 hit.placeBlockPos.y,
                 hit.placeChunk->chunkZ * Chunk::chunkDepth + hit.placeBlockPos.z
-            ) + p.second;
+            ) + glm::dvec3(p.second);
 
             bool overlap = (blockWorldMin.x < playerAABBMax.x && blockWorldMax.x > playerAABBMin.x) &&
                            (blockWorldMin.y < playerAABBMax.y && blockWorldMax.y > playerAABBMin.y) &&

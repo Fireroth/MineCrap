@@ -1,7 +1,7 @@
 #include "noise.hpp"
 #include "../core/options.hpp"
 
-// seedOffset is used to create different noise for features
+// seedOffset is used to create different noise for features (no longer being used)
 ChunkNoises noiseInit(int seedOffset) {
     ChunkNoises noises;
 
