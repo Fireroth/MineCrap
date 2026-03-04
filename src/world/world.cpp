@@ -112,7 +112,7 @@ bool World::isChunkInFrustum(int chunkX, int chunkZ, const Frustum& frustum, con
     double minY = 0.0 - cameraPos.y;
     double maxY = static_cast<double>(Chunk::chunkHeight) - cameraPos.y;
     double minZ = static_cast<double>(chunkZ * Chunk::chunkDepth) - cameraPos.z;
-    float maxZ = minZ + static_cast<float>(Chunk::chunkDepth);
+    double maxZ = minZ + static_cast<double>(Chunk::chunkDepth);
 
     for (int i = 0; i < 6; i++) {
         const glm::vec4& plane = frustum.planes[i];
@@ -156,9 +156,9 @@ void World::renderLiquid(const Camera& camera, GLint uLiquidModelLoc, const Frus
 
         float cx = (coord.first * Chunk::chunkWidth) + (Chunk::chunkWidth * 0.5f);
         float cz = (coord.second * Chunk::chunkDepth) + (Chunk::chunkDepth * 0.5f);
-        float dx = camPos.x - cx;
-        float dy = camPos.y;
-        float dz = camPos.z - cz;
+        float dx = static_cast<float>(camPos.x - cx);
+        float dy = static_cast<float>(camPos.y);
+        float dz = static_cast<float>(camPos.z - cz);
         float dist2 = dx*dx + dy*dy + dz*dz;
         visible.emplace_back(dist2, chunk);
     }

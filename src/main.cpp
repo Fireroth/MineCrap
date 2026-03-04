@@ -1,6 +1,8 @@
 #ifdef _WIN32
     #include <windows.h>
 #endif
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb_image.h>
 #include <thread>
 #include <chrono>
 #include <glad/glad.h>
