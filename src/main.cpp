@@ -1,5 +1,6 @@
 #ifdef _WIN32
     #include <windows.h>
+    #include <timeapi.h>
 #endif
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
@@ -28,6 +29,7 @@ int main() {
     #ifdef _WIN32
         HWND hwnd = GetConsoleWindow();
         ShowWindow(hwnd, getOptionInt("hide_console", 1) ? SW_HIDE : SW_SHOW);
+        timeBeginPeriod(1);
     #endif
 
     Renderer renderer;
@@ -75,20 +77,28 @@ int main() {
 
         window.swapBuffers();
         window.pollEvents();
-        
+
         // Frame rate limiting
         int currentMaxFPS = getOptionInt("max_fps", 60);
         if (currentMaxFPS > 0) {
-            float targetFrameTime = 1.0f / static_cast<float>(currentMaxFPS);
-            double elapsedTime = glfwGetTime() - currentFrame;
-            if (elapsedTime < targetFrameTime) {
-                double remainingTime = targetFrameTime - elapsedTime;
-                if (remainingTime > 0.0001) {
-                    std::this_thread::sleep_for(std::chrono::duration<double>(remainingTime - 0.0001));
-                }
-                while (glfwGetTime() - currentFrame < targetFrameTime) {}
+            double targetFrameTime = 1.0 / static_cast<double>(currentMaxFPS);
+            double frameEnd = currentFrame + targetFrameTime;
+            double remaining = frameEnd - glfwGetTime();
+            while (remaining > 0.002) {
+                #ifdef _WIN32
+                    Sleep(1);
+                #else
+                    std::this_thread::sleep_for(std::chrono::microseconds(500));
+                #endif
+                remaining = frameEnd - glfwGetTime();
             }
+            while (glfwGetTime() < frameEnd) {}
         }
     }
+
+    #ifdef _WIN32
+        timeEndPeriod(1);
+    #endif
+
     return 0;
 }

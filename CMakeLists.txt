@@ -49,6 +49,10 @@ add_executable(MineCrap ${SRC_FILES} ${RESOURCE_FILES})
 
 target_link_libraries(MineCrap glad glfw imgui)
 
+if (WIN32)
+    target_link_libraries(MineCrap winmm)
+endif()
+
 add_custom_command(TARGET MineCrap POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
             ${CMAKE_SOURCE_DIR}/textures $<TARGET_FILE_DIR:MineCrap>/textures
