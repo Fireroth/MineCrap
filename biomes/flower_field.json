@@ -1,0 +1,131 @@
+{
+    "name": "Flower Field",
+    "id": "flower_field",
+    "terrain": {
+        "heightScale": 0.7,
+        "detailWeight": 0.1,
+        "detail2Weight": 0.2,
+        "power": 1.0,
+        "baseHeight": 29.0,
+        "heightMultiplier": 24.0,
+        "deepenBelowY": 37.0,
+        "deepenFactor": 0.5
+    },
+    "layers": [
+        {
+            "block": 1,
+            "depth": 1,
+            "position": "top",
+            "aboveY": 35,
+            "fallbackBlock": 4
+        },
+        {
+            "block": 2,
+            "depth": 3,
+            "position": "below_top"
+        },
+        {
+            "block": 3,
+            "depth": 1,
+            "position": "below_top"
+        },
+        {
+            "block": 3,
+            "position": "fill"
+        }
+    ],
+    "waterBlock": 9,
+    "waterLevel": 36,
+    "features": [
+        {
+            "type": "block",
+            "block": 34,
+            "threshold": 0.97,
+            "allowedBlock": 1,
+            "seedOffset": 0,
+            "yOffset": 0
+        },
+        {
+            "type": "block",
+            "block": 33,
+            "threshold": 0.97,
+            "allowedBlock": 1,
+            "seedOffset": 1,
+            "yOffset": 0
+        },
+        {
+            "type": "block",
+            "block": 30,
+            "threshold": 0.97,
+            "allowedBlock": 1,
+            "seedOffset": 2,
+            "yOffset": 0
+        },
+        {
+            "type": "block",
+            "block": 29,
+            "threshold": 0.97,
+            "allowedBlock": 1,
+            "seedOffset": 3,
+            "yOffset": 0
+        },
+        {
+            "type": "block",
+            "block": 28,
+            "threshold": 0.97,
+            "allowedBlock": 1,
+            "seedOffset": 4,
+            "yOffset": 0
+        },
+        {
+            "type": "block",
+            "block": 20,
+            "threshold": 0.97,
+            "allowedBlock": 1,
+            "seedOffset": 5,
+            "yOffset": 0
+        },
+        {
+            "type": "block",
+            "block": 21,
+            "threshold": 0.97,
+            "allowedBlock": 1,
+            "seedOffset": 6,
+            "yOffset": 0
+        },
+        {
+            "type": "block",
+            "block": 17,
+            "threshold": 0.97,
+            "allowedBlock": 1,
+            "seedOffset": 7,
+            "yOffset": 0
+        },
+        {
+            "type": "block",
+            "block": 18,
+            "threshold": 0.97,
+            "allowedBlock": 1,
+            "seedOffset": 8,
+            "yOffset": 0
+        },
+        {
+            "type": "structure",
+            "structure": "tinyTree",
+            "threshold": 0.97,
+            "xOffset": 1,
+            "zOffset": 1,
+            "allowedBlock": 1,
+            "seedOffset": 9,
+            "yOffset": 0
+        },
+        {
+            "type": "block",
+            "block": 55,
+            "threshold": 0.97,
+            "allowedBlock": 1,
+            "seedOffset": 10,
+            "yOffset": 0
+        }
+    ]
+}

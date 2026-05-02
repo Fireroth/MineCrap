@@ -15,6 +15,7 @@
 #include "core/options.hpp"
 #include "core/controls.hpp"
 #include "world/modelDB.hpp"
+#include "world/biomeDB.hpp"
 
 GLFWwindow* g_currentGLFWwindow = nullptr;
 GLFWwindow* getCurrentGLFWwindow() { return g_currentGLFWwindow; }
@@ -35,7 +36,8 @@ int main() {
     Renderer renderer;
     ImGuiOverlay ImGuiOverlay;
     BlockDB::init();
-    ModelDB::loadAllModels("models");
+    BiomeDB::init();
+    ModelDB::init();
     loadControlsFromFile("controls.txt");
     
     Camera camera(
@@ -73,7 +75,7 @@ int main() {
         window.clear(0.6f, 1.0f, 1.0f, 1.0f); // Light blue background
         renderer.renderWorld(camera, aspectRatio, deltaTime, currentFrame);
         renderer.renderCrosshair(aspectRatio);
-        ImGuiOverlay.render(deltaTime, camera, &renderer.world);
+        ImGuiOverlay.render(deltaTime, camera, &renderer.world, &renderer);
 
         window.swapBuffers();
         window.pollEvents();

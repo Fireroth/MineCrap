@@ -724,5 +724,104 @@
         "model": "cross",
         "renderFacesInBetween": false,
         "tabName": "Plants"
+    },
+
+    "grassy_stone": {
+        "id": 62,
+        "textures": [[10,14],[10,14],[10,14],[10,14],[10,15],[10,14]],
+        "transparent": false,
+        "liquid": false,
+        "name": "Grassy Stone",
+        "model": "cube",
+        "renderFacesInBetween": false,
+        "tabName": "Blocks"
+    },
+
+    "palm_log": {
+        "id": 63,
+        "textures": [[10,13],[10,13],[10,13],[10,13],[10,12],[10,12]],
+        "transparent": false,
+        "liquid": false,
+        "name": "Palm Log",
+        "model": "cube",
+        "renderFacesInBetween": false,
+        "tabName": "Blocks"
+    },
+
+    "palm_leaves:slow": {
+        "id": 64,
+        "textures": [[10,11],[10,11],[10,11],[10,11],[10,11],[10,11]],
+        "transparent": true,
+        "liquid": false,
+        "name": "Palm Leaves",
+        "model": "cube",
+        "renderFacesInBetween": true,
+        "tabName": "Blocks"
+    },
+
+    "palm_leaves:fast": {
+        "id": 64,
+        "textures": [[10,10],[10,10],[10,10],[10,10],[10,10],[10,10]],
+        "transparent": false,
+        "liquid": false,
+        "name": "Palm Leaves",
+        "model": "cube",
+        "renderFacesInBetween": false,
+        "tabName": "Blocks"
+    },
+
+    "palm_plank": {
+        "id": 65,
+        "textures": [[11,15],[11,15],[11,15],[11,15],[11,15],[11,15]],
+        "transparent": false,
+        "liquid": false,
+        "name": "Palm Plank",
+        "model": "cube",
+        "renderFacesInBetween": false,
+        "tabName": "Blocks"
+    },
+
+    "palm_plank_slab": {
+        "id": 66,
+        "textures": [[11,15],[11,15],[11,15],[11,15],[11,15],[11,15]],
+        "transparent": false,
+        "liquid": false,
+        "name": "Palm Plank Slab",
+        "model": "slab",
+        "renderFacesInBetween": false,
+        "tabName": "Slabs"
+    },
+
+    "cobblestone": {
+        "id": 67,
+        "textures": [[11,14],[11,14],[11,14],[11,14],[11,14],[11,14]],
+        "transparent": false,
+        "liquid": false,
+        "name": "Cobblestone",
+        "model": "cube",
+        "renderFacesInBetween": false,
+        "tabName": "Blocks"
+    },
+
+    "cobblestone_slab": {
+        "id": 68,
+        "textures": [[11,14],[11,14],[11,14],[11,14],[11,14],[11,14]],
+        "transparent": false,
+        "liquid": false,
+        "name": "Cobblestone Slab",
+        "model": "slab",
+        "renderFacesInBetween": false,
+        "tabName": "Slabs"
+    },
+    
+    "warm_water": {
+        "id": 69,
+        "textures": [[11,13],[11,13],[11,13],[11,13],[11,13],[11,13]],
+        "transparent": true,
+        "liquid": true,
+        "name": "Warm Water",
+        "model": "liquid",
+        "renderFacesInBetween": false,
+        "tabName": "Liquids"
     }
 }

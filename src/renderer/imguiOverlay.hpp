@@ -7,6 +7,9 @@
 #include <string>
 #include <unordered_map>
 #include "../core/camera.hpp"
+#include "blockPreviewRenderer.hpp"
+
+class Renderer;
 
 extern bool inventoryOpen;
 extern bool debugOpen;
@@ -24,7 +27,7 @@ public:
     ~ImGuiOverlay();
 
     bool init(GLFWwindow* window, GLuint textureAtlas);
-    void render(float deltaTime, Camera& camera, class World* world);
+    void render(float deltaTime, Camera& camera, class World* world, Renderer* renderer);
 
     static std::vector<const char*> blockItems;
     static std::vector<uint8_t> blockIds;

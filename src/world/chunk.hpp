@@ -18,15 +18,6 @@ public:
 
     ChunkNoises noises;
 
-    enum class Biome {
-        Plains,
-        Desert,
-        Forest,
-        FirForest,
-        FlowerField,
-        MapleForest
-    };
-
     struct Block {
         uint8_t type;
     };
@@ -42,7 +33,7 @@ public:
 
     Block blocks[chunkWidth][chunkHeight][chunkDepth];
     int chunkX, chunkZ;
-    Biome biome;
+    int biomeIndex = 0;
 
 private:
     World* world;
@@ -57,8 +48,7 @@ private:
     std::vector<float> liquidVertexDataCPU;
     std::vector<unsigned int> liquidIndexDataCPU;
 
-    void addFace(std::vector<float>& vertices, std::vector<unsigned int>& indices,
-                 int x, int y, int z, int face, const BlockDB::BlockInfo* blockInfo, unsigned int& indexOffset);
+    void addFace(std::vector<float>& vertices, std::vector<unsigned int>& indices, int x, int y, int z, int face, const BlockDB::BlockInfo* blockInfo, unsigned int& indexOffset);
 
     bool isBlockVisible(int x, int y, int z, int face) const;
 };

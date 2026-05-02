@@ -3,15 +3,16 @@
 #include <fstream>
 #include <cstdio>
 #include <nlohmannJSON/json.hpp>
+#include <iostream>
 
 using json = nlohmann::json;
 namespace fs = std::filesystem;
 
 std::unordered_map<std::string, Model> ModelDB::models;
 
-void ModelDB::loadAllModels(const std::string& modelsDir) {
+void ModelDB::init() {
     models.clear();
-    for (const auto& entry : fs::directory_iterator(modelsDir)) {
+    for (const auto& entry : fs::directory_iterator("models")) {
         if (!entry.is_regular_file())
             continue;
         auto path = entry.path();
@@ -139,6 +140,7 @@ void ModelDB::loadAllModels(const std::string& modelsDir) {
         }
         std::string name = path.stem().string();
         models[name] = std::move(model);
+        std::cout << "ModelDB: loaded model " << name << std::endl;
     }
 }
 

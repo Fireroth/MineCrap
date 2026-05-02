@@ -48,20 +48,27 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
         lastX = static_cast<float>(xpos);
         lastY = static_cast<float>(ypos);
         firstMouse = false;
+        return;
     }
 
     float xOffset = static_cast<float>(xpos) - lastX;
     float yOffset = lastY - static_cast<float>(ypos);
 
-    lastX = static_cast<float>(xpos);
-    lastY = static_cast<float>(ypos);
-
     if (g_camera)
         g_camera->processMouseMovement(xOffset, yOffset);
+    
+    // Keep cursor centered on screen
+    int width, height;
+    glfwGetWindowSize(window, &width, &height);
+    double centerX = width / 2.0;
+    double centerY = height / 2.0;
+    glfwSetCursorPos(window, centerX, centerY);
+    lastX = static_cast<float>(centerX);
+    lastY = static_cast<float>(centerY);
 }
 
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
-    if (pauseMenuOpen) return;
+    if (pauseMenuOpen || inventoryOpen) return;
     const int hotbarSize = 9;
 
     if (yoffset < 0) {
@@ -120,10 +127,14 @@ void setupInputCallbacks(GLFWwindow* window, Camera* camera, World* world) {
 
 // Speed multiplier
 float getSpeedMultiplier(GLFWwindow* window) {
+    bool sprintPressed = glfwGetKey(window, g_controls.sprint) == GLFW_PRESS;
+    bool onlyForward = (glfwGetKey(window, g_controls.moveForward) == GLFW_PRESS) && (glfwGetKey(window, g_controls.moveBackward) != GLFW_PRESS);
+    bool canSprint = sprintPressed && onlyForward;
+    
     if (flyMode)
-        return (glfwGetKey(window, g_controls.sprint) == GLFW_PRESS) ? 30.0f : 4.0f;
+        return sprintPressed ? 30.0f : 4.0f;
     else
-        return (glfwGetKey(window, g_controls.sprint) == GLFW_PRESS) ? 2.5f : 1.9f;
+        return canSprint ? 2.25f : 1.75f;
 }
 
 // Keyboard movement
@@ -136,11 +147,11 @@ void processInput(GLFWwindow* window, Camera& camera, float deltaTime, float spe
     else
         camera.updateVelocity(deltaTime);
 
-    static bool escPressedLastFrame = false;
-    bool escPressedThisFrame = glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS;
-
     static int width, height;
     glfwGetWindowSize(window, &width, &height);
+
+    static bool escPressedLastFrame = false;
+    bool escPressedThisFrame = glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS;
 
     if (escPressedThisFrame && !escPressedLastFrame) {
         glfwSetCursorPos(window, width / 2.0, height / 2.0);
@@ -158,12 +169,13 @@ void processInput(GLFWwindow* window, Camera& camera, float deltaTime, float spe
             consoleOpen = false;
             inventoryOpen = false;
             cursorCaptured = !cursorCaptured;
-            glfwSetInputMode(window, GLFW_CURSOR,
-                            cursorCaptured ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
+            glfwSetInputMode(window, GLFW_CURSOR, cursorCaptured ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
             firstMouse = true; // Reset mouse position capture
         }
     }
     escPressedLastFrame = escPressedThisFrame;
+
+    if (pauseMenuOpen) return;
 
     // Toggle debug window
     static bool debugTogglePressedLastFrame = false;
@@ -281,4 +293,3 @@ void processInput(GLFWwindow* window, Camera& camera, float deltaTime, float spe
 
     }
 }
-

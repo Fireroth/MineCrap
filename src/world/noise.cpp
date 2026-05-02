@@ -10,7 +10,7 @@ ChunkNoises noiseInit(int seedOffset) {
     noises.biomeNoise.SetNoiseType(FastNoiseLite::NoiseType_Cellular);
     noises.biomeNoise.SetCellularReturnType(FastNoiseLite::CellularReturnType_CellValue);
     noises.biomeNoise.SetCellularDistanceFunction(FastNoiseLite::CellularDistanceFunction_Hybrid);
-    noises.biomeNoise.SetFrequency(0.0025f);
+    noises.biomeNoise.SetFrequency(0.0020f);
     noises.biomeNoise.SetSeed(seed + 10);
 
     noises.biomeDistortNoise.SetNoiseType(FastNoiseLite::NoiseType_OpenSimplex2);

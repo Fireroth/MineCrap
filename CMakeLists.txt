@@ -34,6 +34,7 @@ include_directories(
     lib/
     lib/glad/include
     lib/glfw/include
+    lib/nlohmannJSON
 )
 
 file(GLOB_RECURSE SRC_FILES
@@ -42,7 +43,7 @@ file(GLOB_RECURSE SRC_FILES
 
 set(RESOURCE_FILES "")
 if(WIN32)
-        list(APPEND RESOURCE_FILES "${CMAKE_SOURCE_DIR}/App.rc")
+    list(APPEND RESOURCE_FILES "${CMAKE_SOURCE_DIR}/App.rc")
 endif()
 
 add_executable(MineCrap ${SRC_FILES} ${RESOURCE_FILES})
@@ -53,23 +54,50 @@ if (WIN32)
     target_link_libraries(MineCrap winmm)
 endif()
 
-add_custom_command(TARGET MineCrap POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_directory
-            ${CMAKE_SOURCE_DIR}/textures $<TARGET_FILE_DIR:MineCrap>/textures
-    COMMAND ${CMAKE_COMMAND} -E copy_directory
-            ${CMAKE_SOURCE_DIR}/shaders $<TARGET_FILE_DIR:MineCrap>/shaders
-    COMMAND ${CMAKE_COMMAND} -E copy_directory
-            ${CMAKE_SOURCE_DIR}/sounds $<TARGET_FILE_DIR:MineCrap>/sounds
-    COMMAND ${CMAKE_COMMAND} -E copy_directory
-            ${CMAKE_SOURCE_DIR}/structures $<TARGET_FILE_DIR:MineCrap>/structures
-    COMMAND ${CMAKE_COMMAND} -E copy_directory
-            ${CMAKE_SOURCE_DIR}/models $<TARGET_FILE_DIR:MineCrap>/models
-    COMMAND ${CMAKE_COMMAND} -E copy_directory
-            ${CMAKE_SOURCE_DIR}/blocks $<TARGET_FILE_DIR:MineCrap>/blocks
-    COMMAND ${CMAKE_COMMAND} -E copy
-            "${CMAKE_SOURCE_DIR}/options.txt" "$<TARGET_FILE_DIR:MineCrap>/options.txt" 
-    COMMAND ${CMAKE_COMMAND} -E copy
-            "${CMAKE_SOURCE_DIR}/controls.txt" "$<TARGET_FILE_DIR:MineCrap>/controls.txt"
-    COMMAND ${CMAKE_COMMAND} -E copy
-            "${CMAKE_SOURCE_DIR}/Font.ttf" "$<TARGET_FILE_DIR:MineCrap>/Font.ttf"
+
+file(GLOB_RECURSE ASSET_FILES CONFIGURE_DEPENDS
+    ${CMAKE_SOURCE_DIR}/textures/*
+    ${CMAKE_SOURCE_DIR}/shaders/*
+    ${CMAKE_SOURCE_DIR}/sounds/*
+    ${CMAKE_SOURCE_DIR}/structures/*
+    ${CMAKE_SOURCE_DIR}/models/*
+    ${CMAKE_SOURCE_DIR}/blocks/*
+    ${CMAKE_SOURCE_DIR}/biomes/*
+    ${CMAKE_SOURCE_DIR}/options.txt
+    ${CMAKE_SOURCE_DIR}/controls.txt
+    ${CMAKE_SOURCE_DIR}/Font.ttf
 )
+
+set(OUTPUT_DIR ${CMAKE_SOURCE_DIR}/bin/${CMAKE_BUILD_TYPE})
+set(ASSET_STAMP ${CMAKE_BINARY_DIR}/assets.stamp)
+
+add_custom_command(
+    OUTPUT ${ASSET_STAMP}
+
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+            ${CMAKE_SOURCE_DIR}/textures ${OUTPUT_DIR}/textures
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+            ${CMAKE_SOURCE_DIR}/shaders ${OUTPUT_DIR}/shaders
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+            ${CMAKE_SOURCE_DIR}/sounds ${OUTPUT_DIR}/sounds
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+            ${CMAKE_SOURCE_DIR}/structures ${OUTPUT_DIR}/structures
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+            ${CMAKE_SOURCE_DIR}/models ${OUTPUT_DIR}/models
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+            ${CMAKE_SOURCE_DIR}/blocks ${OUTPUT_DIR}/blocks
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+            ${CMAKE_SOURCE_DIR}/biomes ${OUTPUT_DIR}/biomes
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "${CMAKE_SOURCE_DIR}/options.txt" "${OUTPUT_DIR}/options.txt"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "${CMAKE_SOURCE_DIR}/controls.txt" "${OUTPUT_DIR}/controls.txt"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "${CMAKE_SOURCE_DIR}/Font.ttf" "${OUTPUT_DIR}/Font.ttf"
+
+    COMMAND ${CMAKE_COMMAND} -E touch ${ASSET_STAMP}
+    DEPENDS ${ASSET_FILES}
+)
+
+add_custom_target(copy_assets DEPENDS ${ASSET_STAMP})
+add_dependencies(MineCrap copy_assets)

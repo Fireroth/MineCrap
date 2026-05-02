@@ -1,0 +1,35 @@
+{
+    "name": "Ocean",
+    "id": "ocean",
+    "terrain": {
+        "heightScale": 1.0,
+        "detailWeight": 1.0,
+        "detail2Weight": 1.0,
+        "power": 1.0,
+        "baseHeight": 25.0,
+        "heightMultiplier": 1.0,
+        "deepenBelowY": 35.0,
+        "deepenFactor": 0.9
+    },
+    "layers": [
+        {
+            "block": 4,
+            "depth": 1,
+            "position": "top",
+            "aboveY": 35,
+            "fallbackBlock": 4
+        },
+        {
+            "block": 4,
+            "depth": 4,
+            "position": "below_top"
+        },
+        {
+            "block": 3,
+            "position": "fill"
+        }
+    ],
+    "waterBlock": 9,
+    "waterLevel": 36,
+    "features": []
+}

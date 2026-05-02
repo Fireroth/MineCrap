@@ -175,7 +175,7 @@ void Renderer::renderWorld(const Camera& camera, float aspectRatio, float deltaT
     float baseFov = getOptionFloat("fov", 60.0f);
     
     float getSpeedMultiplier(GLFWwindow* window);
-    bool sprintState = window && getSpeedMultiplier(window) > 2.4f;
+    bool sprintState = window && getSpeedMultiplier(window) > 2.0f;
     float sprintFov = baseFov + 10.0f;
 
     bool zoomState = window && getZoomState(window);

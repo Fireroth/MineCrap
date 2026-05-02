@@ -1,0 +1,74 @@
+{
+    "name": "Rocky Waters",
+    "id": "rocky_waters",
+    "terrain": {
+        "heightScale": 10.0,
+        "detailWeight": 1.0,
+        "detail2Weight": 5.0,
+        "power": 1.0,
+        "baseHeight": -7.0,
+        "heightMultiplier": 1.0,
+        "deepenBelowY": 35.0,
+        "deepenFactor": -0.55,
+        "flattenAboveY": 53.0
+    },
+    "layers": [
+        {
+            "block": 62,
+            "depth": 1,
+            "position": "top",
+            "aboveY": 35,
+            "fallbackBlock": 4
+        },
+        {
+            "block": 3,
+            "position": "fill"
+        }
+    ],
+    "waterBlock": 9,
+    "waterLevel": 36,
+    "features": [
+        {
+            "type": "structure",
+            "structure": "palmTree",
+            "threshold": 0.99,
+            "xOffset": 5,
+            "zOffset": 5,
+            "allowedBlock": 62,
+            "seedOffset": 1,
+            "yOffset": 0
+        },
+        {
+            "type": "block",
+            "block": 17,
+            "threshold": 0.75,
+            "allowedBlock": 62,
+            "seedOffset": 2,
+            "yOffset": 0
+        },
+        {
+            "type": "block",
+            "block": 18,
+            "threshold": 0.75,
+            "allowedBlock": 62,
+            "seedOffset": 3,
+            "yOffset": 0
+        },
+        {
+            "type": "block",
+            "block": 29,
+            "threshold": 0.9,
+            "allowedBlock": 62,
+            "seedOffset": 4,
+            "yOffset": 0
+        },
+        {
+            "type": "block",
+            "block": 25,
+            "threshold": 0.9,
+            "allowedBlock": 62,
+            "seedOffset": 5,
+            "yOffset": 0
+        }
+    ]
+}

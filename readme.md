@@ -2,18 +2,19 @@
 A somewhat simple voxel game written in C++ with OpenGL 3.3<br>
 <img src="preview/thumb.png" alt="In-game screenshot" width="400"/>
 
-## ✨ Features
+## Features
 -  Face Culling
 -  Chunk based world generation
 -  Block placing and breaking
--  Infinite terrain
+-  Procedural terrain generation
 -  Biomes
 -  Multiple block models
 -  Transparent and translucent blocks
 -  Frustum Culling
 -  Player physics & collisions
+-  Giant world size
 
-## 🧱 Building from source
+## Building from source
 Before building the project, ensure you have the following installed:
 - C++ compiler with C++17 (or later) support
 - CMake (version 3.10 or higher)
@@ -63,7 +64,7 @@ cmake --build build -j$(nproc)
 
 ---
 
-🙌 Honorable Mentions<br>
+Honorable Mentions<br>
 <sub>jdh - [YouTube](https://www.youtube.com/@jdh)<br> 
 Low Level Game Dev - [YouTube](https://www.youtube.com/@lowlevelgamedev9330)<br> 
 WSAL Evan - [YouTube](https://www.youtube.com/@wsalevan)<br> 

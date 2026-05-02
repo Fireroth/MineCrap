@@ -53,7 +53,7 @@ struct Model {
 
 class ModelDB {
 public:
-    static void loadAllModels(const std::string& modelsDir);
+    static void init();
     static const Model* getModel(const std::string& name);
     static bool getCollisionBoxes(const std::string& modelName, std::vector<std::pair<glm::vec3, glm::vec3>>& outBoxes);
     static bool getHitBoxes(const std::string& modelName, std::vector<std::pair<glm::vec3, glm::vec3>>& outBoxes);

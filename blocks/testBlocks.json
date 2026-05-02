@@ -11,5 +11,16 @@
         "model": "testModel",
         "renderFacesInBetween": false,
         "tabName": "Internal"
+    },
+    "temp_stairs": {
+        "id": 251,
+        "textures": [[6,14],[6,14],[6,14],[6,14],[6,14],[6,14]],
+        "textures2": [[6,14],[6,14],[6,14],[6,14],[6,14],[6,14]],
+        "transparent": false,
+        "liquid": false,
+        "name": "Temp stairs",
+        "model": "stairs",
+        "renderFacesInBetween": false,
+        "tabName": "Internal"
     }
 }

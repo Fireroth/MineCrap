@@ -3,68 +3,20 @@
 #include "structureDB.hpp"
 #include "noise.hpp"
 #include "chunkTerrain.hpp"
+#include "biomeDB.hpp"
 
-// Helper function to get biome based on noise value
-Chunk::Biome getBiome(float b) {
-    static const std::vector<Chunk::Biome> biomes = {
-        Chunk::Biome::Forest,
-        Chunk::Biome::Plains,
-        Chunk::Biome::FirForest,
-        Chunk::Biome::FlowerField,
-        Chunk::Biome::MapleForest,
-        Chunk::Biome::Desert
-    };
+// Helper function to get biome index based on noise value
+int getBiomeIndex(float b) {
+    int count = BiomeDB::getBiomeCount();
+    if (count == 0) return 0;
 
     float normalized = (b + 1.0f) / 2.0f;
-    int index = static_cast<int>(normalized * static_cast<float>(biomes.size()));
+    int index = static_cast<int>(normalized * static_cast<float>(count));
 
-    if (index >= static_cast<int>(biomes.size()))
-        index = static_cast<int>(biomes.size() - 1);
+    if (index >= count)
+        index = count - 1;
 
-    return biomes[index];
-}
-
-
-// Helper function to get biome parameters
-void getBiomeParams(Chunk::Biome biome, float& heightScale, float& detailWeight, float& power, float& baseHeight) {
-    switch (biome) {
-        case Chunk::Biome::Desert:
-            heightScale = 0.5f;
-            detailWeight = 0.1f;
-            power = 1.0f;
-            baseHeight = 36.0f;
-            break;
-        case Chunk::Biome::Plains:
-            heightScale = 0.7f;
-            detailWeight = 0.1f;
-            power = 1.0f;
-            baseHeight = 31.0f;
-            break;
-        case Chunk::Biome::Forest:
-            heightScale = 1.0f;
-            detailWeight = 0.4f;
-            power = 1.3f;
-            baseHeight = 30.0f;
-            break;
-        case Chunk::Biome::FirForest:
-            heightScale = 0.9f;
-            detailWeight = 0.4f;
-            power = 1.0f;
-            baseHeight = 30.0f;
-            break;
-        case Chunk::Biome::FlowerField:
-            heightScale = 0.7f;
-            detailWeight = 0.1f;
-            power = 1.0f;
-            baseHeight = 29.0f;
-            break;
-        case Chunk::Biome::MapleForest:
-            heightScale = 1.0f;
-            detailWeight = 0.4f;
-            power = 1.3f;
-            baseHeight = 30.0f;
-            break;
-    }
+    return index;
 }
 
 void generateChunkTerrain(Chunk& chunk) {
@@ -85,10 +37,10 @@ void generateChunkTerrain(Chunk& chunk) {
         chunkWorldX + noises.biomeDistortNoise.GetNoise(chunkWorldX, chunkWorldZ) * biomeDistortStrength,
         chunkWorldZ + noises.biomeDistortNoise.GetNoise(chunkWorldX + 1000.0, chunkWorldZ + 1000.0) * biomeDistortStrength
     );
-    Chunk::Biome biome = getBiome(b);
+    int mainBiomeIndex = getBiomeIndex(b);
 
     // Precompute biome and height values for the blending
-    std::vector<std::vector<Chunk::Biome>> biomeCache(chunkWidth + 2 * transitionRadius, std::vector<Chunk::Biome>(chunkDepth + 2 * transitionRadius));
+    std::vector<std::vector<int>> biomeCache(chunkWidth + 2 * transitionRadius, std::vector<int>(chunkDepth + 2 * transitionRadius));
     std::vector<std::vector<float>> heightCache(chunkWidth + 2 * transitionRadius, std::vector<float>(chunkDepth + 2 * transitionRadius));
 
     for (int localOffsetX = -transitionRadius; localOffsetX < chunkWidth + transitionRadius; localOffsetX++) {
@@ -100,25 +52,44 @@ void generateChunkTerrain(Chunk& chunk) {
             float distortX = noises.biomeDistortNoise.GetNoise((double)worldX, (double)worldZ) * biomeDistortStrength;
             float distortY = noises.biomeDistortNoise.GetNoise((double)worldX + 1000.0, (double)worldZ + 1000.0) * biomeDistortStrength;
             float biomeNoise = noises.biomeNoise.GetNoise((double)worldX + distortX, (double)worldZ + distortY);
-            Chunk::Biome biome = getBiome(biomeNoise);
-            biomeCache[localOffsetX + transitionRadius][localOffsetZ + transitionRadius] = biome;
+            int biomeIdx = getBiomeIndex(biomeNoise);
+            biomeCache[localOffsetX + transitionRadius][localOffsetZ + transitionRadius] = biomeIdx;
 
             float base = noises.baseNoise.GetNoise((double)worldX, (double)worldZ) * 0.5f + 0.5f;
             float detail = noises.detailNoise.GetNoise((double)worldX, (double)worldZ) * 0.5f + 0.5f;
             float detail2 = noises.detail2Noise.GetNoise((double)worldX, (double)worldZ) * 0.5f + 0.5f;
 
+            const BiomeData* biomeData = BiomeDB::getBiome(biomeIdx);
             float heightScale = 1.0f;
-            float detailWeight = 1.0f;
+            float detailWeight = 0.3f;
+            float detail2Weight = 0.2f;
             float power = 1.3f;
             float baseHeight = 30.0f;
-            getBiomeParams(biome, heightScale, detailWeight, power, baseHeight);
+            float heightMultiplier = 24.0f;
+            float deepenBelowY = 37.0f;
+            float deepenFactor = 0.5f;
+            float flattenAboveY = -1.0f;
 
-            float combined = base + detail * detailWeight + detail2 * 0.2f;
+            if (biomeData) {
+                heightScale = biomeData->terrain.heightScale;
+                detailWeight = biomeData->terrain.detailWeight;
+                detail2Weight = biomeData->terrain.detail2Weight;
+                power = biomeData->terrain.power;
+                baseHeight = biomeData->terrain.baseHeight;
+                heightMultiplier = biomeData->terrain.heightMultiplier;
+                deepenBelowY = biomeData->terrain.deepenBelowY;
+                deepenFactor = biomeData->terrain.deepenFactor;
+                flattenAboveY = biomeData->terrain.flattenAboveY;
+            }
+
+            float combined = base + detail * detailWeight + detail2 * detail2Weight;
             combined = std::pow(combined, power);
 
-            float height = combined * 24.0f * heightScale + baseHeight;
-            if (height < 37.0f) // Deeper lakes
-                height = height - ((37.0f - height) / 2.0f);
+            float height = combined * heightMultiplier * heightScale + baseHeight;
+            if (height < deepenBelowY)
+                height = height - ((deepenBelowY - height) * deepenFactor);
+            if (flattenAboveY >= 0.0f && height > flattenAboveY)
+                height = flattenAboveY;
 
             heightCache[localOffsetX + transitionRadius][localOffsetZ + transitionRadius] = height;
         }
@@ -133,7 +104,7 @@ void generateChunkTerrain(Chunk& chunk) {
             float distortX = noises.biomeDistortNoise.GetNoise((double)worldX, (double)worldZ) * biomeDistortStrength;
             float distortY = noises.biomeDistortNoise.GetNoise((double)worldX + 1000.0, (double)worldZ + 1000.0) * biomeDistortStrength;
             float centerBiomeNoise = noises.biomeNoise.GetNoise((double)worldX + distortX, (double)worldZ + distortY);
-            Chunk::Biome centerBiome = getBiome(centerBiomeNoise);
+            int centerBiomeIdx = getBiomeIndex(centerBiomeNoise);
 
             float centerHeight = heightCache[x + transitionRadius][z + transitionRadius];
 
@@ -141,26 +112,26 @@ void generateChunkTerrain(Chunk& chunk) {
             bool hasDifferentBiome = false;
             for (int localOffsetX = -transitionRadius; localOffsetX <= transitionRadius && !hasDifferentBiome; localOffsetX++) {
                 for (int localOffsetZ = -transitionRadius; localOffsetZ <= transitionRadius && !hasDifferentBiome; localOffsetZ++) {
-                    Chunk::Biome nBiome = biomeCache[x + localOffsetX + transitionRadius][z + localOffsetZ + transitionRadius];
-                    if (nBiome != centerBiome) {
+                    int nBiome = biomeCache[x + localOffsetX + transitionRadius][z + localOffsetZ + transitionRadius];
+                    if (nBiome != centerBiomeIdx) {
                         hasDifferentBiome = true;
                     }
                 }
             }
 
             float blendedHeight = 0.0f;
-            Chunk::Biome finalBiome = centerBiome;
+            int finalBiomeIdx = centerBiomeIdx;
 
             if (hasDifferentBiome) {
                 float totalWeight = 0.0f;
-                std::map<Chunk::Biome, float> biomeWeights;
+                std::map<int, float> biomeWeights;
 
                 for (int localOffsetX = -transitionRadius; localOffsetX <= transitionRadius; localOffsetX++) {
                     for (int localOffsetZ = -transitionRadius; localOffsetZ <= transitionRadius; localOffsetZ++) {
                         float dist2 = static_cast<float>(localOffsetX * localOffsetX + localOffsetZ * localOffsetZ);
                         float weight = 1.0f / (dist2 + 1.0f);
 
-                        Chunk::Biome nBiome = biomeCache[x + localOffsetX + transitionRadius][z + localOffsetZ + transitionRadius];
+                        int nBiome = biomeCache[x + localOffsetX + transitionRadius][z + localOffsetZ + transitionRadius];
                         float nHeight = heightCache[x + localOffsetX + transitionRadius][z + localOffsetZ + transitionRadius];
 
                         biomeWeights[nBiome] += weight;
@@ -175,136 +146,92 @@ void generateChunkTerrain(Chunk& chunk) {
                 for (auto& [b, w] : biomeWeights) {
                     if (w > maxWeight) {
                         maxWeight = w;
-                        finalBiome = b;
+                        finalBiomeIdx = b;
                     }
                 }
             } else {
                 // No blending needed
                 blendedHeight = centerHeight;
-                finalBiome = centerBiome;
+                finalBiomeIdx = centerBiomeIdx;
             }
 
             int height = static_cast<int>(blendedHeight);
+
+            const BiomeData* finalBiome = BiomeDB::getBiome(finalBiomeIdx);
 
             for (int y = 0; y < chunkHeight; y++) {
                 if (y == 0) {
                     chunk.blocks[x][y][z].type = 6; // Bedrock
                 } else if (y > height) {
-                    chunk.blocks[x][y][z].type = (y < 37) ? 9 : 0; // Water or air
+                    // Above terrain: water or air
+                    int waterLevel = finalBiome ? finalBiome->waterLevel : 37;
+                    int waterBlock = finalBiome ? finalBiome->waterBlock : 9;
+                    chunk.blocks[x][y][z].type = (y < waterLevel) ? static_cast<uint8_t>(waterBlock) : 0;
                     continue;
-                } else if (y == height) {
-                    switch (finalBiome) {
-                        case Chunk::Biome::Plains:
-                        case Chunk::Biome::Forest:
-                        case Chunk::Biome::FlowerField:
-                        case Chunk::Biome::MapleForest:
-                            // If grass would be generated below y 36, use sand instead
-                            chunk.blocks[x][y][z].type = (y < 36) ? 4 : 1; // Sand or Grass Block
-                            break;
-                        case Chunk::Biome::FirForest:
-                            chunk.blocks[x][y][z].type = (y < 36) ? 4 : 23; // Sand or Dark Grass Block
-                            break;
-                        case Chunk::Biome::Desert:
-                            chunk.blocks[x][y][z].type = 4; // Sand
-                            break;
+                } else if (finalBiome && !finalBiome->layers.empty()) {
+                    // Layer placement
+                    int depthFromTop = height - y; // 0 = surface, 1 = one below, etc.
+                    bool placed = false;
+                    int layerStartDepth = 0;
+
+                    for (const auto& layer : finalBiome->layers) {
+                        if (layer.position == "top") {
+                            if (depthFromTop == 0) {
+                                // Check Y conditions
+                                bool conditionMet = true;
+                                if (layer.aboveY >= 0 && y < layer.aboveY)
+                                    conditionMet = false;
+                                if (layer.belowY >= 0 && y > layer.belowY)
+                                    conditionMet = false;
+
+                                if (conditionMet) {
+                                    chunk.blocks[x][y][z].type = static_cast<uint8_t>(layer.block);
+                                } else if (layer.fallbackBlock >= 0) {
+                                    chunk.blocks[x][y][z].type = static_cast<uint8_t>(layer.fallbackBlock);
+                                } else {
+                                    chunk.blocks[x][y][z].type = static_cast<uint8_t>(layer.block);
+                                }
+                                placed = true;
+                                layerStartDepth = 1;
+                                break;
+                            }
+                        } else if (layer.position == "below_top") {
+                            if (depthFromTop >= layerStartDepth && depthFromTop < layerStartDepth + layer.depth) {
+                                chunk.blocks[x][y][z].type = static_cast<uint8_t>(layer.block);
+                                placed = true;
+                                break;
+                            }
+                            layerStartDepth += layer.depth;
+                        } else if (layer.position == "fill") {
+                            if (depthFromTop >= layerStartDepth) {
+                                chunk.blocks[x][y][z].type = static_cast<uint8_t>(layer.block);
+                                placed = true;
+                                break;
+                            }
+                        }
                     }
-                } else if (y >= height - 3) {
-                    switch (finalBiome) {
-                        case Chunk::Biome::Plains:
-                        case Chunk::Biome::Forest:
-                        case Chunk::Biome::FirForest:
-                        case Chunk::Biome::FlowerField:
-                        case Chunk::Biome::MapleForest:
-                            chunk.blocks[x][y][z].type = 2; // Dirt
-                            break;
-                        case Chunk::Biome::Desert:
-                            chunk.blocks[x][y][z].type = 4; // Sand
-                            break;
-                    }
-                } else if (y >= height - 4) { // Desert will have stone lower underground
-                    switch (finalBiome) {
-                        case Chunk::Biome::Plains:
-                        case Chunk::Biome::Forest:
-                        case Chunk::Biome::FirForest:
-                        case Chunk::Biome::FlowerField:
-                        case Chunk::Biome::MapleForest:
-                            chunk.blocks[x][y][z].type = 3; // Stone
-                            break;
-                        case Chunk::Biome::Desert:
-                            chunk.blocks[x][y][z].type = 4; // Sand
-                            break;
+
+                    if (!placed) {
+                        chunk.blocks[x][y][z].type = 3; // Stone fallback
                     }
                 } else {
-                    chunk.blocks[x][y][z].type = 3; // Stone
+                    chunk.blocks[x][y][z].type = 3; // Stone fallback
                 }
             }
         }
     }
 
     // Biome specific features
-    chunk.biome = biome;
-    switch (biome) {
-        case Chunk::Biome::Plains:
-            //(chunk, treshold, xOffset, zOffset, structureName/blockID, allowedBlockID, seedOffset, yOffset)
-            generateChunkBiomeFeatures(chunk, 0.9997f, 4, 3, "puddle", 1, 0, -4);
-            generateChunkBiomeFeatures(chunk, 0.998f, 2, 2, "tree", 1, 1, 0);
-            generateChunkBiomeBlocks(chunk, 0.83f, 17, 1, 2, 0); // Grass
-            generateChunkBiomeBlocks(chunk, 0.80f, 18, 1, 3, 0); // Grass Short
-            generateChunkBiomeBlocks(chunk, 0.96f, 20, 1, 4, 0); // Poppy
-            generateChunkBiomeBlocks(chunk, 0.96f, 21, 1, 5, 0); // Dandelion
-            break;
-        case Chunk::Biome::Forest:
-            generateChunkBiomeFeatures(chunk, 0.93f, 2, 2, "tree", 1, 0, 0);
-            generateChunkBiomeBlocks(chunk, 0.93f, 17, 1, 1, 0); // Grass
-            generateChunkBiomeBlocks(chunk, 0.93f, 18, 1, 2, 0); // Grass Short
-            generateChunkBiomeBlocks(chunk, 0.92f, 41, 1, 3, 0); // Leaves Carpet
-            generateChunkBiomeBlocks(chunk, 0.997f, 60, 1, 4, 0); // Brown Mushroom
-            generateChunkBiomeBlocks(chunk, 0.997f, 61, 1, 5, 0); // Red Mushroom
-            break;
-        case Chunk::Biome::Desert:
-            generateChunkBiomeFeatures(chunk, 0.997f, 0, 0, "cactus2", 4, 0, 0);
-            generateChunkBiomeFeatures(chunk, 0.997f, 0, 0, "cactus", 4, 1, 0);
-            generateChunkBiomeBlocks(chunk, 0.985f, 19, 4, 2, 0); // Dead Bush
-            generateChunkBiomeFeatures(chunk, 0.99999f, 8, 8, "pyramid", 4, 3, -1);
-            generateChunkBiomeFeatures(chunk, 0.998f, 0, 0, "flowerCactus", 4, 4, 0);
-            generateChunkBiomeBlocks(chunk, 0.985f, 59, 4, 5, 0); // Dead Grass
-            break;
-        case Chunk::Biome::FirForest:
-            generateChunkBiomeFeatures(chunk, 0.985f, 4, 4, "firTree", 23, 0, 0);
-            generateChunkBiomeFeatures(chunk, 0.99f, 4, 4, "smallFirTree", 23, 1, 0);
-            generateChunkBiomeBlocks(chunk, 0.80f, 24, 23, 2, 0); // Dark Grass
-            generateChunkBiomeBlocks(chunk, 0.88f, 26, 23, 3, 0); // Dark Grass Short
-            generateChunkBiomeBlocks(chunk, 0.93f, 25, 23, 4, 0); // Pebble
-            generateChunkBiomeBlocks(chunk, 0.98f, 56, 9, 5, 0); // Lily Pad
-            generateChunkBiomeBlocks(chunk, 0.98f, 60, 23, 6, 0); // Brown Mushroom
-            generateChunkBiomeBlocks(chunk, 0.98f, 61, 23, 7, 0); // Red Mushroom
-            generateChunkBiomeFeatures(chunk, 0.998f, 2, 2, "rock", 23, 8, -1);
-            break;
-        case Chunk::Biome::FlowerField:
-            generateChunkBiomeBlocks(chunk, 0.97f, 34, 1, 0, 0); // Lavender
-            generateChunkBiomeBlocks(chunk, 0.97f, 33, 1, 1, 0); // Crocus
-            generateChunkBiomeBlocks(chunk, 0.97f, 30, 1, 2, 0); // Bistort
-            generateChunkBiomeBlocks(chunk, 0.97f, 29, 1, 3, 0); // Pink Anemone
-            generateChunkBiomeBlocks(chunk, 0.97f, 28, 1, 4, 0); // Blue Sage
-            generateChunkBiomeBlocks(chunk, 0.97f, 20, 1, 5, 0); // Poppy
-            generateChunkBiomeBlocks(chunk, 0.97f, 21, 1, 6, 0); // Dandelion
-            generateChunkBiomeBlocks(chunk, 0.97f, 17, 1, 7, 0); // Grass
-            generateChunkBiomeBlocks(chunk, 0.97f, 18, 1, 8, 0); // Grass Short
-            generateChunkBiomeFeatures(chunk, 0.97f, 1, 1, "tinyTree", 1, 9, 0);
-            generateChunkBiomeBlocks(chunk, 0.97f, 55, 1, 10, 0); // Red Rose
-            break;
-        case Chunk::Biome::MapleForest:
-            generateChunkBiomeFeatures(chunk, 0.986f, 2, 2, "redMaple", 1, 0, 0);
-            generateChunkBiomeFeatures(chunk, 0.986f, 2, 2, "orangeMaple", 1, 1, 0);
-            generateChunkBiomeFeatures(chunk, 0.986f, 2, 2, "yellowMaple", 1, 2, 0);
-            generateChunkBiomeBlocks(chunk, 0.90f, 17, 1, 3, 0); // Grass
-            generateChunkBiomeBlocks(chunk, 0.90f, 18, 1, 4, 0); // Grass Short
-            generateChunkBiomeBlocks(chunk, 0.96f, 20, 1, 5, 0); // Poppy
-            generateChunkBiomeBlocks(chunk, 0.96f, 21, 1, 6, 0); // Dandelion
-            generateChunkBiomeBlocks(chunk, 0.93f, 52, 1, 7, 0); // Maple Leaves Carpet
-            generateChunkBiomeFeatures(chunk, 0.99f, 2, 2, "greenMaple", 1, 8, 0);
-            break;
+    chunk.biomeIndex = mainBiomeIndex;
+    const BiomeData* mainBiome = BiomeDB::getBiome(mainBiomeIndex);
+    for (const auto& feature : mainBiome->features) {
+        if (feature.type == "structure") {
+            generateChunkBiomeFeatures(chunk, feature.threshold, feature.xOffset, feature.zOffset, feature.structure, feature.allowedBlock, feature.seedOffset, feature.yOffset);
+        } else if (feature.type == "block") {
+            generateChunkBiomeBlocks(chunk, feature.threshold, feature.block, feature.allowedBlock, feature.seedOffset, feature.yOffset);
+        }
     }
+    
 }
 
 StructureLayer rotateLayer(const StructureLayer& layer, int rot) {
