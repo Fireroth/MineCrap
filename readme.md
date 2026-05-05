@@ -1,5 +1,5 @@
-# MineCrap
-A somewhat simple voxel game written in C++ with OpenGL 3.3<br>
+# Terraxel
+Terraxel (formerly MineCrap) is a somewhat simple voxel-based game written in C++ with OpenGL 3.3<br>
 <img src="preview/thumb.png" alt="In-game screenshot" width="400"/>
 
 ## Features
@@ -22,8 +22,8 @@ Before building the project, ensure you have the following installed:
 ### Windows
 Clone the repository
 ```
-git clone https://github.com/Fireroth/MineCrap.git
-cd MineCrap
+git clone https://github.com/Fireroth/Terraxel.git
+cd Terraxel
 ```
 
 Run CMake
@@ -39,8 +39,8 @@ cmake --build build --config Release
 ### Linux
 Clone the repository
 ```
-git clone https://github.com/Fireroth/MineCrap.git
-cd MineCrap
+git clone https://github.com/Fireroth/Terraxel.git
+cd Terraxel
 ```
 
 Run CMake
@@ -53,7 +53,7 @@ Build the project
 cmake --build build -j$(nproc)
 ```
 
-## 📚 Libraries used
+## Libraries used
 - [glfw](https://www.glfw.org/) – Window and input handling  
 - [glad](https://github.com/Dav1dde/glad) – GL Loader-Generator
 - [glm](https://github.com/g-truc/glm) – OpenGL math library
